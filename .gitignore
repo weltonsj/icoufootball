@@ -1,0 +1,23 @@
+# --- Dependências e Logs do Sistema (Geral) ---
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# --- Arquivos de Configuração com Chaves Secretas (Segurança) ---
+# Ignora os arquivos reais que contêm suas API Keys
+config/firebase-config.js
+config/emailjs-config.js
+config/api-config.js
+
+# Nota: Você deve criar versões de exemplo (ex: firebase-config.example.js)
+# sem as chaves reais para commitar no repositório, para que outros
+# saibam a estrutura do arquivo.
+
+# --- Cache e Temporários ---
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.firebase/
+firebase-debug.log
