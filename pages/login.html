@@ -11,7 +11,7 @@
 <body>
   <section class="login-bg">
     <div class="card card--glass login-card" role="region" aria-labelledby="brand-title">
-      <div class="row" style="justify-content: space-between; align-items: center;">
+      <div class="row row-apart">
         <div class="brand-title" id="brand-title">i<span class="brand-cou">Cou</span>Football</div>
         <div class="toggle-row">
           <span class="toggle-text">Registrar-se</span>
@@ -24,10 +24,14 @@
       <form id="login-form" class="v-stack" autocomplete="on">
         <input type="email" id="login-email" class="input-field" placeholder="Email" required aria-label="E-mail">
         <input type="password" id="login-password" class="input-field" placeholder="Senha" required aria-label="Senha">
-        <input type="text" id="register-username" class="input-field register-only" placeholder="Nome de Usuário" aria-label="Nome de Usuário" style="display:none;">
-        <input type="password" id="register-confirm" class="input-field register-only" placeholder="Confirmar Senha" aria-label="Confirmar Senha" style="display:none;">
+        <div id="register-fields" style="display: none; width: 100%;">
+          <div class="v-stack">
+            <input type="text" id="register-username" class="input-field" placeholder="Nome de Usuário" aria-label="Nome de Usuário">
+            <input type="password" id="register-confirm" class="input-field" placeholder="Confirmar Senha" aria-label="Confirmar Senha">
+          </div>
+        </div>
 
-        <div class="row" style="justify-content: space-between; align-items: center;">
+        <div class="row row-apart">
           <a href="./recover-password.html">Esqueceu sua senha?</a>
           <div class="social-row">
             <a href="#" class="social-icon" aria-label="Login com Google">G</a>

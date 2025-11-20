@@ -3,31 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#FD8A24">
-  <title>iCouFootball</title>
+  <title>iCouFootball - Tabela de Classificação</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/css/main.css">
-  <link rel="stylesheet" href="./assets/css/components.css">
-  <link rel="manifest" href="./config/manifest.json">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/components.css">
 </head>
-<body class="app-layout">
-  <header class="app-header">
-    <div class="logo">iCouFootball</div>
-    <div class="user-area">
-      <button class="btn-outline" id="btn-dark-mode">Modo Escuro</button>
+<body>
+  <section class="main-bg">
+    <div class="card card--glass main-card" role="region" aria-labelledby="brand-title">
+      <div class="row" style="justify-content: space-between; align-items: center;">
+        <div class="brand-title" id="brand-title">i<span class="brand-cou">Cou</span>Football</div>
+        <a href="pages/login.html" class="btn-primary">ENTRAR</a>
+      </div>
+      <div class="subtitle">Acompanhe a classificação em tempo real.</div>
+
+      <div class="v-stack">
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Jogador</th>
+                <th>P</th>
+                <th>V</th>
+                <th>SG</th>
+                <th>GP</th>
+                <th>GC</th>
+              </tr>
+            </thead>
+            <tbody id="standings-body">
+              <!-- Linhas da tabela serão inseridas aqui via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </header>
-  <nav class="app-nav" aria-label="Navegação principal">
-    <button class="nav-toggle" aria-controls="nav-menu" aria-expanded="false">☰</button>
-    <ul id="nav-menu">
-      <li><a href="./pages/dashboard.html">Dashboard</a></li>
-      <li><a href="./pages/standings.html">Classificação</a></li>
-      <li><a href="./pages/matches.html">Partidas</a></li>
-      <li><a href="./pages/history.html">Histórico</a></li>
-      <li><a href="./pages/admin.html">Admin</a></li>
-    </ul>
-  </nav>
-  <main id="app-content" class="app-main" role="main"></main>
-  <script type="module" src="./assets/js/app.js"></script>
+  </section>
+  <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>

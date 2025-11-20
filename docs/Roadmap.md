@@ -1,220 +1,77 @@
-# Roadmap de Desenvolvimento iCouFootball v2.0 (Versão Final – 19 de Novembro de 2025)
+# 🗺️ Roadmap de Desenvolvimento - iCouFootball V1.0
 
-**Objetivo deste documento:** Ser o único ponto de verdade para o Trae AI (ou qualquer desenvolvedor) seguir 100% à risca, sem margem para alucinações ou interpretações. Todo o código, estrutura de pastas, nomes de arquivos, classes CSS, IDs e fluxos devem respeitar exatamente o que está descrito aqui e no PRD.
+Este roadmap detalha as fases de desenvolvimento para a versão 1.0 do iCouFootball, focado na utilização de HTML5, CSS e JavaScript Vanilla, com Firebase para backend/auth e Firestore para o banco de dados.
 
-**Stack obrigatória (sem exceções):**
-- HTML5 + CSS3 (Vanilla) + JavaScript ES6+ (Vanilla – sem React, Vue, etc.)
-- Firebase Auth + Firestore
-- PWA (manifest + service worker)
-- Bibliotecas permitidas apenas via CDN: Chart.js, jsPDF + html2canvas, EmailJS
+## Fase 0: Configuração e Design (2-3 Semanas)
 
-**Estrutura de pastas oficial (já criada e imutável):**
+**Objetivo:** Estabelecer a base técnica, o ambiente de desenvolvimento e a identidade visual completa.
 
-```
-icoufootball/
-├─ index.html
-├─ pages/
-│  ├─ login.html
-│  ├─ dashboard.html
-│  ├─ admin.html
-│  ├─ history.html
-│  ├─ matches.html
-│  └─ standings.html
-├─ assets/
-│  ├─ css/
-│  │  ├─ main.css
-│  │  ├─ theme.css
-│  │  ├─ layout.css
-│  │  └─ components.css
-│  ├─ js/
-│  │  ├─ app.js
-│  │  ├─ auth.js
-│  │  ├─ firebase.js
-│  │  ├─ matches.js
-│  │  ├─ standings.js
-│  │  ├─ stats.js
-│  │  ├─ chat.js
-│  │  ├─ notifications.js
-│  │  ├─ export.js
-│  │  ├─ api.js
-│  │  ├─ admin.js
-│  │  └─ pwa.js
-│  └─ images/
-│     ├─ teams/
-│     └─ icons/
-├─ config/
-│  ├─ manifest.json
-│  ├─ service-worker.js
-│  ├─ firebase-config.js
-│  ├─ firestore.rules
-│  └─ emailjs-config.js
-├─ docs/
-│  ├─ PRD.md
-│  └─ Fluxograma do Sistema (Mermaid).md
-├─ .gitignore
-└─ README.md
-```
+| Item | Requisitos Relacionados | Detalhamento das Tarefas |
+| :--- | :--- | :--- |
+| **Ambiente Inicial** | [cite_start]RF2 (Firebase Auth) [cite: 27] | [cite_start]Configuração inicial do projeto Firebase e do banco de dados Firestore[cite: 95]. Configurar ambiente de desenvolvimento Vanilla JS. |
+| **Identidade Visual** | [cite_start]UI/UX (Design) [cite: 19] | [cite_start]Criação do CSS com as cores primárias (`#FD8A24` e `#605F54`) [cite: 6] e tipografia. [cite_start]Definir o design **responsivo (Mobile First)**[cite: 19]. |
+| **Modo Escuro** | [cite_start]UI/UX (Modo Escuro) [cite: 19] | [cite_start]Implementação do tema escuro como padrão ou com alternância fácil[cite: 19]. |
+| **Acessibilidade** | [cite_start]UI/UX (Acessibilidade) [cite: 19] | [cite_start]Verificação e ajuste de contraste entre texto e fundo[cite: 19]. |
+| **Módulos JS** | [cite_start]Desenvolvimento [cite: 4] | [cite_start]Estruturação dos módulos JS (e.g., Auth, UI, Firestore CRUD)[cite: 4]. |
 
-## 1. Design System Oficial (obrigatório seguir exatamente)
+## Fase 1: Core System (Autenticação e Tabela Pública) (4-6 Semanas)
 
-### Cores (variáveis CSS em `assets/css/theme.css`)
-```css
-:root {
-  --brand-primary: #FD8A24;     /* laranja */
-  --brand-secondary: #605F54;   /* cinza oliva */
-  --bg-light: #FFFFFF;
-  --bg-dark: #1A1A1A;
-  --text-light: #212529;
-  --text-dark: #E9ECEF;
-  --success: #28A745;
-  --danger: #DC3545;
-  --warning: #FFC107;
-  --card-bg-light: #F8F9FA;
-  --card-bg-dark: #2D2D2D;
-}
+**Objetivo:** Lançar a base de dados, autenticação e a Home Page em tempo real (Transparência).
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-light: #1A1A1A;
-    --text-light: #E9ECEF;
-    --card-bg-light: #2D2D2D;
-  }
-}
-```
+| Item | Requisitos Relacionados | Detalhamento das Tarefas |
+| :--- | :--- | :--- |
+| **Autenticação (Login/Registro)** | [cite_start]RF2 [cite: 27] | [cite_start]Implementar Firebase Authentication (e-mail/senha) e a Recuperação de Senha[cite: 28, 32]. |
+| **Home Page (Pública)** | [cite_start]RF1 [cite: 21][cite_start], RNF1 [cite: 87] | [cite_start]Desenvolvimento da Home Page [cite: 21] e do componente de tabela. [cite_start]Implementar conexão **`onSnapshot` do Firestore** para atualização em tempo real[cite: 23, 87]. |
+| **Lógica da Tabela I** | [cite_start]RF1, RF6 [cite: 48] | [cite_start]Implementação do cálculo de Pontos Corridos (3/1/0) [cite: 37] [cite_start]e ordenação básica (P, V, SG, GP, GC)[cite: 24]. |
+| **Tabela de Players** | [cite_start]RF1 [cite: 25] | [cite_start]Exibição da lista de jogadores com nome, time e estrelas (parcialmente)[cite: 25]. |
+| **Gestão de Perfil (Base)** | [cite_start]RF8 [cite: 63] | [cite_start]Módulo inicial para Jogador gerenciar Nome, Descrição e Perfil Público/Privado[cite: 64, 66, 67]. |
 
-### Fontes (Google Fonts – incluir no `<head>` de todas as páginas)
-```html
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
-```
-- Body: 'Roboto', sans-serif
-- Títulos: 'Montserrat', sans-serif
+## Fase 2: Gestão e Fair Play (6-8 Semanas)
 
-### Espaçamentos (8px grid)
-- 0.5rem = 8px
-- 1rem   = 16px
-- 1.5rem = 24px
-- 2rem   = 32px
-- 3rem   = 48px
+**Objetivo:** Entregar o Painel do Administrador e o sistema central de Fair Play (Confirmação de Placar).
 
-### Classes CSS obrigatórias (em `components.css`)
-```css
-.btn-primary { background: var(--brand-primary); color: white; }
-.btn-success { background: var(--success); }
-.btn-danger  { background: var(--danger); }
-.card { background: var(--card-bg-light); border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.table-responsive { overflow-x: auto; }
-.text-center { text-align: center; }
-```
+| Item | Requisitos Relacionados | Detalhamento das Tarefas |
+| :--- | :--- | :--- |
+| **Painel Admin** | [cite_start]RF3, RF4 [cite: 33, 36] | [cite_start]Criação do Painel de Controle (restrito via Firebase Auth)[cite: 88]. [cite_start]Implementação das funções de Gestão de Usuários (Inativar, Excluir Terceiros, Mudar Função)[cite: 35]. |
+| **Gestão de Campeonatos** | [cite_start]RF4 [cite: 36] | Implementação da criação/início/fim do campeonato. [cite_start]Módulo para Admin pré-definir **Rodadas Fixas**[cite: 39]. |
+| **Sistema Fair Play** | [cite_start]RF5 [cite: 43] | [cite_start]Módulo de **Lançamento de Placar** por Jogador (Status "Pendente")[cite: 44]. [cite_start]Implementação da **Confirmação** pelo Jogador B[cite: 46]. |
+| **Forçar e Logs** | [cite_start]RF5, RF9 [cite: 47, 73] | [cite_start]Função de **Forçar Confirmação** para Admin[cite: 47]. [cite_start]Implementação do **Log de Atividades** (Firestore) para registrar ações críticas do Admin[cite: 79]. |
+| **Comunicação Básica** | [cite_start]RF9 [cite: 74] | [cite_start]Implementação do **Chat Interno** (requer Firestore) para usuários logados[cite: 74]. |
 
-## 2. Páginas HTML – Estrutura Exata (IDs e classes obrigatórios)
+## Fase 3: Refinamento e Funcionalidades Avançadas (4-5 Semanas)
 
-### `index.html` (shell único)
-- Verifica Firebase Auth → redireciona para login.html ou dashboard.html
+**Objetivo:** Finalizar os requisitos de UI/UX, integrar APIs externas e a lógica de desempate.
 
-### `pages/login.html`
-IDs obrigatórios: `#login-form`, `#email`, `#password`, `#btn-login`, `#error-message`
+| Item | Requisitos Relacionados | Detalhamento das Tarefas |
+| :--- | :--- | :--- |
+| **Integração Imagens** | [cite_start]RF3, RNF4 [cite: 35, 87] | [cite_start]Módulo de upload de foto de perfil (Validação: `.jpg`/`.png` < 2MB) [cite: 35, 87] e integração com ImgBB. [cite_start]Implementação de **fallback/placeholder** (RNF3)[cite: 87]. |
+| **Integração Times** | [cite_start]RF3, RNF3 [cite: 35, 87] | [cite_start]Integração com **TheSportsDB** para escolha de time[cite: 35]. [cite_start]Implementação de **fallback/placeholder** (RNF3)[cite: 87]. |
+| **Critério de Desempate** | [cite_start]RF6 [cite: 48] | [cite_start]Implementação da lógica de desempate final por **Confronto Direto**[cite: 50]. |
+| **Estatísticas Avançadas** | [cite_start]RF7 [cite: 51] | [cite_start]Cálculo e exibição das Estatísticas Avançadas (Melhor Ataque, Melhor Defesa) na Home Page [cite: 26] [cite_start]e no Dashboard Pessoal[cite: 52]. |
+| **Transmissão e Estrelas** | [cite_start]RNF5 [cite: 87][cite_start], RF8 [cite: 68] | [cite_start]Adicionar campo de **Link de Transmissão** na partida[cite: 87]. [cite_start]Implementar a lógica de cálculo e exibição do **Sistema de Estrelas**[cite: 70]. |
+| **Notificações por E-mail** | [cite_start]RF9 [cite: 75] | [cite_start]Configuração da ferramenta de envio de e-mails para Admin (Início de Campeonato/Rodada)[cite: 76, 77, 78]. |
 
-### `pages/dashboard.html`
-- Seções com IDs:
-  - `#pending-matches-alert`
-  - `#kpi-cards`
-  - `#recent-matches`
-  - `#standings-preview`
-  - `#chart-points-evolution` (Chart.js canvas)
+## Fase 4: Finalização e Lançamento (2 Semanas)
 
-### `pages/matches.html`
-- Formulário: `#match-form`
-- Inputs: `#home-score`, `#away-score`, `#btn-submit-match`
-- Lista de pendentes: `#pending-list` (com botões `data-match-id` e ações "Confirmar" / "Contestar")
+**Objetivo:** Testes, documentação e entrega da versão 1.0.
 
-### `pages/standings.html`
-- Tabela: `<table id="standings-table">` com thead fixo:
-  - Pos | Time | PJ | V | E | D | GP | GC | SG | Pts
-- Botão: `#btn-export-pdf`
+| Item | Requisitos Relacionados | Detalhamento das Tarefas |
+| :--- | :--- | :--- |
+| **Testes de Segurança** | [cite_start]RNF6 [cite: 88] | [cite_start]Testes de acesso e permissões (Admin vs. Jogador)[cite: 88]. |
+| **Testes de Performance** | [cite_start]RNF1 [cite: 87] | [cite_start]Garantir que o tempo de carregamento da tabela não exceda 2s[cite: 87]. |
+| **Arquivamento/Exportação** | [cite_start]RF4 [cite: 41] | [cite_start]Finalizar a função de Arquivamento de campeonatos (máximo 12 meses) [cite: 41] [cite_start]e a função de **Exportação em PDF** (Admin)[cite: 42]. |
+| **Documentação Técnica** | N/A | [cite_start]Documentação final do código e da estrutura do Firestore Schema[cite: 95]. |
+| **Deploy** | N/A | Lançamento da versão 1.0. |
 
-### `pages/admin.html` (visível só para role === 'admin')
-- Seções: Iniciar/Encerrar Campeonato, Gerenciar Usuários, Forçar Placar
+---
 
-### `pages/history.html`
-- Lista de campeonatos arquivados da coleção `history`
+## 🔮 Roadmap Futuro (V2.0+)
 
-## 3. Roadmap de Implementação – Fases Obrigatórias (sem pular nenhuma)
+[cite_start]Estas são sugestões para melhorias após o lançamento da V1.0[cite: 89].
 
-### Fase 1 – Setup & Auth (100% funcional antes de seguir)
-- [ ] Criar projeto Firebase (Auth + Firestore)
-- [ ] Copiar exatamente `config/firebase-config.js` e `config/firestore.rules` (regras do PRD)
-- [ ] Implementar `assets/js/firebase.js` + `auth.js`
-- [ ] `index.html` com listener de authStateChanged
-- [ ] `login.html` completo com login, registro e recuperação de senha
-- [ ] Redirecionamento correto
+* [cite_start]**Notificação Push:** Implementação via **Firebase Cloud Messaging (FCM)** para Fair Play mais rápido[cite: 91].
+* [cite_start]**Visualização Gráfica:** Adicionar gráficos simples (barras/pizza) para estatísticas[cite: 92].
+* [cite_start]**Sistema de Troféus:** Implementar "Troféus" virtuais por conquistas (Artilheiro, etc.)[cite: 93].
+* [cite_start]**Sistema de Votação (MVP):** Permitir votos em "Melhor Jogador da Rodada"[cite: 94].
 
-### Fase 2 – Perfil & Upload de Imagens
-- [ ] Edição de perfil (foto + time) → usar ImgBB API (chave no `api.js`)
-- [ ] Busca de escudos via TheSportsDB (função em `api.js`)
-
-### Fase 3 – Core: Partidas + Validação Dupla (Fair Play)
-- [ ] `matches.js`: criar partida → status "pending"
-- [ ] Listener em tempo real no dashboard mostrando pendências
-- [ ] Botões "Confirmar" (muda para "confirmed") e "Contestar" (notifica admin via EmailJS)
-- [ ] Admin pode forçar confirmação (bypass)
-
-### Fase 4 – Tabela de Classificação Dinâmica
-- [ ] `standings.js`: função `calculateStandings()` com ordem exata do PRD:
-  1. Pontos → 2. Vitórias → 3. Saldo de Gols → 4. Gols Pró → 5. Confronto Direto (implementar função `headToHeadPoints(playerA, playerB)`)
-- [ ] Atualização em tempo real via Firestore listener
-
-### Fase 5 – Estatísticas + Chat
-- [ ] `stats.js` + Chart.js (gráfico de evolução de pontos)
-- [ ] `chat.js` com listener Firestore coleção `chat`
-
-### Fase 6 – Admin + Export + Notificações
-- [ ] Painel admin completo
-- [ ] `export.js` → jsPDF + html2canvas para PDF da tabela
-- [ ] `notifications.js` → EmailJS ao iniciar nova rodada
-
-### Fase 7 – PWA + Finalizações
-- [ ] `manifest.json` (nome "iCouFootball", ícones 192x192 e 512x512 em `/assets/images/icons/`)
-- [ ] `service-worker.js` com cache de todas as páginas e assets
-- [ ] Testar instalação PWA em Android/Chrome
-
-### Fase 8 – Deploy
-- [ ] Firebase Hosting (`firebase deploy`)
-
-## 4. Regras Firestore (copiar exatamente para `config/firestore.rules`)
-```rules
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    // Usuários
-    match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth.uid == userId;
-    }
-
-    // Partidas ativas
-    match /matches/{matchId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth.uid in [resource.data.homePlayerId, resource.data.awayPlayerId];
-      allow update: if (request.auth.uid in [resource.data.homePlayerId, resource.data.awayPlayerId] 
-                     && request.resource.data.status == 'confirmed')
-                     || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    // Chat
-    match /chat/{messageId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-    }
-
-    // History (somente leitura + admin delete)
-    match /history/{seasonId} {
-      allow read: if request.auth != null;
-      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-  }
-}
-```
-
-**Este documento + PRD.md são a única fonte de verdade.**  
-Qualquer dúvida: pare e pergunte antes de inventar algo novo.
+Este roadmap é um documento vivo e será atualizado conforme o projeto evolui.

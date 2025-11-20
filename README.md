@@ -1,90 +1,39 @@
-# ⚽ iCouFootball
+# iCouFootball
 
-![Status do Projeto](https://img.shields.io/badge/Status-Em_Desenvolvimento-orange)
-![License](https://img.shields.io/badge/License-MIT-blue)
-![Tech](https://img.shields.io/badge/Stack-HTML_CSS_JS_Firebase-yellow)
+O iCouFootball é um sistema de gerenciamento e exibição de estatísticas para campeonatos de FC25 (EAFC), focado em proporcionar uma experiência pública, dinâmica e confiável para o acompanhamento de competições no formato de Pontos Corridos.
 
-**iCouFootball** é um sistema web (SPA & PWA) desenvolvido para gerenciar campeonatos de pontos corridos do jogo **EA Sports FC 25**. O foco do projeto é oferecer uma plataforma leve, sem frameworks pesados, com atualizações em tempo real e ferramentas robustas de estatísticas.
+## 🚀 Visão Geral
 
----
+O sistema foi desenvolvido para ser fácil de usar tanto para a administração quanto para os jogadores, com foco em uma interface limpa e responsiva. A identidade visual segue as cores primárias #FD8A24 (Laranja) e #605F54 (Cinza Escuro).
 
-## 🎨 Identidade Visual & Design
+## ✨ Funcionalidades
 
-O design system foi construído com foco em alto contraste e identidade esportiva.
+- **Página Pública:** Acompanhe a tabela de classificação e estatísticas em tempo real, sem necessidade de login.
+- **Fair Play:** Sistema de validação de placar entre os jogadores.
+- **Gestão Simplificada:** Painel de controle intuitivo para Administradores.
+- **Autonomia para Jogadores:** Gerencie seu perfil e insira resultados de forma fácil.
+- **Modo Escuro:** Interface moderna com suporte para modo escuro como padrão.
 
-| Cor | Hex | Uso Principal |
-| :--- | :--- | :--- |
-| 🟠 **Laranja Vibrante** | `#FD8A24` | Botões, Destaques, Acentos |
-| 🟤 **Cinza Oliva** | `#605F54` | Elementos Secundários, Bordas |
-| ⚫ **Dark Mode** | `#1a1a1a` | Fundo da Aplicação |
+## 🛠️ Tecnologias Utilizadas
 
----
+- **Frontend:** HTML5, CSS3, JavaScript (Vanilla)
+- **Backend:** Firebase (Authentication, Firestore)
+- **APIs Externas:** ImgBB (para upload de imagens), TheSportsDB (para informações de times)
 
-## 🚀 Funcionalidades Principais
+## 📁 Estrutura do Projeto
 
-### 👤 Gestão de Usuários
-* **Níveis de Acesso:** Administrador e Usuário Comum.
-* **Perfil:** Personalização de foto e escolha de time (via API externa).
-* **Segurança:** Autenticação via Firebase Auth.
+A estrutura de pastas do projeto está organizada da seguinte forma:
 
-### 🏆 Campeonato & Tabela
-* **Tabela Dinâmica:** Ordenação automática (Pontos > Vitórias > Saldo > Gols Pró).
-* **Fair Play:** Sistema de **Validação de Placar** (O oponente precisa confirmar o resultado inserido).
-* **Histórico:** Arquivamento de campeonatos passados com limpeza automática após 1 ano.
+- **`/`**: Arquivos principais da aplicação (index.html, etc).
+- **`/assets`**: Contém todos os arquivos de assets, como CSS, JavaScript e imagens.
+- **`/config`**: Arquivos de configuração do Firebase e service worker.
+- **`/docs`**: Documentação do projeto, incluindo o PRD e o Roadmap.
+- **`/pages`**: Páginas HTML secundárias da aplicação.
 
-### 📊 Dashboard & Estatísticas
-* Gráficos de evolução de desempenho (`Chart.js`).
-* Cards de destaque: Melhor Ataque, Melhor Defesa, Aproveitamento.
-* Exportação da tabela final em **PDF**.
+## 🤝 Como Contribuir
 
-### ⚙️ Ferramentas
-* **Chat Global:** Comunicação em tempo real entre participantes da liga.
-* **Notificações:** E-mail automático ao iniciar rodadas (`EmailJS`).
-* **PWA:** Instalável em dispositivos móveis (Android/iOS).
+Contribuições são bem-vindas! Para sugestões, por favor, abra uma issue descrevendo sua ideia.
 
----
+## 📝 Licença
 
-## 🛠️ Stack Tecnológica
-
-Este projeto segue uma filosofia **"Vanilla"** (Puro), sem dependência de frameworks Frontend (React/Vue/Angular).
-
-* **Frontend:**
-  * HTML5 Semântico
-  * CSS3 (Grid & Flexbox, Variáveis CSS)
-  * JavaScript (ES6+, Módulos)
-* **Backend (BaaS):**
-  * Google Firebase Firestore (Banco de Dados NoSQL)
-  * Google Firebase Authentication
-* **APIs & Integrações:**
-  * **TheSportsDB / API-Football:** Logos e bandeiras dos times.
-  * **ImgBB / Cloudinary:** Hospedagem de imagens de perfil.
-  * **EmailJS:** Disparo de e-mails transacionais.
-  * **jsPDF:** Geração de relatórios PDF.
-  * **Chart.js:** Visualização de dados.
-
----
-
-## 📂 Estrutura do Projeto
-
-```text
-iCouFootball/
-│
-├── index.html          # Entrada principal (SPA)
-├── manifest.json       # Configuração PWA
-├── serviceWorker.js    # Cache e funcionamento Offline
-│
-├── css/
-│   ├── style.css       # Estilos globais e reset
-│   ├── components.css  # Estilos de botões, cards e tabelas
-│   └── dark-mode.css   # Variáveis de tema
-│
-├── js/
-│   ├── app.js          # Lógica principal e roteamento
-│   ├── firebase-config.js # Configuração do Firebase (Ignorado no Git)
-│   ├── auth.js         # Lógica de Login/Logout
-│   ├── db.js           # Funções CRUD do Firestore
-│   └── utils.js        # Formatadores e auxiliares
-│
-└── assets/             # Imagens estáticas e ícones
-    ├── icons/          # Ícones do PWA
-    └── images/         # Logos, banners e perfis
+Este projeto é de código aberto e está disponível para uso e modificação.
