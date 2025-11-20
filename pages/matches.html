@@ -1,9 +1,95 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <title>Partidas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserir Placar - iCouFootball</title>
+    <link rel="stylesheet" href="../assets/css/theme.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/layout.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
 </head>
 <body>
+    <div id="app-container">
+        <header class="app-header">
+            <div class="container">
+                <nav class="navbar">
+                    <a href="../index.html" class="navbar__logo">iCouFootball</a>
+                    <button class="navbar__menu-toggle" aria-expanded="false" aria-controls="navbar-menu">
+                        &#9776; <!-- Hamburger icon -->
+                    </button>
+                    <div class="navbar__nav" id="navbar-menu">
+                        <ul class="navbar__list">
+                            <li class="navbar__item"><a href="dashboard.html" class="navbar__link">Dashboard</a></li>
+                            <li class="navbar__item"><a href="matches.html" class="navbar__link is-active">Partidas</a></li>
+                            <li class="navbar__item"><a href="standings.html" class="navbar__link">Classificação</a></li>
+                            <li class="navbar__item"><a href="history.html" class="navbar__link">Histórico</a></li>
+                            <li class="navbar__item"><a href="login.html" class="navbar__link">Login</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <div class="container">
+                <h1>Inserir Placar da Partida</h1>
+
+                <div class="card mt-lg">
+                    <div class="card__header">Confronto</div>
+                    <div class="card__body score-entry">
+                        <div class="score-entry__teams">
+                            <div class="score-entry__team">
+                                <h2 class="score-entry__team-name">Time da Casa</h2>
+                                <input type="number" class="form-input score-entry__score-input" value="0" min="0" max="99">
+                            </div>
+                            <span class="score-entry__separator">X</span>
+                            <div class="score-entry__team">
+                                <h2 class="score-entry__team-name">Time Visitante</h2>
+                                <input type="number" class="form-input score-entry__score-input" value="0" min="0" max="99">
+                            </div>
+                        </div>
+                        <div class="score-entry__actions mt-lg">
+                            <button class="btn btn-primary">Salvar Placar</button>
+                            <button class="btn btn-secondary">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-lg">
+                    <div class="card__header">Próximas Partidas</div>
+                    <div class="card__body">
+                        <ul class="list-unstyled">
+                            <li>Time A vs Time B - 20/11/2025 20:00</li>
+                            <li>Time C vs Time D - 21/11/2025 19:30</li>
+                            <li>Time E vs Time F - 22/11/2025 21:00</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="container">
+                <p>&copy; 2025 iCouFootball. Todos os direitos reservados.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.querySelector('.navbar__menu-toggle');
+            const navbarMenu = document.getElementById('navbar-menu');
+
+            if (menuToggle && navbarMenu) {
+                menuToggle.addEventListener('click', () => {
+                    const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true' || false;
+                    menuToggle.setAttribute('aria-expanded', !isExpanded);
+                    navbarMenu.classList.toggle('is-active');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

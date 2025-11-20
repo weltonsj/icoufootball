@@ -1,55 +1,98 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Entrar no iCouFootball</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/main.css">
-  <link rel="stylesheet" href="../assets/css/components.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - iCouFootball</title>
+    <link rel="stylesheet" href="../assets/css/theme.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/layout.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .app-main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
-  <section class="login-bg">
-    <div class="card card--glass login-card" role="region" aria-labelledby="brand-title">
-      <div class="row row-apart">
-        <div class="brand-title" id="brand-title">i<span class="brand-cou">Cou</span>Football</div>
-        <div class="toggle-row">
-          <span class="toggle-text">Registrar-se</span>
-          <input id="mode-toggle" class="mode-toggle" type="checkbox" aria-label="Alternar para Registrar-se">
-          <label for="mode-toggle" class="toggle-switch"></label>
-        </div>
-      </div>
-      <div class="subtitle">Gerencie seu campeonato de futebol.</div>
+    <div id="app-container">
+        <header class="app-header">
+            <div class="container">
+                <nav class="navbar">
+                    <a href="../index.html" class="navbar__logo">iCouFootball</a>
+                    <button class="navbar__menu-toggle" aria-expanded="false" aria-controls="navbar-menu">
+                        &#9776; <!-- Hamburger icon -->
+                    </button>
+                    <div class="navbar__nav" id="navbar-menu">
+                        <ul class="navbar__list">
+                            <li class="navbar__item"><a href="dashboard.html" class="navbar__link">Dashboard</a></li>
+                            <li class="navbar__item"><a href="matches.html" class="navbar__link">Partidas</a></li>
+                            <li class="navbar__item"><a href="standings.html" class="navbar__link">Classificação</a></li>
+                            <li class="navbar__item"><a href="history.html" class="navbar__link">Histórico</a></li>
+                            <li class="navbar__item"><a href="login.html" class="navbar__link is-active">Login</a></li>
+                            <li class="navbar__item"><a href="players.html" class="navbar__link">Jogadores</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </header>
 
-      <form id="login-form" class="v-stack" autocomplete="on">
-        <input type="email" id="login-email" class="input-field" placeholder="Email" required aria-label="E-mail">
-        <input type="password" id="login-password" class="input-field" placeholder="Senha" required aria-label="Senha">
-        <div id="register-fields" style="display: none; width: 100%;">
-          <div class="v-stack">
-            <input type="text" id="register-username" class="input-field" placeholder="Nome de Usuário" aria-label="Nome de Usuário">
-            <input type="password" id="register-confirm" class="input-field" placeholder="Confirmar Senha" aria-label="Confirmar Senha">
-          </div>
-        </div>
+        <main class="app-main">
+            <div class="container">
+                <div class="card login-card">
+                    <div class="card__header">Entrar na sua conta</div>
+                    <div class="card__body">
+                        <form>
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" class="form-input" placeholder="seuemail@exemplo.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="form-label">Senha</label>
+                                <input type="password" id="password" class="form-input" placeholder="********" required>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                        </form>
+                        <div class="login-card__links">
+                            <a href="#">Esqueceu a senha?</a>
+                            <a href="#">Criar uma conta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
 
-        <div class="row row-apart">
-          <a href="./recover-password.html">Esqueceu sua senha?</a>
-          <div class="social-row">
-            <a href="#" class="social-icon" aria-label="Login com Google">G</a>
-            <a href="#" class="social-icon" aria-label="Login com Facebook">f</a>
-          </div>
-        </div>
-
-        <button id="login-submit" type="submit" class="btn-primary">ENTRAR</button>
-        <p id="login-error-message" class="text-error" style="display:none;"></p>
-      </form>
-
-      <div class="pagination-dots">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      </div>
+        <footer class="app-footer">
+            <div class="container">
+                <p>&copy; 2025 iCouFootball. Todos os direitos reservados.</p>
+            </div>
+        </footer>
     </div>
-  </section>
-  <script type="module" src="../assets/js/auth.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.querySelector('.navbar__menu-toggle');
+            const navbarMenu = document.getElementById('navbar-menu');
+
+            if (menuToggle && navbarMenu) {
+                menuToggle.addEventListener('click', () => {
+                    const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true' || false;
+                    menuToggle.setAttribute('aria-expanded', !isExpanded);
+                    navbarMenu.classList.toggle('is-active');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
