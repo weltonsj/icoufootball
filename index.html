@@ -2,8 +2,32 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FD8A24">
   <title>iCouFootball</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/main.css">
+  <link rel="stylesheet" href="./assets/css/components.css">
+  <link rel="manifest" href="./config/manifest.json">
 </head>
-<body>
+<body class="app-layout">
+  <header class="app-header">
+    <div class="logo">iCouFootball</div>
+    <div class="user-area">
+      <button class="btn-outline" id="btn-dark-mode">Modo Escuro</button>
+    </div>
+  </header>
+  <nav class="app-nav" aria-label="Navegação principal">
+    <button class="nav-toggle" aria-controls="nav-menu" aria-expanded="false">☰</button>
+    <ul id="nav-menu">
+      <li><a href="./pages/dashboard.html">Dashboard</a></li>
+      <li><a href="./pages/standings.html">Classificação</a></li>
+      <li><a href="./pages/matches.html">Partidas</a></li>
+      <li><a href="./pages/history.html">Histórico</a></li>
+      <li><a href="./pages/admin.html">Admin</a></li>
+    </ul>
+  </nav>
+  <main id="app-content" class="app-main" role="main"></main>
+  <script type="module" src="./assets/js/app.js"></script>
 </body>
 </html>

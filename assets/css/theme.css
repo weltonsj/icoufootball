@@ -1,1 +1,44 @@
-:root{}
+:root {
+  --color-primary: #FD8A24;
+  --color-secondary: #605F54;
+  --color-background-light: #F0F0F0;
+  --color-background-dark: #222222;
+  --color-text-light: #333333;
+  --color-text-dark: #E0E0E0;
+  --color-accent: #FFE0B2;
+  --color-text-dimmed: #A0A0A0;
+  --color-success: #4CAF50;
+  --color-error: #F44336;
+  --color-warning: #FFEB3B;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  --font-family-base: 'Inter', Arial, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-md: 1.25rem;
+  --font-size-lg: 1.75rem;
+  --font-size-xl: 2.25rem;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-heading: 1.2;
+  --line-height-body: 1.6;
+
+  --shadow-sm: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0px 8px 24px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0px 16px 48px rgba(0, 0, 0, 0.2);
+  --transition-default: all 0.3s ease-in-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-light: #222222;
+    --color-text-light: #E0E0E0;
+  }
+}
