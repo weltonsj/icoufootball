@@ -1,0 +1,374 @@
+@import url("./style.css");
+
+/* Variáveis CSS (Adicionadas ao bloco existente) */
+:root {
+    /* ... (variáveis existentes) ... */
+    --input-bg: #3A3A3A;
+    --status-confirmed: #28a745;
+    --status-pending: #ffc107;
+    --status-contested: #dc3545;
+    --action-confirm: #28a745;
+    --action-contest: #dc3545;
+    --action-secondary: #007bff; /* Azul para botões secundários */
+}
+
+/* ====================================================================
+   Regras para o Painel de Partidas
+   ====================================================================
+*/
+
+/* Main Content para Partidas */
+.app-content h3 {
+	margin-bottom: 10px;
+	font-size: .85em;
+}
+
+.matches-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+	grid-template-columns: .75fr 2.5fr;
+}
+
+.section-new-match h2, .section-match-list h3 {
+    text-align: left;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    text-transform: uppercase;
+    font-size: 1.1em;
+}
+
+/* Card Section Styles */
+.card-section {
+    background-color: #2b2b2b75;
+	border-left: 1px solid var(--highlight-color);
+    border-right: 1px solid var(--highlight-color);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.card-title {
+    color: var(--highlight-color);
+    font-size: 0.9em;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+/* Formulário de Inserção de Placar */
+.score-form {
+    /* Estilos base já definidos em .card-section */
+}
+
+.input-group select {
+	padding: 12px 15px;
+	background-color: var(--input-bg);
+	border: 1px solid var(--input-border);
+	border-radius: 8px;
+	color: var(--text-color);
+	font-size: 1em;
+	width: 100%;
+	outline: none;
+	margin-bottom: 1em;
+}
+
+.score-inputs-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.score-input-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.score-input-item label {
+    font-size: 0.8em;
+    color: #AAA;
+    margin-bottom: 5px;
+}
+
+.score-input-item input {
+    width: 100%;
+    max-width: 80px; /* Largura fixa para input de placar */
+    padding: 12px;
+    text-align: center;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#linkInput {
+	width: 100%;
+    height: 2em;
+    padding: .25em;
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+.score-separator {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+/* Formulário de Link de Transmissão (Secundário) */
+.transmission-form {
+    /* Estilos base já definidos em .card-section */
+    margin-top: 20px;
+}
+
+.btn-primary {
+    background-color: var(--star-empty);
+    color: var(--text-color);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-primary:hover {
+	background-color: var(--table-header-bg);
+}
+
+.btn-action {}
+
+.btn-secondary {
+    background-color: var(--star-empty);
+    color: var(--text-color);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-secondary:hover {
+    background-color: var(--table-header-bg);
+}
+
+/* Tabela/Lista de Partidas */
+.match-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+	max-height: 600px;
+    overflow: auto;
+}
+
+.match-item {
+    background-color: var(--secondary-bg);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-left: 5px solid; /* Borda lateral para status */
+}
+
+.pending-confirmation { border-color: var(--status-pending); }
+.awaiting-opponent { border-color: var(--highlight-color); }
+.contested-final { border-color: var(--status-contested); }
+.confirmed-item { border-color: var(--status-confirmed); }
+
+.match-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.match-date-time {
+    font-size: 0.8em;
+    color: #AAA;
+    margin-bottom: 5px;
+}
+
+.match-details {
+    font-size: 1em;
+    color: var(--text-color);
+    font-weight: normal;
+}
+
+.match-details strong {
+    font-weight: bold;
+    color: var(--highlight-color);
+}
+
+.score-pending-value, .score-confirmed-value {
+    margin: 0 5px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.match-status-badge {
+    align-self: flex-start;
+    margin-top: 8px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.7em;
+    text-transform: uppercase;
+    color: var(--primary-bg);
+}
+
+.awaiting-badge { background-color: var(--highlight-color); }
+.pending-badge { background-color: var(--status-pending); }
+.contested-badge { background-color: var(--status-contested); }
+.confirmed-badge { background-color: var(--status-confirmed); }
+
+
+/* Ações de Fair Play */
+.match-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 10px;
+}
+
+.btn-action {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    padding: 8px 10px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-grow: 1; /* Ocupa espaço igual */
+}
+
+.btn-action i {
+    margin-right: 5px;
+}
+
+.btn-action.confirm {
+    background-color: var(--action-confirm);
+    color: white;
+    border-color: var(--action-confirm);
+}
+
+.btn-action.contest {
+    background-color: var(--action-contest);
+    color: white;
+    border-color: var(--action-contest);
+}
+
+.btn-action:hover:not(.confirm):not(.contest) {
+    background-color: var(--border-color);
+}
+
+/*
+   ====================================================================
+   Responsividade para Telas Maiores (PC)
+   ====================================================================
+*/
+@media (max-width: 1360px) {
+	.matches-content {
+		grid-template-columns: .75fr 2.25fr; /* Coluna 1: Forms, Coluna 2: Lista de Partidas */
+	}
+}
+
+@media (min-width: 768px) {
+    .matches-content {
+        display: grid;
+        gap: 10px;
+        padding: 10px;
+		height: 100vh;
+    }
+
+    .section-new-match {
+        grid-column: 1 / 2;
+        order: 1;
+    }
+
+    .section-match-list {
+        grid-column: 2 / 3;
+        order: 2;
+    }
+
+    .score-form {
+        margin-bottom: 10px;
+    }
+    
+    .transmission-form {
+        margin-top: 0;
+    }
+    
+    .match-item {
+        flex-direction: row; /* Coloca info e ações na mesma linha */
+        justify-content: space-between;
+        align-items: center;
+        /* padding: 15px 20px; */
+		font-size: .95em;
+    }
+    
+    .match-info {
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .match-date-time {
+        flex-shrink: 0; /* Não encolhe */
+    }
+
+    .match-details {
+        flex-grow: 1;
+        min-width: 150px;
+    }
+    
+    .match-status-badge {
+        order: -1; /* Move o badge para a esquerda */
+        margin-right: 15px;
+    }
+
+    .match-actions {
+        padding-top: 0;
+        border-top: none;
+        margin-top: 0;
+        flex-shrink: 0;
+        width: 300px; /* Largura fixa para os botões de ação */
+    }
+    
+    .btn-action {
+        padding: 8px 15px;
+    }
+    
+    .score-input-item input {
+        max-width: 100px;
+    }
+    
+    .input-group select {
+        padding: 12px 15px;
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        color: var(--text-color);
+        font-size: 1em;
+        width: 100%;
+        outline: none;
+		margin-bottom: 0;
+    }
+}

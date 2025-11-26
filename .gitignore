@@ -10,6 +10,7 @@ Thumbs.db
 config/firebase-config.js
 config/emailjs-config.js
 config/api-config.js
+serviceAccountKey.json
 
 # Nota: Você deve criar versões de exemplo (ex: firebase-config.example.js)
 # sem as chaves reais para commitar no repositório, para que outros

@@ -1,41 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>iCouFootball</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/theme.css">
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/components.css">
-</head>
-<body>
-  <header class="card card--glass" role="banner" aria-labelledby="brand-title">
-    <div class="row" style="justify-content: space-between; align-items: center;">
-      <div class="brand-title" id="brand-title">i<span class="brand-cou">Cou</span>Football</div>
-      <nav aria-label="Navegação principal" class="row" style="gap: var(--spacing-md);">
-        <a href="pages/standings.html">Classificação</a>
-        <a href="pages/dashboard.html">Dashboard</a>
-        <a href="pages/matches.html">Partidas</a>
-        <a href="pages/admin.html">Admin</a>
-        <a href="pages/login.html" class="btn-primary">Entrar</a>
-      </nav>
-    </div>
-  </header>
-  <main class="main-bg" role="main">
-    <div class="card card--glass main-card">
-      <div class="subtitle">Bem-vindo. Utilize a navegação acima para acessar as páginas.</div>
-      <div class="row" style="justify-content: flex-start;">
-        <a href="pages/standings.html" class="btn-primary">Ver Classificação</a>
-      </div>
-    </div>
-  </main>
-  <footer class="card card--glass" role="contentinfo" style="margin: var(--spacing-md);">
-    <div class="row" style="justify-content: space-between; align-items: center;">
-      <span class="subtitle">© iCouFootball</span>
-      <span class="subtitle">Modo escuro habilitado</span>
-    </div>
-  </footer>
-  <script type="module" src="assets/js/app.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="refresh" content="0; url=/pages/homepage.html">
+        <title>iCouFootball - Classificação Geral</title>
+        <link rel="stylesheet" href="./css/main.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+            integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </head>
+    <body>
+        <div class="app-container">
+            <header class="app-header">
+                <div class="logo-area">
+                    <img src="https://i.ibb.co/JRnDn3r7/logo-icoufootball-40x40.webp" alt="Logo iCouFootball"
+                        class="logo-icon">
+                    <h1 class="logo-text">iCou<span>Football</span></h1>
+                </div>
+            </header>
+
+            <main class="app-content">
+                Carregando...
+            </main>
+
+            <footer class="app-footer">
+                <p>&copy; Copyright iCouFootball 2024</p>
+                <a href="#" class="footer-link">Sobre</a>
+                <div class="dark-mode-toggle">
+                    <span>Modo Escuro:</span>
+                    <span class="dark-mode-status">ON</span>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </footer>
+        </div>
+    </body>
 </html>

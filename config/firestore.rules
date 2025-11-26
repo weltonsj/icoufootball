@@ -1,1 +1,101 @@
 rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==== Helper Functions ====
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Checa se o usuário tem a custom claim 'admin'
+    // A atribuição dessa claim deve ser feita por um script de backend seguro (Firebase Functions)
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+
+    // ==== Coleção 'users' ====
+    // Perfis de usuários.
+    match /users/{userId} {
+      allow read: if resource.data.perfilPublico == true || isOwner(userId) || isAdmin();
+
+      // Escrita (Criar): Um usuário pode criar seu próprio documento.
+      allow create: if isOwner(userId);
+
+      // Escrita (Atualizar): Um usuário pode atualizar seu próprio perfil, ou um admin pode atualizar qualquer perfil.
+      allow update: if isOwner(userId) || isAdmin();
+
+      // Deleção: Um usuário pode deletar sua própria conta, ou um admin pode deletar qualquer conta.
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // ==== Coleção 'campeonatos' ====
+    // Contém os dados principais dos campeonatos.
+    match /campeonatos/{campeonatoId} {
+      // Leitura: Todos podem ver os campeonatos, tabelas, etc.
+      allow read: if true;
+
+      // Escrita (Criar, Atualizar, Deletar): Apenas administradores podem gerenciar campeonatos.
+      allow write: if isAdmin();
+
+      // --- Subcoleção 'rodadas' ---
+      match /rodadas/{rodadaId} {
+        allow read: if true;
+        allow write: if isAdmin();
+        match /partidas/{partidaId} {
+          allow read: if true;
+          allow update: if isAdmin()
+            || (
+              isAuthenticated()
+              && request.auth.uid == resource.data.jogadorAId
+              && resource.data.placarStatus == 'pending'
+              && request.resource.data.placarStatus == resource.data.placarStatus
+              && request.resource.data.jogadorAId == resource.data.jogadorAId
+              && request.resource.data.jogadorBId == resource.data.jogadorBId
+              && request.resource.data.placarB == resource.data.placarB
+              && request.resource.data.vencedorId == resource.data.vencedorId
+              && request.resource.data.linkTransmissao == resource.data.linkTransmissao
+              && request.resource.data.championshipId == resource.data.championshipId
+              && request.resource.data.rodadaId == resource.data.rodadaId
+              && request.resource.data.dataPartida == resource.data.dataPartida
+              && request.resource.data.placarA is int
+              && request.resource.data.placarA >= 0
+            )
+            || (
+              isAuthenticated()
+              && request.auth.uid == resource.data.jogadorBId
+              && resource.data.placarStatus == 'pending'
+              && request.resource.data.jogadorAId == resource.data.jogadorAId
+              && request.resource.data.jogadorBId == resource.data.jogadorBId
+              && request.resource.data.placarA == resource.data.placarA
+              && request.resource.data.placarB == resource.data.placarB
+              && request.resource.data.vencedorId == resource.data.vencedorId
+              && request.resource.data.linkTransmissao == resource.data.linkTransmissao
+              && request.resource.data.championshipId == resource.data.championshipId
+              && request.resource.data.rodadaId == resource.data.rodadaId
+              && request.resource.data.dataPartida == resource.data.dataPartida
+              && request.resource.data.placarStatus in ['confirmed', 'contested']
+            );
+          allow create, delete: if isAdmin();
+        }
+      }
+
+    }
+
+      
+    }
+
+    match /{path=**}/partidas/{partidaId} {
+      allow read: if true;
+    }
+
+    // ==== Coleção 'logs' ====
+    // Logs de atividades críticas do sistema.
+    match /logs/{logId} {
+      // Apenas admins podem ler ou escrever logs.
+      allow read, write: if isAdmin();
+    }
+  }
