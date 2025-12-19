@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Modal & Spinner Tests</title>
+  <link rel="stylesheet" href="../styles/theme.css">
+  <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+  <main class="app-content">
+    <h2>Modal & Spinner</h2>
+    <button id="btnModal">Show Modal</button>
+    <button id="btnSpinner">Show Spinner</button>
+    <div id="results"></div>
+  </main>
+  <script type="module">
+    import { showModal } from '../src/components/modal.js'
+    import { showSpinner, hideSpinner } from '../src/components/spinner.js'
+    const results=document.getElementById('results')
+    document.getElementById('btnModal').onclick=()=>{showModal('success','Teste','Modal exibido')}
+    document.getElementById('btnSpinner').onclick=()=>{showSpinner();setTimeout(()=>{hideSpinner();},1000)}
+    function run(name,fn){try{fn();const p=document.createElement('p');p.textContent=`✔ ${name}`;results.appendChild(p)}catch(e){const p=document.createElement('p');p.textContent=`✘ ${name} - ${e}`;results.appendChild(p)}}
+    run('modal styles loaded',()=>{const s=getComputedStyle(document.body); if(!s) throw 'no style'})
+  </script>
+</body>
+</html>

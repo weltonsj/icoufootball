@@ -20,7 +20,8 @@ service cloud.firestore {
     // ==== Coleção 'users' ====
     // Perfis de usuários.
     match /users/{userId} {
-      allow read: if resource.data.perfilPublico == true || isOwner(userId) || isAdmin();
+      // Permite ler perfis básicos (para busca de amigos) ou perfil completo se for público/próprio/admin
+      allow read: if isAuthenticated() || resource.data.perfilPublico == true || isOwner(userId) || isAdmin();
 
       // Escrita (Criar): Um usuário pode criar seu próprio documento.
       allow create: if isOwner(userId);
@@ -30,6 +31,64 @@ service cloud.firestore {
 
       // Deleção: Um usuário pode deletar sua própria conta, ou um admin pode deletar qualquer conta.
       allow delete: if isOwner(userId) || isAdmin();
+
+      // --- Subcoleção 'amigos' ---
+      // Lista de amigos do usuário
+      match /amigos/{amigoId} {
+        // Usuário pode ler sua própria lista de amigos ou se for o amigo
+        allow read: if isOwner(userId) || isOwner(amigoId);
+        // Usuário pode gerenciar sua própria lista OU adicionar-se na lista do amigo (quando aceita solicitação)
+        allow write: if isOwner(userId) || (isAuthenticated() && request.auth.uid == amigoId);
+      }
+      
+      // --- Subcoleção 'configuracoes' ---
+      // Configurações pessoais do usuário (temas do chat, preferências, etc.)
+      match /configuracoes/{configId} {
+        // Usuário pode ler e escrever apenas suas próprias configurações
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ==== Coleção 'solicitacoesAmizade' ====
+    // Solicitações de amizade
+    match /solicitacoesAmizade/{solicitacaoId} {
+      // Ler: Apenas remetente ou destinatário
+      allow read: if isAuthenticated() && 
+        (resource.data.deId == request.auth.uid || 
+         resource.data.paraId == request.auth.uid);
+      
+      // Criar: Apenas usuários autenticados, e deId deve ser o próprio usuário
+      allow create: if isAuthenticated() && 
+        request.resource.data.deId == request.auth.uid &&
+        request.resource.data.paraId != request.auth.uid;
+      
+      // Atualizar: Apenas destinatário pode aceitar/recusar
+      allow update: if isAuthenticated() && 
+        resource.data.paraId == request.auth.uid &&
+        resource.data.status == 'pendente' &&
+        request.resource.data.status in ['aceita', 'recusada'];
+      
+      // Deletar: Admin apenas
+      allow delete: if isAdmin();
+    }
+
+    // ==== Coleção 'notificacoes' ====
+    // Notificações in-app
+    match /notificacoes/{notificacaoId} {
+      // Ler: Usuários autenticados podem ler notificações
+      // A query filtra por usuarioId no código
+      allow read: if isAuthenticated();
+      
+      // Criar: Sistema ou outros usuários (para notificar)
+      allow create: if isAuthenticated();
+      
+      // Atualizar: Apenas o próprio usuário (marcar como lida)
+      allow update: if isAuthenticated() && 
+        resource.data.usuarioId == request.auth.uid;
+      
+      // Deletar: Apenas o próprio usuário
+      allow delete: if isAuthenticated() && 
+        resource.data.usuarioId == request.auth.uid;
     }
 
     // ==== Coleção 'campeonatos' ====
@@ -74,7 +133,7 @@ service cloud.firestore {
               && request.resource.data.placarB == resource.data.placarB
               && request.resource.data.vencedorId == resource.data.vencedorId
               && request.resource.data.linkTransmissao == resource.data.linkTransmissao
-              && request.resource.data.championshipId == resource.data.championshipId
+              && request.resource.data.campeonatoId == resource.data.campeonatoId
               && request.resource.data.rodadaId == resource.data.rodadaId
               && request.resource.data.dataPartida == resource.data.dataPartida
               && request.resource.data.placarStatus in ['confirmed', 'contested']
@@ -82,14 +141,59 @@ service cloud.firestore {
           allow create, delete: if isAdmin();
         }
       }
-
-    }
-
-      
     }
 
     match /{path=**}/partidas/{partidaId} {
       allow read: if true;
+    }
+
+    // ==== Coleção 'conversas' (Chat) ====
+    // Conversas entre usuários
+    match /conversas/{conversaId} {
+      // Ler: Usuários autenticados podem ler conversas que participam
+      // resource == null permite queries antes de verificar documentos individuais
+      allow read: if isAuthenticated();
+      
+      // Criar: Usuários autenticados podem criar conversas onde estão como participantes
+      allow create: if isAuthenticated() && 
+        request.auth.uid in request.resource.data.participantes &&
+        request.resource.data.participantes.size() == 2;
+      
+      // Atualizar: Apenas participantes podem atualizar
+      allow update: if isAuthenticated() && 
+        request.auth.uid in resource.data.participantes;
+      
+      // Deletar: Admin ou participante pode deletar
+      allow delete: if isAdmin() || 
+        (isAuthenticated() && request.auth.uid in resource.data.participantes);
+
+      // --- Subcoleção 'mensagens' ---
+      match /mensagens/{mensagemId} {
+        // Ler: Usuários autenticados (verificação de participantes no nível da query)
+        allow read: if isAuthenticated();
+        
+        // Criar: Usuário deve ser o remetente
+        allow create: if isAuthenticated() && 
+          request.resource.data.remetenteId == request.auth.uid;
+        
+        // Atualizar: Permite marcar como entregue OU lida
+        // Destinatário pode marcar mensagens como entregue ou lida
+        // Não pode alterar conteúdo ou remetente
+        allow update: if isAuthenticated() && 
+          resource.data.remetenteId != request.auth.uid &&
+          request.resource.data.remetenteId == resource.data.remetenteId &&
+          request.resource.data.conteudo == resource.data.conteudo &&
+          (
+            // Permitir marcar como entregue
+            (request.resource.data.entregue == true && 
+             request.resource.data.lida == resource.data.lida) ||
+            // Permitir marcar como lida
+            (request.resource.data.lida == true)
+          );
+        
+        // Deletar: Admin apenas
+        allow delete: if isAdmin();
+      }
     }
 
     // ==== Coleção 'logs' ====
@@ -99,3 +203,4 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
   }
+}

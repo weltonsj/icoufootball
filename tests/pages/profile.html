@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>iCouFootball - Meu Perfil</title>
+        <link rel="stylesheet" href="../styles/theme.css">
+        <link rel="stylesheet" href="../assets/css/main.css">
+        <link rel="stylesheet" href="../assets/css/pages/profile.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+            integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </head>
+    <body>
+        <div class="app-container">
+            <header class="app-header">
+                <div class="logo-area">
+                    <img src="https://i.ibb.co/JRnDn3r7/logo-icoufootball-40x40.webp" alt="Logo iCouFootball"
+                        class="logo-icon">
+                    <h1 class="logo-text">i<span>Cou</span>Football</h1>
+                </div>
+                <div class="profile-avatar-header">
+                    <img src="https://via.placeholder.com/40x40/e74c3c/ffffff?text=U" alt="Avatar do Usuário"
+                        class="avatar-img">
+                    <i class="fas fa-caret-down avatar-dropdown-icon"></i>
+                </div>
+            </header>
+
+            <main class="app-content profile-content">
+                <section class="section-profile-info">
+                    <h2>Meu Perfil</h2>
+
+                    <div class="profile-header-area card-section">
+                        <div class="profile-photo-upload">
+                            <img src="https://via.placeholder.com/100x100/e74c3c/ffffff?text=U" alt="Foto de Perfil"
+                                class="profile-photo">
+                            <button class="btn-upload">UPLOAD FOTO</button>
+                        </div>
+
+                        <div class="profile-details-summary">
+                            <div class="stars-display">
+                                <span>Estrelas de Campeonato:</span>
+                                <div class="player-stars">
+                                    <i class="fas fa-star filled"></i>
+                                    <i class="fas fa-star filled"></i>
+                                    <i class="fas fa-star filled"></i>
+                                    <i class="fas fa-star filled"></i>
+                                    <i class="fas fa-star filled"></i>
+                                    <span class="total-stars-hint">5 TOTAL</span>
+                                </div>
+                            </div>
+                            <div class="team-info">
+                                <i class="fas fa-trophy team-icon"></i>
+                                <span class="team-name">Falcos FC</span>
+                                <span class="team-motto">"A lenda da campianlone"</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="profile-edit-form card-section">
+                        <h3>Informações Pessoais</h3>
+                        <div class="input-group">
+                            <label for="username">Nome de Usuário</label>
+                            <div class="input-with-icon">
+                                <input type="text" id="username" value="Jogador Exemplo">
+                                <i class="fas fa-search input-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="password">Senha</label>
+                            <div class="input-with-icon">
+                                <input type="password" id="password" value="Esqueceu sua senha">
+                                <i class="fas fa-check-circle input-icon valid-icon"></i>
+                            </div>
+                            <span class="input-help-text">Clique para alterar sua senha.</span>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="bio">Bio</label>
+                            <div class="input-with-icon">
+                                <textarea id="bio" placeholder="Fale um pouco sobre você..."></textarea>
+                                <i class="fab fa-youtube input-icon social-icon"></i>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="whatsapp">Whatsapp</label>
+                            <div class="input-with-icon">
+                                <input type="tel" id="whatsapp" placeholder="(XX) XXXXX-XXXX">
+                                <i class="fab fa-whatsapp input-icon social-icon"></i>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="instagram">Instagram</label>
+                            <div class="input-with-icon">
+                                <input type="text" id="instagram" placeholder="@seuinstagram">
+                                <i class="fab fa-instagram input-icon social-icon"></i>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="twitch">Twitch</label>
+                            <div class="input-with-icon">
+                                <input type="text" id="twitch" placeholder="SeuCanalTwitch">
+                                <i class="fab fa-twitch input-icon social-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">SALVAR ALTERAÇÕES</button>
+                            <div class="public-profile-toggle">
+                                <span>Perfil Público</span>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+            </main>
+
+            <footer class="app-footer">
+                <p>&copy; Copyright iCouFootball 2024</p>
+                <a href="#" class="footer-link">Sobre</a>
+                <div class="dark-mode-toggle">
+                    <span>Modo Escuro:</span>
+                    <span class="dark-mode-status">ON</span>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

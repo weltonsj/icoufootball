@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,slnt,wdth,wght,GRAD,ROND@6..144,-10..0,25..151,1..1000,0..100,0..100&display=swap');
+
+
+:root {
+    --primary-bg: #1A1A1A;
+    --secondary-bg: #2B2B2B;
+    --text-color: #E0E0E0;
+    --highlight-color: #FD8A24;
+    --border-color: #444;
+    --table-header-bg: #3A3A3A;
+    --table-row-hover: #353535;
+    --star-filled: #FFD700;
+    --star-empty: #555;
+    --font-family: 'Google Sans Flex', 'Rubik', 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
+    --input-bg: #3A3A3A;
+    --input-border: #555;
+    --icon-color: #888;
+    --button-icon-bg: #3A3A3A;
+    --chat-bubble-received: #424242;
+    --chat-bubble-sent: #FD8A24;
+    --chat-input-bg: #3A3A3A;
+    --chat-border-color: #555;
+    --unread-badge-bg: #E74C3C;
+    --status-confirmed: #28a745;
+    --status-pending: #ffc107;
+    --status-contested: #dc3545;
+    --action-confirm: #28a745;
+    --action-contest: #dc3545;
+    --action-secondary: #007bff;
+    --action-red: #dc3545;
+    --action-orange: #fd7e14;
+    --action-green: #28a745;
+    --action-blue: #007bff;
+    --kpi-icon-color: #f1c40f;
+    --confirmed-badge-bg: #28a745;
+    --pending-badge-bg: #ffc107;
+    --contested-badge-bg: #dc3545;
+}
+
+/* Tema Claro - Cores suaves e limpas */
+.theme-light,
+.theme-light body,
+html.theme-light {
+    --primary-bg: #F5F5F5;
+    --secondary-bg: #FFFFFF;
+    --text-color: #2C3E50;
+    --highlight-color: #FD8A24;
+    --border-color: #D1D5DB;
+    --table-header-bg: #E8EAF0;
+    --table-row-hover: #F3F4F6;
+    --star-filled: #FFA500;
+    --star-empty: #CBD5E0;
+    --input-bg: #FFFFFF;
+    --input-border: #D1D5DB;
+    --icon-color: #6B7280;
+    --button-icon-bg: #F3F4F6;
+    --chat-bubble-received: #E5E7EB;
+    --chat-bubble-sent: #FEE2D5;
+    --chat-input-bg: #FFFFFF;
+    --chat-border-color: #D1D5DB;
+    --unread-badge-bg: #EF4444;
+    --status-confirmed: #10B981;
+    --status-pending: #F59E0B;
+    --status-contested: #EF4444;
+    --action-confirm: #10B981;
+    --action-contest: #EF4444;
+    --action-secondary: #3B82F6;
+    --action-red: #EF4444;
+    --action-orange: #F97316;
+    --action-green: #10B981;
+    --action-blue: #3B82F6;
+    --kpi-icon-color: #FBBF24;
+    --confirmed-badge-bg: #10B981;
+    --pending-badge-bg: #F59E0B;
+    --contested-badge-bg: #EF4444;
+}
+
+/* Ajustes específicos para elementos no tema claro */
+.theme-light .app-header {
+    background-color: #FFFFFF;
+    border-bottom: 2px solid #E5E7EB;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.theme-light .app-footer {
+    background-color: #FFFFFF;
+    border-top: 2px solid #E5E7EB;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.theme-light .card-section {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.theme-light table {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+}
+
+.theme-light .modal {
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.theme-light .avatar-popover {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-light .auth-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.theme-light .input-with-icon input,
+.theme-light .input-with-icon textarea {
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    color: #2C3E50;
+}
+
+.theme-light .input-with-icon input:focus,
+.theme-light .input-with-icon textarea:focus {
+    border-color: #FD8A24;
+    box-shadow: 0 0 0 3px rgba(253, 138, 36, 0.1);
+}
+
+.theme-light .danger-zone {
+    background-color: rgba(239, 68, 68, 0.05);
+    border-color: #EF4444;
+}
+
+/* ========================================
+   MODO CLARO (Light Mode)
+   ======================================== */
+.theme-light {
+    --primary-bg: #F5F5F5;
+    --secondary-bg: #FFFFFF;
+    --text-color: #2B2B2B;
+    --highlight-color: #FD8A24;
+    --border-color: #DDDDDD;
+    --table-header-bg: #EEEEEE;
+    --table-row-hover: #F8F8F8;
+    --star-filled: #FFD700;
+    --star-empty: #CCCCCC;
+    --input-bg: #FFFFFF;
+    --input-border: #CCCCCC;
+    --icon-color: #666666;
+    --button-icon-bg: #EEEEEE;
+    --chat-bubble-received: #EEEEEE;
+    --chat-bubble-sent: #FD8A24;
+    --chat-input-bg: #FFFFFF;
+    --chat-border-color: #DDDDDD;
+    --unread-badge-bg: #E74C3C;
+    --status-confirmed: #28a745;
+    --status-pending: #ffc107;
+    --status-contested: #dc3545;
+}
+
+/* Aplica variáveis no .app-content quando modo claro está ativo */
+.app-content.theme-light {
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    background-image: none;
+}
+
+body.theme-light {
+    background-color: #E5E5E5;
+}
+
+body.theme-light .app-container {
+    background-color: var(--secondary-bg);
+}
+
+body.theme-light .app-header {
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.theme-light .app-footer {
+    background-color: var(--secondary-bg);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Ajustes de contraste para modo claro */
+body.theme-light .card-section,
+body.theme-light .stat-card,
+body.theme-light .player-card,
+body.theme-light .auth-card {
+    background-color: var(--secondary-bg);
+    border-color: var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+body.theme-light table {
+    background-color: var(--secondary-bg);
+}
+
+body.theme-light table th {
+    background-color: var(--table-header-bg);
+}
+
+body.theme-light input,
+body.theme-light textarea,
+body.theme-light select {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-color);
+}
+
+body.theme-light .nav-item {
+    color: var(--text-color);
+}
+
+body.theme-light .nav-item:hover {
+    color: var(--highlight-color);
+}

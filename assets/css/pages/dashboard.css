@@ -1,0 +1,261 @@
+/* ====================================================================
+   Regras para a Dashboard do Jogador
+   ====================================================================
+*/
+
+.dashboard-content {
+    padding: 20px;
+}
+
+.section-kpis {
+    margin-bottom: 30px;
+}
+
+.kpis-header {
+    display: flex;
+	align-items: center;
+	flex-direction: row;
+	gap: 15px;
+	margin-bottom: 20px;
+    justify-content: flex-start;
+}
+
+.kpis-header h2 {
+    font-size: 1.1em;
+    text-align: left; /* Alinhamento à esquerda na dashboard */
+    margin-bottom: 0; /* Remove margin-bottom padrão de h2 */
+    text-transform: uppercase;
+    color: var(--text-color);
+}
+
+.time-profile-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.profile-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-dropdown-icon {
+    color: #AAA;
+    font-size: 0.8em;
+}
+
+.kpi-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 2 colunas em mobile, 4 em desktop */
+    gap: 15px;
+}
+
+.kpi-card {
+    background-color: var(--secondary-bg);
+	border-right: 1px solid var(--highlight-color);
+    border-left: 1px solid var(--highlight-color);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 120px;
+    justify-content: center;
+}
+
+.kpi-icon {
+    font-size: 1.8em;
+    color: var(--kpi-icon-color);
+    margin-bottom: 8px;
+}
+
+.kpi-value {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.kpi-label {
+    font-size: 0.8em;
+    color: #AAA;
+}
+
+.section-match-history {
+    margin-bottom: 20px;
+	overflow-y: auto;
+	padding-bottom: 20px;
+	min-height: 300px;
+	max-height: 600px;
+}
+
+.section-match-history h3 {
+    text-align: left; /* Alinhamento à esquerda */
+    margin-bottom: 20px;
+    font-size: 1em;
+    text-transform: uppercase;
+    color: var(--text-color);
+}
+
+.match-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.match-item {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar linha em mobile */
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px; /* Espaçamento entre os elementos */
+}
+
+.match-date {
+    font-size: 0.9em;
+    color: #AAA;
+    flex-basis: 100%; /* Ocupa linha inteira em mobile */
+}
+
+.match-teams {
+    font-weight: bold;
+    color: var(--text-color);
+    flex-grow: 1; /* Ocupa o espaço restante */
+    white-space: nowrap; /* Previne quebra de linha excessiva */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adiciona "..." se o texto for muito longo */
+}
+
+.match-status.badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap; /* Impede que o badge quebre a linha */
+}
+
+.confirmed-badge {
+    background-color: var(--confirmed-badge-bg);
+    color: var(--primary-bg);
+}
+
+.pending-badge {
+    background-color: var(--pending-badge-bg);
+    color: var(--primary-bg); /* Ou uma cor escura que contraste */
+}
+
+.contested-badge {
+    background-color: var(--contested-badge-bg);
+    color: var(--text-color);
+}
+
+/*
+   ====================================================================
+   Responsividade para Telas Maiores (PC) - Mantendo a consistência
+   ====================================================================
+*/
+
+@media (min-width: 768px) {
+    /* O body e app-container já devem ter os estilos de desktop */
+    /* Header e Footer também já devem estar responsivos */
+	
+	.app-content {
+		display: initial;
+		overflow-y: hidden;
+	}
+	
+    .dashboard-content {
+        padding: 30px 30px 10px 30px;
+    }
+	
+    .kpis-header {
+        margin-bottom: 25px;
+    }
+
+    .kpis-header h2 {
+        font-size: 1.2em;
+    }
+
+    .kpi-cards {
+        grid-template-columns: repeat(4, 1fr); /* 4 colunas em desktop */
+        gap: 20px;
+    }
+
+    .kpi-card {
+        padding: 20px;
+        min-height: 140px;
+    }
+
+    .kpi-icon {
+        font-size: 2.2em;
+    }
+
+    .kpi-value {
+        font-size: 2em;
+    }
+
+    .kpi-label {
+        font-size: 0.9em;
+    }
+	
+    .section-match-history h3 {
+        font-size: 1.1em;
+        margin-bottom: 25px;
+    }
+
+    .match-item {
+        padding: 18px 20px;
+        flex-wrap: nowrap; /* Não quebra linha em desktop */
+        gap: 15px;
+    }
+
+    .match-date {
+        flex-basis: auto; /* Não ocupa linha inteira */
+        min-width: 100px; /* Garante que a data não encolha demais */
+    }
+
+    .match-teams {
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    .match-status.badge {
+        padding: 7px 12px;
+        font-size: 0.85em;
+    }
+}
+
+/* ====================================================================
+   Estilos adicionais para Seleção de Time no Dashboard
+   ====================================================================
+*/
+
+.time-profile-summary {
+    transition: transform 0.2s ease, opacity 0.3s ease;
+}
+
+.time-profile-summary:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.time-profile-summary:active {
+    transform: scale(0.98);
+}
+
+.team-name-display {
+    font-size: 0.9em;
+    color: var(--text-color);
+    font-weight: 600;
+}

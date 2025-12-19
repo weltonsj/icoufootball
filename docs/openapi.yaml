@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  title: iCouFootball API
+  version: 1.0.0
+paths:
+  /register:
+    post:
+      summary: Cadastro de usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '201':
+          description: Usuário criado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uid:
+                    type: string
+                  profile:
+                    type: object
+        '400':
+          description: Validação falhou
+        '409':
+          description: E-mail já cadastrado
+        '500':
+          description: Erro interno

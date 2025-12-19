@@ -1,0 +1,1045 @@
+@import '../../styles/theme.css';
+@import './components/friends.css';
+
+/* Base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: #605F54;
+    /* Cor de fundo da imagem de mobile */
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    /* Alinha o conteúdo ao topo para telas maiores */
+    min-height: 100vh;
+    /* padding: 20px; /* Adiciona um padding geral para telas maiores */
+}
+
+/* Previne FOUC (Flash of Unstyled Content) durante carregamento inicial */
+body.app-loading .main-nav {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+body.app-loading .profile-avatar-header {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+body:not(.app-loading) .main-nav,
+body:not(.app-loading) .profile-avatar-header {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Controle de visibilidade baseado em autenticação - Elimina FOUC 100% */
+/* Quando NÃO autenticado: oculta elementos autenticados */
+html:not(.authenticated) #navHome,
+html:not(.authenticated) #navDashboard,
+html:not(.authenticated) #navMatches,
+html:not(.authenticated) #navChat,
+html:not(.authenticated) #navProfile,
+html:not(.authenticated) #navAdmin,
+html:not(.authenticated) .profile-avatar-header {
+    display: none !important;
+}
+
+/* Quando autenticado: oculta elementos públicos */
+html.authenticated #navLogin {
+    display: none !important;
+}
+
+/* Quando autenticado como Jogador: oculta Admin */
+html.authenticated.role-jogador #navAdmin {
+    display: none !important;
+}
+
+/* Quando autenticado como Admin: mostra tudo */
+html.authenticated.role-admin #navAdmin {
+    display: block !important;
+}
+
+/* Previne re-layout do header durante carregamento - Mantém estabilidade visual */
+.app-header {
+    min-height: 100px;
+}
+
+/* Previne flash durante transição de páginas */
+.app-content {
+    min-height: calc(100vh - 160px);
+}
+
+/* Overlay de carregamento suave - Freeze frame durante recarregamento */
+body.page-reloading .app-content {
+    opacity: 1;
+    transition: none;
+}
+
+body.page-reloading .main-nav,
+body.page-reloading .profile-avatar-header {
+    opacity: 1 !important;
+    pointer-events: none;
+}
+
+/* Skeleton para avatar durante carregamento */
+body.page-reloading .profile-avatar-header {
+    filter: brightness(0.95);
+}
+
+/* Container principal do aplicativo */
+.app-container {
+    background-color: var(--primary-bg);
+    border-radius: 25px;
+    /* Bordas arredondadas para simular o device */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+    /* Largura máxima para mobile */
+    overflow: hidden;
+    /* Garante que elementos filhos não transbordem */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* Altura mínima para mobile */
+}
+
+/* Header */
+.app-header {
+    background-color: var(--secondary-bg);
+    /* Cor mais escura para o header */
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    /* Permite que os itens do header quebrem a linha */
+}
+
+/* Avatar no Header */
+.profile-avatar-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-avatar-header .avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--highlight-color);
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.logo-text>span {
+    color: var(--highlight-color);
+}
+
+.main-nav {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    /* Para mobile, a navegação pode quebrar abaixo do logo */
+    flex-basis: 100%;
+    /* Ocupa a largura total em mobile */
+    justify-content: center;
+}
+
+.nav-item {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9em;
+    padding: 5px 0;
+    position: relative;
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--highlight-color);
+}
+
+.btn-login {
+    background: linear-gradient(135deg, var(--highlight-color) 0%, #ff9d3d 100%);
+    color: var(--primary-bg);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(253, 138, 24, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, #ff9d3d 0%, #ffb366 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(253, 138, 24, 0.5);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+/* Main Content */
+.app-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-image: url("https://i.ibb.co/YBwM7XCy/background-main-1024x1024.webp");
+}
+
+.app-content h2,
+.app-content h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    text-transform: uppercase;
+    font-size: 1.25rem;
+}
+
+/* Footer */
+.app-footer {
+    background-color: var(--secondary-bg);
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8em;
+    color: #AAA;
+    gap: 10px;
+    /* Espaçamento entre os itens do footer */
+}
+
+.app-footer p,
+.app-footer a {
+    color: #AAA;
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    color: var(--highlight-color);
+}
+
+/* Table Container */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--chat-border-color);
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--secondary-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 300px;
+}
+
+table th,
+table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9em;
+}
+
+table th {
+    background-color: var(--table-header-bg);
+    font-weight: bold;
+    color: var(--text-color);
+    text-transform: uppercase;
+}
+
+table tr:last-child td {
+    border-bottom: none;
+}
+
+table tbody tr:hover {
+    background-color: var(--table-row-hover);
+}
+
+.team-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.team-logo {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.hidden {
+    display: none !important
+}
+
+.dark-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dark-mode-status {
+    font-weight: bold;
+    color: var(--highlight-color);
+}
+
+/* Switch de Modo Escuro */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 20px;
+    /* Bordas arredondadas para o slider */
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%;
+    /* Bolinha redonda */
+}
+
+input:checked+.slider {
+    background-color: var(--highlight-color);
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px var(--highlight-color);
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--secondary-bg) inset !important;
+    /* Define a cor do texto para evitar que ela mude também */
+    -webkit-text-fill-color: var(--text-color) !important;
+    /* Adiciona transição para suavizar a mudança, se necessário */
+    transition: background-color 5000s ease-in-out 0s;
+    opacity: .9 !important;
+}
+
+/* Responsividade para Telas Maiores (PC) */
+@media (min-width: 768px) {
+    body {
+        background-color: #444;
+        /* Cor de fundo mais escura para a imagem de PC */
+        align-items: center;
+        /* Centraliza verticalmente o app-container */
+    }
+
+    .app-container {
+        max-width: 100vw;
+        /* Largura máxima para telas de PC */
+        /* min-height: 80vh; /* Altura responsiva */
+        border-radius: 0;
+        /* Bordas um pouco menos arredondadas */
+    }
+
+    .app-header {
+        flex-wrap: nowrap;
+        /* Impede que itens quebrem linha */
+        justify-content: space-between;
+    }
+
+    .logo-area {
+        flex-grow: 0;
+        /* Não cresce para ocupar espaço */
+    }
+
+    .main-nav {
+        flex-basis: auto;
+        /* Deixa de ocupar 100% da largura */
+        margin-top: 0;
+        flex-grow: 1;
+        /* Ocupa espaço entre o logo e o botão */
+        justify-content: flex-start;
+        /* Alinha itens à esquerda */
+        margin-left: 30px;
+        /* Espaçamento da logo */
+        gap: 25px;
+    }
+
+    .btn-login {
+        margin-top: 0;
+    }
+
+    .app-footer {
+        padding: 20px 30px;
+    }
+
+    .app-footer {
+        padding: 20px 30px;
+    }
+}
+
+@media (min-width: 1024px) {}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999
+}
+
+.modal {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 360px;
+    width: 90%
+}
+
+.modal h3 {
+    color: var(--highlight-color);
+    margin-bottom: 10px
+}
+
+.modal p {
+    color: var(--text-color);
+    margin-bottom: 15px
+}
+
+.modal-btn {
+    background-color: var(--highlight-color);
+    color: var(--primary-bg);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: bold;
+    cursor: pointer
+}
+
+.modal-error {
+    border-color: #dc3545
+}
+
+.modal-success {
+    border-color: #28a745
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    animation: fadeIn .2s forwards
+}
+
+.modal {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 360px;
+    width: 90%;
+    transform: scale(.98);
+    animation: popIn .2s forwards
+}
+
+.modal h3 {
+    color: var(--highlight-color);
+    margin-bottom: 10px
+}
+
+.modal p {
+    color: var(--text-color);
+    margin-bottom: 15px
+}
+
+.modal-btn {
+    background: linear-gradient(135deg, var(--highlight-color) 0%, #ff9d3d 100%);
+    color: var(--primary-bg);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(253, 138, 24, 0.3);
+}
+
+.modal-btn:hover {
+    background: linear-gradient(135deg, #ff9d3d 0%, #ffb366 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(253, 138, 24, 0.4);
+}
+
+.modal-btn:active {
+    transform: translateY(0);
+}
+
+.modal-error {
+    border-color: #dc3545
+}
+
+.modal-success {
+    border-color: #28a745
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 10px
+}
+
+.modal input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 8px
+}
+
+.modal input[aria-invalid="true"] {
+    border-color: #dc3545
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes popIn {
+    to {
+        transform: scale(1)
+    }
+}
+
+@media (min-width:768px) {
+    .modal {
+        max-width: 420px
+    }
+}
+
+/* Spinner */
+.spinner-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    background: rgba(26, 26, 26, 0.7)
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(253, 138, 24, 0.2);
+    border-top-color: var(--highlight-color);
+    border-radius: 50%;
+    animation: spin .8s linear infinite
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+.btn-logout {
+    margin-left: auto;
+    background: var(--highlight-color);
+    color: var(--primary-bg);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: bold;
+    cursor: pointer
+}
+
+.btn-logout:focus {
+    outline: 2px solid var(--border-color)
+}
+
+.main-nav {
+    display: flex;
+    gap: 12px;
+    align-items: center
+}
+
+/* Menu do Avatar - Layout Vertical Moderno */
+.avatar-popover {
+    position: absolute;
+    background: var(--secondary-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 200px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.avatar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    color: var(--text-color);
+}
+
+.avatar-menu-item:hover {
+    background: var(--table-row-hover);
+    transform: translateX(4px);
+}
+
+.avatar-menu-item.danger {
+    color: #ff6b6b;
+}
+
+.avatar-menu-item.danger:hover {
+    background: rgba(220, 53, 69, 0.15);
+}
+
+.avatar-menu-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--highlight-color);
+    font-size: 1.1em;
+}
+
+.avatar-menu-item.danger i {
+    color: #ff6b6b;
+}
+
+.avatar-menu-item span {
+    font-size: 0.95em;
+    font-weight: 500;
+}
+
+/* Public Profile Toggle dentro do Avatar Menu */
+.avatar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    color: var(--text-color);
+    font-size: 0.9em;
+}
+
+.avatar-toggle span {
+    font-weight: 500;
+}
+
+.avatar-toggle .switch {
+    width: 40px;
+    height: 20px;
+}
+
+/* ====================================================================
+   ESTILOS DA PÁGINA ESTÁTICA HOME + LOGIN (Consolidados)
+   ==================================================================== */
+
+/* Layout Grid 3 Colunas para página estática */
+.main-page-content {
+    display: grid !important;
+    grid-template-areas:
+        "standings stats auth"
+        "players players players" !important;
+    grid-template-columns: 1.5fr 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 20px !important;
+    padding: 20px !important;
+    align-items: start !important;
+}
+
+/* Quando autenticado: auth-card oculto, stats expande */
+html.authenticated .main-page-content {
+    grid-template-areas:
+        "standings stats stats"
+        "players players players" !important;
+    grid-template-columns: 1.5fr 1.5fr !important;
+}
+
+html.authenticated .main-page-content .auth-card {
+    display: none;
+}
+
+/* Seções da Home */
+.section-standings {
+    grid-area: standings;
+    margin-bottom: 0;
+}
+
+.section-stats {
+    grid-area: stats;
+    margin-bottom: 0;
+}
+
+.section-players {
+    grid-area: players;
+    margin-bottom: 20px;
+}
+
+/* Tabela de classificação */
+.numeric {
+    text-align: center;
+}
+
+/* Cards de estatísticas */
+.stats-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.stat-card {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 80px;
+}
+
+.stat-card h4 {
+    font-size: 0.8em;
+    color: var(--highlight-color);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.stat-card p {
+    font-size: 0.9em;
+    color: var(--text-color);
+}
+
+/* Grid de jogadores em destaque */
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.player-card {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid var(--highlight-color);
+}
+
+.player-card h4 {
+    font-size: 1em;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.player-team {
+    font-size: 0.8em;
+    color: #AAA;
+    margin-bottom: 10px;
+}
+
+.player-stars {
+    color: var(--star-empty);
+    font-size: 1.1em;
+}
+
+.player-stars .filled {
+    color: var(--star-filled);
+}
+
+/* ====================================================================
+   ESTILOS DO AUTH-CARD (LOGIN/REGISTRO)
+   ==================================================================== */
+
+.auth-card {
+    grid-area: auth;
+    background-color: var(--secondary-bg);
+    border-radius: 15px;
+    padding: 25px 20px;
+    width: 100%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 20px;
+}
+
+.auth-card-title {
+    margin-bottom: 20px;
+}
+
+.auth-card-title h2 {
+    text-transform: math-auto;
+    margin-bottom: 0;
+    text-align: left;
+    font-size: 1.8rem;
+}
+
+.auth-card-title h2 span {
+    color: var(--highlight-color);
+}
+
+.auth-card-title>span {
+    color: var(--text-color);
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
+.auth-toggle {
+    display: flex;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.toggle-button {
+    flex: 1;
+    background-color: transparent;
+    border: none;
+    padding: 10px 8px;
+    color: #888;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+}
+
+.toggle-button.active {
+    border: 1px solid var(--highlight-color);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-form.hidden {
+    display: none;
+}
+
+.auth-form .input-group {
+    position: relative;
+}
+
+.auth-form .input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #3a3a3a6e;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.auth-form .input-group input::placeholder {
+    color: #A0A0A0;
+}
+
+.auth-form .input-group input:focus {
+    border-color: var(--highlight-color);
+    box-shadow: 0 0 0 2px rgba(253, 138, 36, 0.3);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.auth-form .btn-primary {
+    background: linear-gradient(135deg, var(--highlight-color) 0%, #ff9d3d 100%);
+    color: var(--primary-bg);
+    border: none;
+    border-radius: 10px;
+    padding: 14px 24px;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 5px;
+    box-shadow: 0 4px 10px rgba(253, 138, 24, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.auth-form .btn-primary:hover {
+    background: linear-gradient(135deg, #ff9d3d 0%, #ffb366 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(253, 138, 24, 0.5);
+}
+
+.auth-form .btn-primary:active {
+    transform: translateY(-1px);
+}
+
+.auth-form .btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(253, 138, 24, 0.3);
+}
+
+.forgot-password {
+    text-align: left;
+    color: #AAA;
+    font-size: 0.85em;
+    text-decoration: none;
+    margin-top: 5px;
+}
+
+.forgot-password:hover {
+    color: var(--highlight-color);
+    text-decoration: underline;
+}
+
+/* ====================================================================
+   RESPONSIVIDADE PARA MOBILE
+   ==================================================================== */
+
+@media (max-width: 1024px) {
+    .main-page-content {
+        grid-template-areas:
+            "standings"
+            "auth"
+            "stats"
+            "players";
+        grid-template-columns: 1fr;
+    }
+
+    html.authenticated .main-page-content {
+        grid-template-areas:
+            "standings"
+            "stats"
+            "players";
+        grid-template-columns: 1fr;
+    }
+
+    .stats-cards {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .players-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
