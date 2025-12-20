@@ -7,10 +7,10 @@ Thumbs.db
 
 # --- Arquivos de Configuração com Chaves Secretas (Segurança) ---
 # Ignora os arquivos reais que contêm suas API Keys
-config/firebase-config.js
-config/emailjs-config.js
-config/api-config.js
-serviceAccountKey.json
+# config/firebase-config.js
+# config/emailjs-config.js
+# config/api-config.js
+# serviceAccountKey.json
 
 # Nota: Você deve criar versões de exemplo (ex: firebase-config.example.js)
 # sem as chaves reais para commitar no repositório, para que outros
