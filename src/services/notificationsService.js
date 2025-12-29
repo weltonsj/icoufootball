@@ -1,4 +1,4 @@
-import { db } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import { 
   collection, 
   query, 
@@ -20,7 +20,7 @@ export async function getUnreadNotifications(userId) {
     const notificacoesRef = collection(db, 'notificacoes');
     const q = query(
       notificacoesRef, 
-      where('usuarioId', '==', userId),
+            where('usuarioId', '==', userId),
       where('lida', '==', false)
     );
     
@@ -36,8 +36,8 @@ export async function getUnreadNotifications(userId) {
     
     // Ordena por data (mais recentes primeiro)
     notifications.sort((a, b) => {
-      const timeA = a.criadoEm?.toMillis() || 0;
-      const timeB = b.criadoEm?.toMillis() || 0;
+            const timeA = a.dataNotificacao?.toMillis?.() || 0;
+            const timeB = b.dataNotificacao?.toMillis?.() || 0;
       return timeB - timeA;
     });
     
@@ -54,10 +54,37 @@ export async function getUnreadNotifications(userId) {
  */
 export async function markNotificationsAsRead(notificationIds) {
   try {
-    const promises = notificationIds.map(id => 
-      updateDoc(doc(db, 'notificacoes', id), { lida: true })
-    );
-    await Promise.all(promises);
+        const currentUserId = auth.currentUser?.uid;
+        if (!currentUserId) {
+            throw new Error('Usuário não autenticado.');
+        }
+
+        const safeIds = Array.isArray(notificationIds)
+            ? notificationIds.filter(id => {
+                    const notif = notificacoesAtuais.find(n => n?.id === id);
+                    // Se não encontrarmos no cache local, não tentamos atualizar (evita erro de permissão por IDs stale)
+                    if (!notif) return false;
+                    // CORRIGIDO: usar usuarioId (padrão PRD português) em vez de userId
+                    return notif.usuarioId === currentUserId;
+                })
+            : [];
+
+        if (safeIds.length === 0) {
+            console.warn('[Notifications] Nenhuma notificação válida para marcar como lida');
+            return;
+        }
+
+        console.log(`[Notifications] Marcando ${safeIds.length} notificações como lidas`);
+
+        const { writeBatch } = await import("https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js");
+        const batch = writeBatch(db);
+        
+        safeIds.forEach(id => {
+            batch.update(doc(db, 'notificacoes', id), { lida: true });
+        });
+        
+        await batch.commit();
+        console.log('[Notifications] ✅ Todas notificações marcadas como lidas');
   } catch (error) {
     console.error('Erro ao marcar notificações como lidas:', error);
     throw error;
@@ -71,10 +98,17 @@ export async function markNotificationsAsRead(notificationIds) {
  * @returns {Function} Função para cancelar a escuta
  */
 export function listenUnreadNotifications(userId, callback) {
+  // Verificar se usuário está autenticado antes de criar listener
+  if (!userId || !auth.currentUser) {
+    console.warn('[Notifications] Usuário não autenticado, não iniciando listener');
+    callback(0, []);
+    return () => {}; // Retorna função vazia para unsubscribe
+  }
+
   const notificacoesRef = collection(db, 'notificacoes');
   const q = query(
     notificacoesRef,
-    where('usuarioId', '==', userId),
+        where('usuarioId', '==', userId),
     where('lida', '==', false)
   );
   
@@ -91,8 +125,14 @@ export function listenUnreadNotifications(userId, callback) {
     
     callback(count, notifications);
   }, (error) => {
-    console.error('Erro ao escutar notificações:', error);
-    callback(0, []);
+    // Erro silencioso se for problema de permissões (usuário não autenticado ou sem acesso)
+    if (error.code === 'permission-denied') {
+      console.warn('[Notifications] Permissões insuficientes - usuário pode não estar autenticado');
+      callback(0, []);
+    } else {
+      console.error('[Notifications] Erro ao escutar notificações:', error);
+      callback(0, []);
+    }
   });
 }
 
@@ -112,11 +152,13 @@ export async function criarNotificacaoMensagem(remetenteId, destinatarioId, conv
         await addDoc(collection(db, 'notificacoes'), {
             usuarioId: destinatarioId,
             tipo: 'mensagem',
-            remetenteId: remetenteId,
             conversaId: conversaId,
             mensagemPreview: mensagemPreview.substring(0, 50),
             lida: false,
-            criadoEm: serverTimestamp()
+            dataNotificacao: serverTimestamp(),
+            metadados: {
+                remetenteId
+            }
         });
         console.log('[Notifications] Notificação de mensagem criada');
     } catch (error) {
@@ -318,7 +360,7 @@ export async function exibirDropdownNotificacoes() {
         listContainer.style.cssText = 'max-height: 350px; overflow-y: auto;';
         
         // Buscar nomes dos remetentes
-        const remetentesIds = [...new Set(notificacoesAtuais.map(n => n.remetenteId).filter(Boolean))];
+        const remetentesIds = [...new Set(notificacoesAtuais.map(n => n?.metadados?.remetenteId).filter(Boolean))];
         const nomesMap = new Map();
         
         for (const id of remetentesIds) {
@@ -343,25 +385,91 @@ export async function exibirDropdownNotificacoes() {
             let icone = 'fa-bell';
             let corIcone = '#FD8A24';
             let titulo = 'Notificação';
-            const preview = notif.mensagemPreview || '';
-            const nomeRemetente = nomesMap.get(notif.remetenteId) || 'Usuário';
+            let subtitulo = ''; // Adicionar subtítulo com origem/motivo
+            let rotaDestino = null; // Rota para redirecionamento
+            const preview = notif.mensagemPreview || notif.mensagem || '';
+            const remetenteId = notif?.metadados?.remetenteId || null;
+            const nomeRemetente = (remetenteId && nomesMap.get(remetenteId)) || notif?.metadados?.remetenteNome || 'Sistema';
             
             if (notif.tipo === 'mensagem') {
                 icone = 'fa-comment';
                 corIcone = '#4FC3F7';
                 titulo = `Nova mensagem de ${nomeRemetente}`;
+                subtitulo = 'Chat privado';
+                rotaDestino = '#chat';
             } else if (notif.tipo === 'solicitacao_amizade') {
                 icone = 'fa-user-plus';
                 corIcone = '#28a745';
-                titulo = `Solicitação de ${nomeRemetente}`;
+                titulo = `Solicitação de amizade`;
+                subtitulo = `De: ${nomeRemetente}`;
+                rotaDestino = '#profile';
             } else if (notif.tipo === 'amizade_aceita') {
                 icone = 'fa-user-check';
                 corIcone = '#28a745';
-                titulo = `${nomeRemetente} aceitou sua solicitação`;
+                titulo = `Amizade aceita`;
+                subtitulo = `${nomeRemetente} aceitou seu pedido`;
+                rotaDestino = '#profile';
+            } else if (notif.tipo === 'convite_campeonato') {
+                icone = 'fa-trophy';
+                corIcone = '#FD8A24';
+                const nomeCamp = notif.campeonatoNome || 'Campeonato';
+                titulo = `Convite para Campeonato`;
+                subtitulo = `${nomeCamp} • De: ${nomeRemetente}`;
+                rotaDestino = '#homepage';
+            } else if (notif.tipo === 'convite_amistosa') {
+                icone = 'fa-futbol';
+                corIcone = '#FD8A24';
+                const rodadaTxt = notif.rodadaId ? `Rodada ${notif.rodadaId}` : 'Amistoso';
+                titulo = `Convite de Partida`;
+                subtitulo = `${rodadaTxt} • De: ${nomeRemetente}`;
+                rotaDestino = '#matches';
+            } else if (notif.tipo === 'placar_pendente') {
+                icone = 'fa-edit';
+                corIcone = '#FF9800';
+                titulo = `Placar pendente`;
+                subtitulo = `Confirme o resultado • De: ${nomeRemetente}`;
+                rotaDestino = '#matches';
+            } else if (notif.tipo === 'placar_confirmado') {
+                icone = 'fa-check-circle';
+                corIcone = '#28a745';
+                titulo = `Placar confirmado`;
+                subtitulo = `Partida finalizada`;
+                rotaDestino = '#matches';
+            } else if (notif.tipo === 'placar_contestado') {
+                icone = 'fa-exclamation-triangle';
+                corIcone = '#f44336';
+                titulo = `Placar contestado`;
+                subtitulo = `Aguardando resolução • Por: ${nomeRemetente}`;
+                rotaDestino = '#matches';
+            } else if (notif.tipo === 'placar_forcado') {
+                icone = 'fa-gavel';
+                corIcone = '#9C27B0';
+                titulo = `Placar forçado pelo Admin`;
+                subtitulo = `Decisão administrativa`;
+                rotaDestino = '#matches';
+            } else if (notif.tipo === 'partida_criada') {
+                icone = 'fa-gamepad';
+                corIcone = '#2196F3';
+                titulo = `Nova partida criada`;
+                subtitulo = `Por: ${nomeRemetente}`;
+                rotaDestino = '#matches';
+            } else if (notif.tipo === 'campeonato_cancelado') {
+                icone = 'fa-ban';
+                corIcone = '#f44336';
+                titulo = `Campeonato cancelado`;
+                subtitulo = notif.campeonatoNome || 'Campeonato';
+                rotaDestino = '#homepage';
+            } else {
+                // Notificação genérica - garantir que tenha contexto
+                titulo = notif.mensagem || 'Notificação do sistema';
+                subtitulo = `Origem: ${nomeRemetente}`;
             }
             
+            // Armazenar rota no item para redirecionamento
+            item.dataset.rotaDestino = rotaDestino || '';
+            
             // Formatar data
-            const data = notif.criadoEm?.toDate?.() || new Date();
+            const data = notif.dataNotificacao?.toDate?.() || new Date();
             const agora = new Date();
             const diff = Math.floor((agora - data) / 1000);
             let tempo = '';
@@ -379,8 +487,11 @@ export async function exibirDropdownNotificacoes() {
                     <i class="fas ${icone}" style="color: ${corIcone}; font-size: 1em;"></i>
                 </div>
                 <div style="flex: 1; min-width: 0;">
-                    <div style="font-weight: 600; color: #E0E0E0; margin-bottom: 4px; font-size: 0.9em;">
+                    <div style="font-weight: 600; color: #E0E0E0; margin-bottom: 2px; font-size: 0.9em;">
                         ${titulo}
+                    </div>
+                    <div style="font-size: 0.8em; color: #FD8A24; margin-bottom: 4px;">
+                        ${subtitulo}
                     </div>
                     ${preview ? `<div style="font-size: 0.85em; color: #AAA; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                         ${preview}
@@ -410,10 +521,11 @@ export async function exibirDropdownNotificacoes() {
                 header.innerHTML = `<i class="fas fa-bell"></i> Notificações (${remaining})`;
             };
             
-            // Ao clicar no item, navegar para a conversa se for mensagem
+            // Ao clicar no item, navegar para a sessão correspondente
             item.onclick = async (e) => {
                 if (e.target.closest('.mark-read-btn')) return;
                 
+                // Handler para mensagens - navegar para chat
                 if (notif.tipo === 'mensagem' && notif.conversaId) {
                     dropdown.remove();
                     dropdownAberto = false;
@@ -424,6 +536,86 @@ export async function exibirDropdownNotificacoes() {
                             window.selecionarConversaPorId(notif.conversaId);
                         }
                     }, 500);
+                    return;
+                }
+
+                // Handler para convite de campeonato
+                if (notif.tipo === 'convite_campeonato' && notif.campeonatoId && notif.usuarioId) {
+                    dropdown.remove();
+                    dropdownAberto = false;
+                    const nomeCamp = notif.campeonatoNome || 'Campeonato';
+                    const { showConfirmModal, showModal } = await import('../components/modal.js');
+
+                    const aceitar = await showConfirmModal('Convite de campeonato', `Aceitar o convite para "${nomeCamp}"?`);
+                    if (aceitar) {
+                        try {
+                            await responderConviteCampeonato({ campeonatoId: notif.campeonatoId, usuarioId: notif.usuarioId, status: 'confirmado' });
+                            await marcarNotificacaoComoLida(notif.id);
+                            showModal('success', 'Confirmado', 'Presença confirmada no campeonato.');
+                        } catch (err) {
+                            showModal('error', 'Erro', err?.message || 'Falha ao confirmar presença.');
+                        }
+                        return;
+                    }
+
+                    const recusar = await showConfirmModal('Recusar convite?', `Deseja recusar o convite para "${nomeCamp}"?`);
+                    if (!recusar) return;
+                    try {
+                        await responderConviteCampeonato({ campeonatoId: notif.campeonatoId, usuarioId: notif.usuarioId, status: 'recusado' });
+                        await marcarNotificacaoComoLida(notif.id);
+                        showModal('info', 'Recusado', 'Convite recusado.');
+                    } catch (err) {
+                        showModal('error', 'Erro', err?.message || 'Falha ao recusar convite.');
+                    }
+                    return;
+                }
+
+                // Handler para convite de amistosa
+                if (notif.tipo === 'convite_amistosa' && notif.partidaId && notif.usuarioId) {
+                    dropdown.remove();
+                    dropdownAberto = false;
+                    const { showConfirmModal, showModal } = await import('../components/modal.js');
+
+                    const rodadaTxt = notif.rodadaId ? `Rodada ${notif.rodadaId}` : 'Amistoso';
+                    const aceitar = await showConfirmModal('Convite de amistoso', `Aceitar o convite de amistoso (${rodadaTxt})?`);
+                    const { serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js');
+
+                    if (aceitar) {
+                        try {
+                            await updateDoc(doc(db, 'partidas', notif.partidaId), {
+                                [`confirmacoes.${notif.usuarioId}`]: 'confirmado',
+                                atualizadoEm: serverTimestamp()
+                            });
+                            await marcarNotificacaoComoLida(notif.id);
+                            showModal('success', 'Confirmado', 'Participação confirmada no amistoso.');
+                        } catch (err) {
+                            showModal('error', 'Erro', err?.message || 'Falha ao confirmar participação.');
+                        }
+                        return;
+                    }
+
+                    const recusar = await showConfirmModal('Recusar convite?', `Deseja recusar o convite de amistoso (${rodadaTxt})?`);
+                    if (!recusar) return;
+                    try {
+                        await updateDoc(doc(db, 'partidas', notif.partidaId), {
+                            [`confirmacoes.${notif.usuarioId}`]: 'recusado',
+                            atualizadoEm: serverTimestamp()
+                        });
+                        await marcarNotificacaoComoLida(notif.id);
+                        showModal('info', 'Recusado', 'Convite recusado.');
+                    } catch (err) {
+                        showModal('error', 'Erro', err?.message || 'Falha ao recusar convite.');
+                    }
+                    return;
+                }
+
+                // Redirecionamento genérico para outras notificações
+                const rotaDestino = item.dataset.rotaDestino;
+                if (rotaDestino) {
+                    dropdown.remove();
+                    dropdownAberto = false;
+                    await marcarNotificacaoComoLida(notif.id);
+                    window.location.hash = rotaDestino;
                 }
             };
             
@@ -462,10 +654,22 @@ export async function exibirDropdownNotificacoes() {
                 markAllBtn.style.color = '#FD8A24';
             };
             markAllBtn.onclick = async () => {
-                const ids = notificacoesAtuais.map(n => n.id);
-                await markNotificationsAsRead(ids);
-                dropdown.remove();
-                dropdownAberto = false;
+                try {
+                    const ids = notificacoesAtuais.map(n => n.id);
+                    await markNotificationsAsRead(ids);
+                    dropdown.remove();
+                    dropdownAberto = false;
+                } catch (err) {
+                    try {
+                        const { showModal } = await import('../components/modal.js');
+                        const msg = (err && typeof err.message === 'string' && err.message.trim())
+                            ? err.message
+                            : 'Não foi possível marcar as notificações como lidas.';
+                        showModal('error', 'Erro', msg);
+                    } catch (_) {
+                        // Sem modal disponível, apenas log
+                    }
+                }
             };
             
             dropdown.appendChild(footer);
@@ -497,6 +701,8 @@ export async function exibirDropdownNotificacoes() {
  */
 async function marcarNotificacaoComoLida(notificacaoId) {
     if (!notificacaoId) return;
+    const currentUserId = auth.currentUser?.uid;
+    if (!currentUserId) return;
     
     try {
         await updateDoc(doc(db, 'notificacoes', notificacaoId), { lida: true });
@@ -504,6 +710,17 @@ async function marcarNotificacaoComoLida(notificacaoId) {
     } catch (error) {
         console.error('[Notifications] Erro ao marcar notificação como lida:', error);
     }
+}
+
+async function responderConviteCampeonato({ campeonatoId, usuarioId, status }) {
+    if (!campeonatoId || !usuarioId) throw new Error('Convite inválido.');
+    const finalStatus = status === 'confirmado' ? 'confirmado' : 'recusado';
+
+    const { serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js');
+    await updateDoc(doc(db, 'campeonatos', campeonatoId, 'convites', usuarioId), {
+        status: finalStatus,
+        respondidoEm: serverTimestamp()
+    });
 }
 
 /**

@@ -367,10 +367,7 @@ export function updateTimeProfileSummary(team) {
 
     // Fallback se imagem falhar
     img.onerror = () => {
-        img.src = '/assets/img/team-placeholder.png';
-        img.onerror = () => {
-            img.src = 'https://via.placeholder.com/40x40/FD8A24/ffffff?text=' + team.name.charAt(0);
-        };
+        img.src = '/assets/img/team-placeholder.svg';
     };
 
     // Cria span com nome do time

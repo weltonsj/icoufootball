@@ -1,7 +1,37 @@
 /* ====================================================================
-   Regras para o Painel de Partidas
+   Regras para o Painel de Partidas - iCouFootball
+   Implementa RF11 (Criação de Partidas) e RF5 (Fair Play) conforme PRD v2.0
    ====================================================================
 */
+
+/* Custom Modal Overlay */
+.custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+.custom-modal.hidden {
+    display: none;
+}
+
+.custom-modal .modal-content {
+    background-color: var(--secondary-bg);
+    border-radius: 12px;
+    max-width: 450px;
+    width: 90%;
+    border: 1px solid var(--chat-border-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
 
 /* Main Content para Partidas */
 .app-content h3 {
@@ -13,26 +43,39 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 30px;
-	grid-template-columns: .75fr 2.5fr;
+    gap: 20px;
 }
 
-.section-new-match h2, .section-match-list h3 {
-    text-align: left;
-    margin-bottom: 15px;
-    color: var(--text-color);
-    text-transform: uppercase;
-    font-size: 1.1em;
-}
-
-/* Card Section Styles */
+/* ====================================================================
+   Seções de Cards
+   ==================================================================== */
 .card-section {
     background-color: var(--secondary-bg);
 	border: 1px solid var(--chat-border-color);
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    margin-bottom: 20px;
+}
+
+.card-section h2 {
+    color: var(--highlight-color);
+    font-size: 1em;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-section h2 i {
+    font-size: 1.1em;
+}
+
+.section-subtitle {
+    font-size: 0.85em;
+    color: #888;
+    margin-top: -10px;
+    margin-bottom: 15px;
 }
 
 .card-title {
@@ -44,8 +87,36 @@
     padding-bottom: 10px;
 }
 
-/* Formulário de Inserção de Placar */
-.input-group select {
+/* ====================================================================
+   Formulário de Criação de Partida
+   ==================================================================== */
+.create-match-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.form-row .input-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.85em;
+    color: #AAA;
+    margin-bottom: 5px;
+}
+
+.input-group select,
+.input-group input[type="url"],
+.input-group input[type="text"] {
 	padding: 12px 15px;
 	background-color: var(--input-bg);
 	border: 1px solid var(--input-border);
@@ -54,7 +125,64 @@
 	font-size: 1em;
 	width: 100%;
 	outline: none;
-	margin-bottom: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.input-group select:focus,
+.input-group input:focus {
+    border-color: var(--highlight-color);
+}
+
+.input-group input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Validação de URL */
+.url-group {
+    position: relative;
+}
+
+.url-validation-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1em;
+}
+
+.input-group input.valid {
+    border-color: #27ae60;
+}
+
+.input-group input.invalid {
+    border-color: #e74c3c;
+}
+
+/* Streaming Row */
+.streaming-row {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+.platform-group {
+    max-width: 250px;
+}
+
+/* Botão Criar Partida */
+.btn-create-match {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    font-size: 1.05em;
+}
+
+.btn-create-match i {
+    font-size: 1.2em;
 }
 
 .score-inputs-group {
@@ -168,6 +296,160 @@
     border-left: 5px solid; /* Borda lateral para status */
 }
 
+/* Header do match-item com data e tipo */
+.match-item .match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Formato detalhado com logos e fotos */
+.match-item .match-teams-detailed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 8px 0;
+}
+
+.match-item .match-player-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+}
+
+.match-item .match-player-info.align-right {
+    justify-content: flex-end;
+}
+
+.match-item .match-team-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.match-item .match-team-name {
+    font-weight: 600;
+    font-size: 0.85em;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.match-item .match-separator {
+    color: var(--secondary-text);
+    opacity: 0.5;
+    margin: 0 2px;
+}
+
+.match-item .match-player-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--highlight-color);
+    flex-shrink: 0;
+}
+
+.match-item .match-player-name {
+    font-size: 0.8em;
+    color: var(--secondary-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70px;
+}
+
+.match-item .match-score {
+    font-weight: 700;
+    font-size: 1.1em;
+    color: var(--highlight-color);
+    padding: 4px 12px;
+    background: rgba(253, 138, 36, 0.1);
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.match-item .match-score.contested {
+    color: var(--status-contested);
+    background: rgba(239, 83, 80, 0.1);
+}
+
+.match-item .match-score.win {
+    color: var(--status-confirmed);
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.match-item .match-score.loss {
+    color: var(--status-contested);
+    background: rgba(239, 83, 80, 0.1);
+}
+
+.match-item .match-vs {
+    font-weight: 700;
+    font-size: 0.9em;
+    color: var(--secondary-text);
+    padding: 4px 10px;
+    background: var(--input-bg);
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+/* Footer do match-item */
+.match-item .match-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Label de tipo de partida (Campeonato/Amistoso) */
+.match-type-label {
+    font-size: 0.7em;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.match-type-campeonato {
+    background-color: var(--highlight-color);
+    color: var(--primary-bg);
+}
+
+.match-type-amistoso {
+    background-color: var(--input-bg);
+    border: 1px solid var(--chat-border-color);
+    color: var(--text-color);
+}
+
+/* Responsivo para formato detalhado */
+@media (max-width: 500px) {
+    .match-item .match-teams-detailed {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .match-item .match-player-info {
+        justify-content: center !important;
+        width: 100%;
+    }
+    
+    .match-item .match-team-name,
+    .match-item .match-player-name {
+        max-width: 100px;
+    }
+}
+
 .pending-confirmation { border-color: var(--status-pending); }
 .awaiting-opponent { border-color: var(--highlight-color); }
 .contested-final { border-color: var(--status-contested); }
@@ -257,6 +539,46 @@
 
 .btn-action:hover:not(.confirm):not(.contest) {
     background-color: var(--border-color);
+}
+
+/* Botões de tamanho pequeno */
+.btn-action.btn-sm {
+    padding: 6px 10px;
+    font-size: 0.8em;
+    flex-grow: 0;
+}
+
+.btn-action.btn-edit-stream {
+    background-color: rgba(142, 68, 173, 0.2);
+    border-color: rgba(142, 68, 173, 0.5);
+    color: #a29bfe;
+}
+
+.btn-action.btn-edit-stream:hover {
+    background-color: rgba(142, 68, 173, 0.4);
+}
+
+/* Indicador de stream ativo */
+.stream-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.2) 0%, rgba(231, 76, 60, 0.1) 100%);
+    border: 1px solid rgba(231, 76, 60, 0.4);
+    border-radius: 20px;
+    font-size: 0.75em;
+    color: #e74c3c;
+    margin-left: 8px;
+}
+
+.stream-indicator i {
+    animation: pulse-dot 1s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 
 /*
@@ -350,5 +672,1028 @@
         width: 100%;
         outline: none;
 		margin-bottom: 0;
+    }
+}
+
+/* ====================================================================
+   Estilos Adicionais para Sistema de Partidas v2.0
+   ==================================================================== */
+
+/* Mensagens de Estado */
+.loading-placeholder,
+.empty-message,
+.error-message {
+    text-align: center;
+    padding: 30px;
+    color: #888;
+    font-size: 0.95em;
+}
+
+.loading-placeholder i {
+    margin-right: 8px;
+    color: var(--highlight-color);
+}
+
+.error-message {
+    color: #e74c3c;
+}
+
+/* Partidas Aguardando Resultado */
+.awaiting-result {
+    border-color: var(--highlight-color);
+}
+
+.awaiting-result-badge {
+    background-color: var(--highlight-color);
+}
+
+.btn-inserir-placar {
+    background-color: var(--highlight-color) !important;
+    color: #fff !important;
+    border-color: var(--highlight-color) !important;
+}
+
+.btn-inserir-placar:hover {
+    filter: brightness(1.1);
+}
+
+/* Separador VS */
+.vs-separator {
+    margin: 0 10px;
+    font-weight: bold;
+    color: #888;
+}
+
+.match-opponent {
+    font-size: 0.85em;
+    color: #AAA;
+    margin-top: 5px;
+}
+
+/* Motivo de Contestação */
+.contest-reason {
+    font-size: 0.8em;
+    color: #999;
+    margin-top: 5px;
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+/* Indicador de Resultado */
+.match-result-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.match-result-indicator.win {
+    background-color: rgba(39, 174, 96, 0.2);
+    color: #27ae60;
+}
+
+.match-result-indicator.loss {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+
+.match-result-indicator.draw {
+    background-color: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+}
+
+/* Status de Partida Confirmada */
+.confirmed-item.win {
+    border-color: #27ae60;
+}
+
+.confirmed-item.loss {
+    border-color: #e74c3c;
+}
+
+.confirmed-item.draw {
+    border-color: #f1c40f;
+}
+
+/* Aguardando Admin */
+.waiting-admin {
+    font-size: 0.85em;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ====================================================================
+   Modal de Placar
+   ==================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-content {
+    background-color: var(--secondary-bg);
+    border-radius: 12px;
+    padding: 25px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    border: 1px solid var(--chat-border-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-content.modal-small {
+    max-width: 400px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: var(--highlight-color);
+}
+
+.modal-content h3 {
+    color: var(--highlight-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Display de Placar no Modal */
+.placar-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.team-placar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.team-name {
+    font-size: 0.9em;
+    color: #AAA;
+    text-align: center;
+    max-width: 120px;
+}
+
+.placar-input {
+    width: 70px !important;
+    height: 60px;
+    text-align: center;
+    font-size: 2em !important;
+    font-weight: bold;
+    background-color: var(--input-bg);
+    border: 2px solid var(--input-border);
+    border-radius: 10px;
+    color: var(--text-color);
+}
+
+.placar-input:focus {
+    border-color: var(--highlight-color);
+    outline: none;
+}
+
+.placar-x {
+    font-size: 2em;
+    font-weight: bold;
+    color: #888;
+}
+
+/* Botões do Modal */
+.btn-full-width {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Info de Contestação */
+.placar-info-contestar {
+    text-align: center;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.placar-info-contestar strong {
+    font-size: 1.2em;
+    color: var(--highlight-color);
+}
+
+/* Textarea do Motivo */
+#motivoContestacao {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1em;
+    resize: vertical;
+    min-height: 80px;
+}
+
+#motivoContestacao:focus {
+    border-color: var(--highlight-color);
+    outline: none;
+}
+
+/* ====================================================================
+   Responsividade para Sistema de Partidas v2.0
+   ==================================================================== */
+@media (max-width: 600px) {
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-row .input-group {
+        min-width: 100%;
+    }
+    
+    .platform-group {
+        max-width: 100%;
+    }
+    
+    .placar-display {
+        gap: 10px;
+    }
+    
+    .placar-input {
+        width: 60px !important;
+        height: 50px;
+        font-size: 1.5em !important;
+    }
+    
+    .placar-x {
+        font-size: 1.5em;
+    }
+    
+    .match-result-indicator {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE ADICIONAL - Mobile Small (≤ 480px)
+   ==================================================================== */
+@media (max-width: 480px) {
+    .matches-content {
+        padding: 16px;
+        gap: 18px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-section {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    
+    .card-section h2 {
+        font-size: 1.1rem;
+        margin-bottom: 14px;
+        font-weight: 700;
+    }
+    
+    .section-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 14px;
+        line-height: 1.4;
+    }
+    
+    /* Create match form - MAIOR */
+    .create-match-form {
+        gap: 16px;
+    }
+    
+    .input-group label {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+    
+    .input-group select,
+    .input-group input[type="url"],
+    .input-group input[type="text"] {
+        padding: 14px;
+        font-size: 1rem;
+        min-height: 48px;
+        border-radius: 10px;
+    }
+    
+    .streaming-row {
+        padding: 14px;
+        border-radius: 10px;
+    }
+    
+    .btn-create-match {
+        padding: 14px 20px;
+        font-size: 1rem;
+        min-height: 48px;
+        border-radius: 10px;
+    }
+    
+    /* Score inputs - MAIOR */
+    .score-inputs-group {
+        margin: 18px 12px;
+        gap: 12px;
+    }
+    
+    .score-input-item {
+        flex: 1;
+    }
+    
+    .score-input-item label {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+    }
+    
+    .score-input-item input {
+        max-width: 70px;
+        padding: 12px;
+        font-size: 1.15rem;
+        border-radius: 8px;
+    }
+    
+    .score-separator {
+        font-size: 1.4em;
+    }
+    
+    #linkInput {
+        font-size: 1rem;
+    }
+    
+    /* Match list - MAIOR */
+    .match-list {
+        gap: 12px;
+    }
+    
+    .match-item {
+        padding: 14px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        border-radius: 10px;
+    }
+    
+    .match-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .match-date-time {
+        font-size: 0.9rem;
+    }
+    
+    .match-details h4 {
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+    
+    .match-score {
+        font-size: 0.95rem;
+    }
+    
+    .match-status-badge {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+    
+    .match-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+        font-size: 0.95rem;
+        min-height: 44px;
+        border-radius: 8px;
+    }
+    
+    /* Stream indicator */
+    .stream-indicator {
+        margin-left: 0;
+        margin-top: 10px;
+        font-size: 0.9rem;
+    }
+    
+    /* Custom Modal - MAIOR */
+    .custom-modal .modal-content {
+        width: 95%;
+        margin: 10px;
+        border-radius: 14px;
+    }
+    
+    .modal-header {
+        padding: 18px;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-body {
+        padding: 18px;
+        font-size: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 18px;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .modal-footer button {
+        width: 100%;
+        min-height: 48px;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+    
+    /* Placar display */
+    .placar-display {
+        gap: 10px;
+    }
+    
+    /* Textarea */
+    #motivoContestacao {
+        font-size: 1rem;
+        min-height: 80px;
+        padding: 14px;
+        border-radius: 10px;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Mobile Large (481px - 768px)
+   ==================================================================== */
+@media (min-width: 481px) and (max-width: 768px) {
+    .matches-content {
+        padding: 20px;
+        gap: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-section h2 {
+        font-size: 1.15rem;
+    }
+    
+    .input-group label {
+        font-size: 0.95rem;
+    }
+    
+    .input-group select,
+    .input-group input[type="url"],
+    .input-group input[type="text"] {
+        font-size: 1rem;
+        min-height: 50px;
+    }
+    
+    .form-row {
+        flex-direction: row;
+    }
+    
+    .match-item {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 16px;
+    }
+    
+    .match-details h4 {
+        font-size: 1.05rem;
+    }
+    
+    .match-actions {
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-end;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-color);
+        margin-top: 12px;
+    }
+    
+    .btn-action {
+        min-height: 46px;
+        font-size: 0.95rem;
+    }
+    
+    .modal-footer button {
+        min-height: 50px;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Tablet (769px - 1024px)
+   ==================================================================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .matches-content {
+        grid-template-columns: 1fr 2fr;
+        gap: 15px;
+        padding: 20px;
+    }
+    
+    .match-actions {
+        width: 250px;
+    }
+}
+
+/* ====================================================================
+   SISTEMA DE FILTROS
+   ==================================================================== */
+.section-filters {
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
+    border: 1px solid rgba(253, 138, 36, 0.2);
+}
+
+.section-filters h2 {
+    color: var(--highlight-color);
+    margin-bottom: 15px;
+}
+
+.filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 140px;
+}
+
+.filter-group label {
+    font-size: 0.8em;
+    color: var(--secondary-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-select,
+.filter-input {
+    padding: 10px 12px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+    border-color: var(--highlight-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(253, 138, 36, 0.15);
+}
+
+.filter-group-search {
+    flex: 1;
+    min-width: 180px;
+}
+
+.btn-clear-filters {
+    padding: 10px 16px;
+    background-color: transparent;
+    border: 1px solid var(--secondary-text);
+    border-radius: 8px;
+    color: var(--secondary-text);
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-clear-filters:hover {
+    border-color: var(--highlight-color);
+    color: var(--highlight-color);
+    background-color: rgba(253, 138, 36, 0.1);
+}
+
+/* Indicador de Filtros Ativos */
+.filtros-ativos-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border-color);
+    flex-wrap: wrap;
+}
+
+.filtros-ativos-container.hidden {
+    display: none;
+}
+
+.filtros-ativos-label {
+    font-size: 0.85em;
+    color: var(--highlight-color);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filtros-ativos-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filtro-tag {
+    padding: 4px 10px;
+    background-color: rgba(253, 138, 36, 0.15);
+    border: 1px solid rgba(253, 138, 36, 0.3);
+    border-radius: 15px;
+    font-size: 0.8em;
+    color: var(--highlight-color);
+}
+
+/* ====================================================================
+   DADOS ENRIQUECIDOS DO ADVERSÁRIO
+   ==================================================================== */
+.adversario-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    margin: 5px 0;
+    flex-wrap: wrap;
+}
+
+.adversario-ranking {
+    font-size: 0.8em;
+    color: var(--highlight-color);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    background: rgba(253, 138, 36, 0.1);
+    border-radius: 4px;
+}
+
+.adversario-ranking i {
+    font-size: 0.9em;
+}
+
+.adversario-estrelas {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    color: #FFD700;
+    font-size: 0.75em;
+}
+
+.adversario-estrelas .far {
+    color: var(--secondary-text);
+    opacity: 0.5;
+}
+
+/* Forma Recente */
+.forma-recente {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.forma-badge {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65em;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+}
+
+.forma-vitoria {
+    background-color: #28a745;
+}
+
+.forma-empate {
+    background-color: #6c757d;
+}
+
+.forma-derrota {
+    background-color: #dc3545;
+}
+
+/* ====================================================================
+   SISTEMA DE TOAST - FAIR PLAY FEEDBACK
+   ==================================================================== */
+.fairplay-toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 380px;
+    pointer-events: none;
+}
+
+.fairplay-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background-color: var(--secondary-bg);
+    border-radius: 10px;
+    border-left: 4px solid;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    position: relative;
+    overflow: hidden;
+}
+
+.fairplay-toast-show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.fairplay-toast-hide {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+/* Cores por tipo */
+.fairplay-toast-success {
+    border-color: #28a745;
+}
+
+.fairplay-toast-success .fairplay-toast-icon {
+    color: #28a745;
+}
+
+.fairplay-toast-error {
+    border-color: #dc3545;
+}
+
+.fairplay-toast-error .fairplay-toast-icon {
+    color: #dc3545;
+}
+
+.fairplay-toast-warning {
+    border-color: #ffc107;
+}
+
+.fairplay-toast-warning .fairplay-toast-icon {
+    color: #ffc107;
+}
+
+.fairplay-toast-info {
+    border-color: var(--highlight-color);
+}
+
+.fairplay-toast-info .fairplay-toast-icon {
+    color: var(--highlight-color);
+}
+
+.fairplay-toast-icon {
+    font-size: 1.4em;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.fairplay-toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.fairplay-toast-title {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.fairplay-toast-message {
+    font-size: 0.85em;
+    color: var(--secondary-text);
+    line-height: 1.4;
+}
+
+.fairplay-toast-close {
+    background: none;
+    border: none;
+    color: var(--secondary-text);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 0.9em;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.fairplay-toast-close:hover {
+    opacity: 1;
+}
+
+/* Barra de progresso */
+.fairplay-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: currentColor;
+    opacity: 0.3;
+    animation: toastProgress 4s linear forwards;
+}
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* ====================================================================
+   ANIMAÇÕES FAIR PLAY
+   ==================================================================== */
+.fairplay-confirmed-animation {
+    animation: fairplayPulse 0.6s ease;
+    position: relative;
+}
+
+@keyframes fairplayPulse {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.02); box-shadow: 0 0 20px rgba(40, 167, 69, 0.4); }
+    100% { transform: scale(1); }
+}
+
+.fairplay-confirmed-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.5);
+    animation: badgePop 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    z-index: 100;
+}
+
+@keyframes badgePop {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    70% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* Ações Fair Play destacadas */
+.match-actions-fairplay {
+    gap: 10px;
+}
+
+.match-actions-fairplay .btn-confirmar {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.match-actions-fairplay .btn-confirmar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.match-actions-fairplay .btn-contestar {
+    background: transparent;
+    border: 1px solid rgba(220, 53, 69, 0.5);
+    color: #dc3545;
+}
+
+.match-actions-fairplay .btn-contestar:hover {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: #dc3545;
+}
+
+/* ====================================================================
+   RESPONSIVIDADE FILTROS
+   ==================================================================== */
+@media (max-width: 768px) {
+    .filters-bar {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .filter-group {
+        width: 100%;
+        min-width: 100%;
+    }
+    
+    .filter-group-search {
+        min-width: 100%;
+    }
+    
+    .btn-clear-filters {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .filtros-ativos-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .adversario-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .fairplay-toast-container {
+        top: auto;
+        bottom: 80px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .fairplay-toast {
+        transform: translateY(100%);
+    }
+    
+    .fairplay-toast-show {
+        transform: translateY(0);
+    }
+    
+    .fairplay-toast-hide {
+        transform: translateY(100%);
     }
 }

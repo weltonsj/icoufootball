@@ -108,9 +108,7 @@ Home | Dashboard← | Partidas | Chat | Perfil | Admin | Sair
 | Arquivo | Descrição |
 |---------|-----------|
 | `src/utils/authManager.js` | Gerenciador centralizado de autenticação e menu |
-| `docs/FEATURES_IMPLEMENTED.md` | Documentação técnica completa |
-| `IMPLEMENTATION_CHECKLIST.md` | Checklist de testes e validação |
-| `tests/test_implementations.js` | Testes rápidos via console |
+| `FEATURES_IMPLEMENTED.md` | Documentação técnica completa |
 
 ### ✏️ Arquivos Modificados
 

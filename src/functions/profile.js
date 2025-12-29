@@ -8,6 +8,12 @@ import { deleteAccount } from "../services/authService.js";
 import { searchTeamByName, saveUserTeam, updateTimeProfileSummary, canChangeTeam } from "../services/teams-service.js";
 import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+import { subscribeToUserProfile, updateUserProfile, removeUserPhoto } from "../services/profileService.js";
+
+const PLACEHOLDER_AVATAR = './assets/img/avatar-placeholder.svg';
+const PLACEHOLDER_TEAM = './assets/img/team-placeholder.svg';
+
+let unsubscribeProfile = null;
 
 function q(id) { return document.getElementById(id) }
 function qs(sel) { return document.querySelector(sel) }
@@ -17,6 +23,124 @@ function toE164(input) { const raw = String(input || '').trim(); if (!raw) retur
 function ensureAt(handle, pattern) { const v = String(handle || '').trim(); if (!v) return ''; const h = v.startsWith('@') ? v : `@${v}`; return pattern.test(h) ? h : '' }
 function isStrongPassword(p) { const s = String(p || ''); return s.length >= 6 && /[A-Za-z]/.test(s) && /[0-9]/.test(s) }
 function setInvalid(el, flag) { if (el) el.setAttribute('aria-invalid', flag ? 'true' : 'false') }
+function setValueIfNotFocused(el, value) { if (!el) return; if (document.activeElement === el) return; el.value = value }
+
+/**
+ * Remove os elementos skeleton e exibe os elementos reais
+ */
+function removeSkeletons() {
+    // Remove skeleton da foto
+    const photoSkeleton = qs('.profile-photo-skeleton');
+    const photo = qs('.profile-photo');
+    if (photoSkeleton) photoSkeleton.remove();
+    if (photo) photo.style.display = '';
+    
+    // Remove skeleton do time
+    const teamSkeleton = qs('.team-logo-skeleton');
+    const teamThumb = qs('.time-profile-summary .profile-thumb');
+    if (teamSkeleton) teamSkeleton.remove();
+    if (teamThumb) teamThumb.style.display = '';
+    
+    // Remove skeleton de texto nas estrelas
+    const starsSkeleton = qs('.player-stars .skeleton-text');
+    if (starsSkeleton) starsSkeleton.remove();
+}
+
+function applyProfileDataToUI(data) {
+    const safe = data || {};
+    
+    // Remove skeletons na primeira vez que dados são carregados
+    removeSkeletons();
+    
+    const photo = qs('.profile-photo');
+    const headerAvatar = qs('.profile-avatar-header .avatar-img');
+    const fUsername = q('username');
+    const fPassword = q('password');
+    const fBio = q('bio');
+    const fWhatsapp = q('whatsapp');
+    const fInstagram = q('instagram');
+    const fTwitch = q('twitch');
+    const fTeamSearch = q('team-search');
+    const teamMotto = qs('.team-motto');
+    const starsContainer = qs('.player-stars');
+    const starsHint = qs('.total-stars-hint');
+    const profileVisibility = q('profileVisibility');
+
+    const fotoUrl = safe.fotoUrl ? String(safe.fotoUrl) : '';
+    if (photo) {
+        photo.src = fotoUrl || PLACEHOLDER_AVATAR;
+        photo.onerror = () => { photo.src = PLACEHOLDER_AVATAR; };
+    }
+    if (headerAvatar) {
+        headerAvatar.src = fotoUrl || PLACEHOLDER_AVATAR;
+        headerAvatar.onerror = () => { headerAvatar.src = PLACEHOLDER_AVATAR; };
+    }
+
+    const nome = safe.nome ? String(safe.nome) : '';
+    if (fUsername) setValueIfNotFocused(fUsername, nome);
+    if (fPassword) setValueIfNotFocused(fPassword, '*****');
+
+    const descricao = typeof safe.descricao === 'string' ? safe.descricao : (typeof safe.bio === 'string' ? safe.bio : '');
+    if (fBio) setValueIfNotFocused(fBio, descricao);
+
+    const redes = (safe.redesSociais && typeof safe.redesSociais === 'object') ? safe.redesSociais : {};
+    const whatsapp = redes.whatsapp || safe.whatsapp || '';
+    const instagram = redes.instagram || safe.instagram || '';
+    const twitch = redes.twitch || safe.twitch || '';
+
+    if (fWhatsapp) {
+        setValueIfNotFocused(fWhatsapp, whatsapp);
+        applyPhoneMask(fWhatsapp);
+    }
+    if (fInstagram) setValueIfNotFocused(fInstagram, instagram);
+    if (fTwitch) setValueIfNotFocused(fTwitch, twitch);
+
+    if (teamMotto) {
+        const desc = descricao || teamMotto.textContent || '';
+        teamMotto.textContent = desc;
+    }
+
+    const total = Math.max(0, Number(safe.estrelas || 0));
+    if (starsContainer) {
+        if (starsHint) starsHint.textContent = `${total} TOTAL`;
+        renderStars(starsContainer, Math.min(total, 5), !!safe.ultimoCampeao);
+    }
+
+    const timeName = safe.timeName || safe.nomeTime || '';
+    const timeLogo = safe.timeLogo || safe.logoTime || '';
+    // Sempre atualiza o resumo do time, usando placeholder se não houver logo
+    updateTimeProfileSummary({ 
+        name: String(timeName || 'Selecione seu time'), 
+        logo: timeLogo ? String(timeLogo) : PLACEHOLDER_TEAM, 
+        id: '' 
+    });
+    if (fTeamSearch) setValueIfNotFocused(fTeamSearch, timeName ? String(timeName) : '');
+
+    if (profileVisibility) {
+        const isPublic = safe.perfilPublico !== false;
+        profileVisibility.innerHTML = `
+            <span class="visibility-badge">
+                <i class="fas ${isPublic ? 'fa-globe' : 'fa-lock'}"></i>
+                Perfil ${isPublic ? 'Público' : 'Privado'}
+            </span>
+        `;
+    }
+}
+
+function bindProfileRealtime(uid) {
+    if (unsubscribeProfile) {
+        try { unsubscribeProfile(); } catch { }
+        unsubscribeProfile = null;
+    }
+    unsubscribeProfile = subscribeToUserProfile(
+        uid,
+        (data) => applyProfileDataToUI(data || {}),
+        (err) => {
+            console.error('[Profile] Erro no realtime:', err);
+            showModal('error', 'Erro ao carregar perfil', 'Não foi possível atualizar seus dados em tempo real');
+        }
+    );
+}
 function promptCurrentPassword() { return new Promise(resolve => { const root = document.getElementById('modal-root') || document.body; const overlay = document.createElement('div'); overlay.className = 'modal-overlay'; const modal = document.createElement('div'); modal.className = 'modal'; modal.setAttribute('role', 'dialog'); modal.setAttribute('aria-modal', 'true'); const h = document.createElement('h3'); h.textContent = 'Confirmar senha atual'; const input = document.createElement('input'); input.type = 'password'; input.placeholder = 'Senha atual'; input.setAttribute('aria-invalid', 'true'); input.addEventListener('input', () => { setInvalid(input, input.value.trim() ? false : true) }); const actions = document.createElement('div'); actions.className = 'modal-actions'; const btnCancel = document.createElement('button'); btnCancel.className = 'modal-btn'; btnCancel.textContent = 'Cancelar'; const btnOk = document.createElement('button'); btnOk.className = 'modal-btn'; btnOk.textContent = 'Confirmar'; btnCancel.onclick = () => { overlay.remove(); resolve(null) }; btnOk.onclick = () => { if (!input.value.trim()) { setInvalid(input, true); return } overlay.remove(); resolve(input.value) }; modal.appendChild(h); modal.appendChild(input); modal.appendChild(actions); actions.appendChild(btnCancel); actions.appendChild(btnOk); overlay.appendChild(modal); root.appendChild(overlay); input.focus() }) }
 
 async function loadProfile() { 
@@ -25,53 +149,45 @@ async function loadProfile() {
         showModal('error', 'Sessão inválida', 'Faça login para acessar seu perfil'); 
         return; 
     } 
-    
-    const data = await getUser(user.uid); 
-    const photo = qs('.profile-photo'); 
-    const headerAvatar = qs('.profile-avatar-header .avatar-img'); 
-    const btnUpload = qs('.btn-upload'); 
-    const fUsername = q('username'); 
-    const fPassword = q('password'); 
-    const fBio = q('bio'); 
-    const fWhatsapp = q('whatsapp'); 
-    const fInstagram = q('instagram'); 
-    const fTwitch = q('twitch'); 
+
+    bindProfileRealtime(user.uid);
+
+    // Carregamento inicial para não esperar o primeiro snapshot
+    try {
+        const data = await getUser(user.uid);
+        applyProfileDataToUI(data || {});
+    } catch (e) {
+        console.warn('[Profile] Falha no carregamento inicial:', e);
+    }
+
+    const btnUpload = qs('.btn-upload');
+    const btnDeletePhoto = q('btnDeletePhoto');
+    if (btnUpload) btnUpload.addEventListener('click', () => handleUpload(user.uid));
+
+    if (btnDeletePhoto) {
+        btnDeletePhoto.addEventListener('click', async () => {
+            const confirmed = await showConfirmModal(
+                'Excluir foto do perfil',
+                'Sua foto será removida e você voltará ao avatar padrão. Deseja continuar?'
+            );
+            if (!confirmed) return;
+
+            try {
+                showSpinner();
+                await removeUserPhoto(user.uid);
+                try { sessionStorage.removeItem('avatar_url'); } catch { }
+                hideSpinner();
+                showModal('success', 'Foto removida', 'Sua foto de perfil foi removida com sucesso');
+            } catch (err) {
+                hideSpinner();
+                console.error('[Profile] Erro ao remover foto:', err);
+                showModal('error', 'Erro ao remover foto', 'Tente novamente mais tarde');
+            }
+        });
+    }
+
     const fTeamSearch = q('team-search');
     const btnConfirmTeam = q('btn-confirm-team');
-    const teamMotto = qs('.team-motto'); 
-    const starsContainer = qs('.player-stars'); 
-    const starsHint = qs('.total-stars-hint'); 
-    const profileSummary = qs('.time-profile-summary');
-    
-    const fotoUrl = (data && data.fotoUrl) || ''; 
-    if (photo && fotoUrl) photo.src = fotoUrl; 
-    if (headerAvatar && fotoUrl) headerAvatar.src = fotoUrl; 
-    if (fUsername) fUsername.value = (data && data.nome) || ''; 
-    if (fPassword) fPassword.value = '*****'; 
-    if (fBio) fBio.value = (data && data.bio) || ''; 
-    if (fWhatsapp) {
-        fWhatsapp.value = (data && data.whatsapp) || '';
-        // Aplica máscara no valor existente
-        applyPhoneMask(fWhatsapp);
-    }
-    if (fInstagram) fInstagram.value = (data && data.instagram) || ''; 
-    if (fTwitch) fTwitch.value = (data && data.twitch) || ''; 
-    if (teamMotto) { 
-        const desc = (data && data.descricao) || teamMotto.textContent || ''; 
-        teamMotto.textContent = desc;
-    } 
-    if (starsContainer) { 
-        const total = Math.max(0, Number((data && data.estrelas) || 0)); 
-        if (starsHint) starsHint.textContent = `${total} TOTAL`; 
-        renderStars(starsContainer, Math.min(total, 5));
-    } 
-    if (btnUpload) btnUpload.addEventListener('click', () => handleUpload(user.uid));
-    
-    // Carrega time salvo na interface (nome + logo)
-    if (data && data.timeName && data.timeLogo) {
-        updateTimeProfileSummary({ name: data.timeName, logo: data.timeLogo });
-        if (fTeamSearch) fTeamSearch.value = data.timeName;
-    }
     
     // Busca de time por nome (input texto)
     if (fTeamSearch && btnConfirmTeam) {
@@ -221,7 +337,7 @@ function showTeamSelectionModal(teams) {
             img.alt = `${team.name} logo`;
             img.style.cssText = 'width: 40px; height: 40px; object-fit: contain;';
             img.onerror = () => {
-                img.src = 'https://via.placeholder.com/40x40/FD8A24/ffffff?text=' + team.name.charAt(0);
+                img.src = '/assets/img/team-placeholder.svg';
             };
             
             // Nome
@@ -280,7 +396,59 @@ function showTeamSelectionModal(teams) {
 
 function createFilePicker() { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; return input }
 function readFileAsBase64(file) { return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => { const res = String(r.result || ''); const base64 = res.split(',')[1] || ''; resolve(base64) }; r.onerror = () => reject(r.error); r.readAsDataURL(file) }) }
-async function handleUpload(uid) { const key = readImgbbKey(); if (!key) { showModal('error', 'Chave Imgbb ausente', 'Configure IMGBB_KEY em window.ENV ou localStorage'); return } const picker = createFilePicker(); picker.onchange = async () => { const file = picker.files && picker.files[0]; if (!file) { return } if (!/^image\//.test(file.type)) { showModal('error', 'Arquivo inválido', 'Selecione uma imagem'); return } try { showSpinner(); const b64 = await readFileAsBase64(file); const fd = new FormData(); fd.append('image', b64); const resp = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(key)}`, { method: 'POST', body: fd }); if (!resp.ok) { hideSpinner(); showModal('error', 'Falha no upload', 'Tente novamente mais tarde'); return } const json = await resp.json(); const url = (json && json.data && json.data.url) || ''; if (!url) { hideSpinner(); showModal('error', 'Resposta inválida', 'Não foi possível obter a URL'); return } await savePartial(uid, { fotoUrl: url }); const img = qs('.profile-photo'); if (img) img.src = url; const headerAvatar = qs('.profile-avatar-header .avatar-img'); if (headerAvatar) headerAvatar.src = url; hideSpinner(); showModal('success', 'Foto atualizada', 'Sua foto de perfil foi salva') } catch (e) { hideSpinner(); showModal('error', 'Erro no upload', 'Verifique sua rede e tente novamente') } }; picker.click() }
+async function handleUpload(uid) {
+    const key = readImgbbKey();
+    if (!key) {
+        showModal('error', 'Chave Imgbb ausente', 'Configure IMGBB_KEY em window.ENV ou localStorage');
+        return;
+    }
+    const picker = createFilePicker();
+    picker.onchange = async () => {
+        const file = picker.files && picker.files[0];
+        if (!file) return;
+
+        const isJpg = file.type === 'image/jpeg';
+        const isPng = file.type === 'image/png';
+        if (!isJpg && !isPng) {
+            showModal('error', 'Arquivo inválido', 'Envie uma imagem .jpg ou .png');
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            showModal('error', 'Arquivo muito grande', 'O limite é 2MB');
+            return;
+        }
+
+        try {
+            showSpinner();
+            const b64 = await readFileAsBase64(file);
+            const fd = new FormData();
+            fd.append('image', b64);
+            const resp = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(key)}`, { method: 'POST', body: fd });
+            if (!resp.ok) {
+                hideSpinner();
+                showModal('error', 'Falha no upload', 'Tente novamente mais tarde');
+                return;
+            }
+            const json = await resp.json();
+            const url = (json && json.data && json.data.url) || '';
+            if (!url) {
+                hideSpinner();
+                showModal('error', 'Resposta inválida', 'Não foi possível obter a URL');
+                return;
+            }
+
+            await updateUserProfile(uid, { fotoUrl: url });
+            try { sessionStorage.setItem('avatar_url', url); } catch { }
+
+            hideSpinner();
+            showModal('success', 'Foto atualizada', 'Sua foto de perfil foi salva');
+        } catch (e) {
+            hideSpinner();
+            showModal('error', 'Erro no upload', 'Verifique sua rede e tente novamente');
+        }
+    };
+    picker.click();
+}
 
 async function savePartial(uid, partial) { const ref = doc(db, 'users', uid); const snap = await getDoc(ref); if (snap.exists()) { await updateDoc(ref, partial) } else { await setDoc(ref, partial, { merge: true }) } }
 
@@ -321,22 +489,86 @@ function wireValidation() {
     });
 }
 
-async function saveProfile() { const user = getCurrentUser(); if (!user) { showModal('error', 'Sessão inválida', 'Entre novamente'); return } const fUsername = q('username'); const fPassword = q('password'); const fBio = q('bio'); const fWhatsapp = q('whatsapp'); const fInstagram = q('instagram'); const fTwitch = q('twitch'); const nome = (fUsername && fUsername.value.trim()) || ''; const bio = (fBio && fBio.value.trim()) || ''; const whatsapp = (fWhatsapp && fWhatsapp.value.trim()) || ''; const instagram = (fInstagram && fInstagram.value.trim()) || ''; const twitch = (fTwitch && fTwitch.value.trim()) || ''; const e164 = toE164(whatsapp); const ig = ensureAt(instagram, /^@[A-Za-z0-9._]{1,30}$/); const tw = ensureAt(twitch, /^@[A-Za-z0-9_]{1,25}$/); const errors = []; if (!(nome.length >= 3 && nome.length <= 40)) errors.push('Nome inválido'); if (bio.length > 280) errors.push('Bio muito longa'); if (whatsapp && !e164) errors.push('WhatsApp inválido'); if (instagram && !ig) errors.push('Instagram inválido'); if (twitch && !tw) errors.push('Twitch inválido'); if (errors.length) { showModal('error', 'Validação falhou', errors.join(' • ')); return } const payload = { nome, bio, whatsapp: e164 || '', instagram: ig || '', twitch: tw || '' }; try { showSpinner(); await savePartial(user.uid, payload); const newPass = (fPassword && fPassword.value.trim()) || ''; if (newPass && newPass !== '*****') { await tryUpdatePassword(user, newPass) } hideSpinner(); showModal('success', 'Perfil atualizado', 'Suas alterações foram salvas') } catch (e) { hideSpinner(); showModal('error', 'Erro ao salvar', 'Tente novamente mais tarde') } }
+async function saveProfile() {
+    const user = getCurrentUser();
+    if (!user) {
+        showModal('error', 'Sessão inválida', 'Entre novamente');
+        return;
+    }
+
+    const fUsername = q('username');
+    const fPassword = q('password');
+    const fBio = q('bio');
+    const fWhatsapp = q('whatsapp');
+    const fInstagram = q('instagram');
+    const fTwitch = q('twitch');
+
+    const nome = (fUsername && fUsername.value.trim()) || '';
+    const descricao = (fBio && fBio.value.trim()) || '';
+    const whatsapp = (fWhatsapp && fWhatsapp.value.trim()) || '';
+    const instagram = (fInstagram && fInstagram.value.trim()) || '';
+    const twitch = (fTwitch && fTwitch.value.trim()) || '';
+
+    const e164 = toE164(whatsapp);
+    const ig = ensureAt(instagram, /^@[A-Za-z0-9._]{1,30}$/);
+    const tw = ensureAt(twitch, /^@[A-Za-z0-9_]{1,25}$/);
+
+    const errors = [];
+    if (!(nome.length >= 3 && nome.length <= 40)) errors.push('Nome inválido');
+    if (descricao.length > 280) errors.push('Bio muito longa');
+    if (whatsapp && !e164) errors.push('WhatsApp inválido');
+    if (instagram && !ig) errors.push('Instagram inválido');
+    if (twitch && !tw) errors.push('Twitch inválido');
+    if (errors.length) {
+        showModal('error', 'Validação falhou', errors.join(' • '));
+        return;
+    }
+
+    const payload = {
+        nome,
+        descricao,
+        redesSociais: {
+            whatsapp: e164 || '',
+            instagram: ig || '',
+            twitch: tw || ''
+        }
+    };
+
+    try {
+        showSpinner();
+        await updateUserProfile(user.uid, payload);
+        const newPass = (fPassword && fPassword.value.trim()) || '';
+        if (newPass && newPass !== '*****') {
+            await tryUpdatePassword(user, newPass);
+        }
+        hideSpinner();
+        showModal('success', 'Perfil atualizado', 'Suas alterações foram salvas');
+    } catch (e) {
+        hideSpinner();
+        showModal('error', 'Erro ao salvar', 'Tente novamente mais tarde');
+    }
+}
 
 async function tryUpdatePassword(user, newPass) { if (!isStrongPassword(newPass)) { showModal('error', 'Senha fraca', 'Use ao menos 6 caracteres com letras e números'); return } try { await updatePassword(user, newPass) } catch (err) { const code = String((err && err.code) || ''); if (code.includes('auth/requires-recent-login')) { const current = await promptCurrentPassword(); if (!current) return; try { const cred = EmailAuthProvider.credential(user.email, current); await reauthenticateWithCredential(user, cred); await updatePassword(user, newPass); showModal('success', 'Senha atualizada', 'Sua senha foi alterada') } catch (e) { showModal('error', 'Falha na reautenticação', 'Verifique a senha atual e tente novamente') } } else { showModal('error', 'Erro ao alterar senha', 'Tente novamente mais tarde') } } }
 
 function wireActions() { const form = qs('.profile-edit-form'); if (form) { form.addEventListener('submit', async e => { e.preventDefault(); await saveProfile() }) } }
 
-function renderStars(container, count) { 
-    const hint = container.querySelector('.total-stars-hint'); 
-    const hintDetached = hint ? hint : null; 
-    container.innerHTML = ''; 
-    for (let i = 0; i < count && i < 5; i++) { 
-        const s = document.createElement('i'); 
-        s.className = 'fas fa-star filled'; 
+function renderStars(container, count, isChampion = false) {
+    const hint = container.querySelector('.total-stars-hint');
+    const hintDetached = hint ? hint : null;
+    container.innerHTML = '';
+    for (let i = 0; i < count && i < 5; i++) {
+        const s = document.createElement('i');
+        s.className = 'fas fa-star filled';
         container.appendChild(s);
-    } 
-    if (hintDetached) { 
+    }
+    if (isChampion) {
+        const t = document.createElement('i');
+        t.className = 'fas fa-trophy champion-trophy';
+        t.title = 'Campeão do último campeonato';
+        container.appendChild(t);
+    }
+    if (hintDetached) {
         container.appendChild(hintDetached);
     }
 }
@@ -512,3 +744,10 @@ function init() {
 
 
 init();
+
+window.cleanupProfile = () => {
+    if (unsubscribeProfile) {
+        try { unsubscribeProfile(); } catch { }
+        unsubscribeProfile = null;
+    }
+};

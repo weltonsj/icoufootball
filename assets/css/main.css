@@ -1,11 +1,18 @@
 @import '../../styles/theme.css';
 @import './components/friends.css';
+@import './responsive.css';
 
 /* Base */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+html {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 body {
@@ -18,6 +25,10 @@ body {
     align-items: flex-start;
     /* Alinha o conteúdo ao topo para telas maiores */
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height para mobile */
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
     /* padding: 20px; /* Adiciona um padding geral para telas maiores */
 }
 
@@ -97,17 +108,17 @@ body.page-reloading .profile-avatar-header {
 /* Container principal do aplicativo */
 .app-container {
     background-color: var(--primary-bg);
-    border-radius: 25px;
-    /* Bordas arredondadas para simular o device */
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    border-radius: 0;
+    box-shadow: none;
     width: 100%;
-    max-width: 400px;
-    /* Largura máxima para mobile */
-    overflow: hidden;
-    /* Garante que elementos filhos não transbordem */
+    max-width: 100%;
+    overflow-x: hidden;
+    /* Garante que elementos filhos não transbordem horizontalmente */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height para mobile */
     /* Altura mínima para mobile */
 }
 
@@ -215,6 +226,42 @@ body.page-reloading .profile-avatar-header {
     transform: translateY(0);
 }
 
+/* Header Login Link - Link elegante para usuários não logados */
+.header-login-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--highlight-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.header-login-link:hover {
+    background-color: var(--highlight-color);
+    color: var(--primary-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(253, 138, 24, 0.3);
+}
+
+.header-login-link i {
+    font-size: 1em;
+}
+
+/* Visibilidade do link de login baseado em autenticação */
+html:not(.authenticated) .header-login-link {
+    display: flex !important;
+}
+
+html.authenticated .header-login-link {
+    display: none !important;
+}
+
 /* Main Content */
 .app-content {
     flex-grow: 1;
@@ -266,6 +313,30 @@ body.page-reloading .profile-avatar-header {
     border-radius: 10px;
 }
 
+/* Scroll para classificação quando há mais de 10 jogadores */
+.table-container.standings-scroll {
+    max-height: 480px; /* ~10 linhas de 40px + cabeçalho */
+    overflow-y: auto;
+}
+
+.table-container.standings-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-container.standings-scroll::-webkit-scrollbar-track {
+    background: var(--secondary-bg);
+    border-radius: 3px;
+}
+
+.table-container.standings-scroll::-webkit-scrollbar-thumb {
+    background: var(--highlight-color);
+    border-radius: 3px;
+}
+
+.table-container.standings-scroll::-webkit-scrollbar-thumb:hover {
+    background: #e07a15;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -302,6 +373,46 @@ table tbody tr:hover {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+/* Formato: logo time + nome time | foto jogador + nome jogador */
+.team-name-text {
+    font-weight: 500;
+    color: var(--text-color);
+    white-space: nowrap;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.team-separator {
+    color: var(--secondary-text);
+    margin: 0 4px;
+    opacity: 0.6;
+}
+
+.player-name-text {
+    color: var(--text-color);
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-avatar-small {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--highlight-color);
+    flex-shrink: 0;
+}
+
+.team-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .team-logo {
@@ -736,21 +847,25 @@ input:-webkit-autofill:active {
 .main-page-content {
     display: grid !important;
     grid-template-areas:
-        "standings stats auth"
-        "players players players" !important;
-    grid-template-columns: 1.5fr 1fr 1fr !important;
-    grid-template-rows: auto auto !important;
+        "players players"
+        "standings stats"
+        "championship live" !important;
+    grid-template-columns: 1.5fr 1fr !important;
+    grid-template-rows: auto auto auto !important;
     gap: 20px !important;
     padding: 20px !important;
-    align-items: start !important;
+    align-items: baseline !important;
 }
 
 /* Quando autenticado: auth-card oculto, stats expande */
 html.authenticated .main-page-content {
     grid-template-areas:
-        "standings stats stats"
-        "players players players" !important;
-    grid-template-columns: 1.5fr 1.5fr !important;
+        "players players"
+        "standings stats"
+        "championship userStatus"
+        "championship live"
+        "championship live" !important;
+    grid-template-columns: 1.5fr 1fr !important;
 }
 
 html.authenticated .main-page-content .auth-card {
@@ -760,17 +875,37 @@ html.authenticated .main-page-content .auth-card {
 /* Seções da Home */
 .section-standings {
     grid-area: standings;
-    margin-bottom: 0;
 }
 
 .section-stats {
     grid-area: stats;
-    margin-bottom: 0;
 }
 
 .section-players {
     grid-area: players;
-    margin-bottom: 20px;
+}
+
+.section-live {
+    grid-area: live;
+}
+
+.section-championship {
+    grid-area: championship;
+}
+
+.section-user-status {
+    grid-area: userStatus;
+}
+
+/* Card de autenticação precisa ocupar a área 'auth' do grid */
+.main-page-content .auth-card {
+    grid-area: auth;
+    margin-bottom: 0;
+}
+
+/* Bloco Ao Vivo ocupa a área 'live' e não deve empurrar o grid com margin */
+.main-page-content .section-live {
+    margin-bottom: 0;
 }
 
 /* Tabela de classificação */
@@ -1019,6 +1154,7 @@ html.authenticated .main-page-content .auth-card {
     .main-page-content {
         grid-template-areas:
             "standings"
+            "live"
             "auth"
             "stats"
             "players";
@@ -1028,6 +1164,7 @@ html.authenticated .main-page-content .auth-card {
     html.authenticated .main-page-content {
         grid-template-areas:
             "standings"
+            "live"
             "stats"
             "players";
         grid-template-columns: 1fr;

@@ -1,6 +1,7 @@
 import { page } from "../functions/pages.js";
 import { showSpinner, hideSpinner } from "../components/spinner.js";
-import { setActiveNavItem, getCurrentUser } from "../utils/authManager.js";
+import { setActiveNavItem, getCurrentUser, getCurrentRole } from "../utils/authManager.js";
+import { showModal } from "../components/modal.js";
 
 const ROUTES = Object.keys(page);
 
@@ -19,6 +20,15 @@ function isRouteProtected(route) {
 
 function isUserAuthenticated() {
   return getCurrentUser() !== null;
+}
+
+function isAdminRoute(route) {
+  return route === 'admin';
+}
+
+function isRoleAdminOrSuperadmin(role) {
+  const r = String(role || '').trim().toLowerCase();
+  return r === 'admin' || r === 'superadmin' || r === 'super-admin' || r === 'super admin';
 }
 
 // Variável global para rastrear rota anterior
@@ -42,6 +52,30 @@ export function renderPages(route = "mainPage", targetSelector = "main.app-conte
     }
   }
 
+  // Detectar saída da rota 'admin' e chamar destruirAdmin()
+  if (rotaAnterior === 'admin' && route !== 'admin') {
+    console.log('[Route] Saindo da rota admin, chamando destruirAdmin()...');
+    if (typeof window.destruirAdmin === 'function') {
+      window.destruirAdmin();
+    }
+  }
+
+  // Detectar saída da rota 'dashboard' e chamar cleanupDashboard()
+  if (rotaAnterior === 'dashboard' && route !== 'dashboard') {
+    console.log('[Route] Saindo da rota dashboard, chamando cleanupDashboard()...');
+    if (typeof window.cleanupDashboard === 'function') {
+      window.cleanupDashboard();
+    }
+  }
+
+  // Detectar saída da rota 'profile' e chamar cleanupProfile()
+  if (rotaAnterior === 'profile' && route !== 'profile') {
+    console.log('[Route] Saindo da rota profile, chamando cleanupProfile()...');
+    if (typeof window.cleanupProfile === 'function') {
+      window.cleanupProfile();
+    }
+  }
+
   // Atualizar rota anterior
   rotaAnterior = route;
 
@@ -60,6 +94,16 @@ export function renderPages(route = "mainPage", targetSelector = "main.app-conte
     console.warn(`Acesso negado à rota protegida: ${route}. Redirecionando para home.`);
     window.location.href = './index.html';
     return;
+  }
+
+  // Route Guard: Admin Only
+  if (isAdminRoute(route)) {
+    const role = getCurrentRole();
+    if (!isRoleAdminOrSuperadmin(role)) {
+      showModal('error', 'Acesso negado', 'Esta página é restrita a administradores.');
+      window.location.hash = '#homepage';
+      return;
+    }
   }
 
   // Transição suave: fade-out
@@ -137,6 +181,13 @@ export function renderPages(route = "mainPage", targetSelector = "main.app-conte
         script.id = `chat-js`;
         script.src = `./src/functions/chatFunctions.js?t=${Date.now()}`;
         document.body.appendChild(script);
+      } else if (currentPage.name === 'matches') {
+        // Matches usa initMatchesPage do matches.js
+        import('../pages/matches.js').then(module => {
+          if (module.initMatchesPage) {
+            module.initMatchesPage();
+          }
+        }).catch(err => console.error('[route] Erro ao carregar matches.js:', err));
       } else {
         // Carrega JS dinâmico para outras páginas
         const existingScript = document.querySelector(`#${currentPage.name}-js`);

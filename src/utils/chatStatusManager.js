@@ -6,11 +6,12 @@
  */
 
 import { db, auth } from '../services/firebase.js';
-import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { doc, updateDoc, serverTimestamp, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js';
 
 // ===== CONSTANTES =====
-const TEMPO_INATIVIDADE_MS = 12000; // 12 segundos para marcar offline
-const INTERVALO_KEEP_ALIVE_MS = 8000; // 8 segundos para keep-alive (menor que inatividade)
+// Seguir comportamento solicitado: 1 minuto de inatividade para marcar offline
+const TEMPO_INATIVIDADE_MS = 60000; // 60 segundos para marcar offline
+const INTERVALO_KEEP_ALIVE_MS = 10000; // 10 segundos para keep-alive (atualizar ultimoAcesso)
 
 // ===== ESTADO DO GERENCIADOR =====
 let isNoChatRoute = false; // Se o usuário está na rota /chat
@@ -71,7 +72,10 @@ export function sairDoChat() {
     // Parar keep-alive
     pararKeepAlive();
     
-    // Iniciar timeout de inatividade (12 segundos)
+    // IMPORTANTE: Ao sair da sessão de chat, iniciar timeout de inatividade
+    // para marcar offline após o tempo configurado (1 minuto). Isso segue
+    // o comportamento do WhatsApp onde sair do chat não marca offline
+    // imediatamente, mas sim após período de inatividade.
     iniciarTimeoutInatividade();
 }
 
@@ -181,27 +185,29 @@ async function atualizarStatusOnline() {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
     
-    if (isOnline) return; // Já está online, não precisa atualizar
-    
     try {
         // Verificar se o usuário está invisível antes de atualizar
-        const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js");
         const userDoc = await getDoc(doc(db, 'users', userId));
         if (userDoc.exists()) {
             const statusAtual = userDoc.data()?.status;
-            // Se invisível, não marcar como online
+            // Se invisível, NÃO marcar como online e NÃO atualizar ultimoAcesso
             if (statusAtual === 'invisivel') {
-                console.log('[StatusManager] Usuário invisível - mantendo offline');
+                console.log('[StatusManager] Usuário invisível - mantendo offline e ultimoAcesso congelado');
                 return;
             }
         }
         
-        // Ao marcar online: NÃO atualizar `ultimoAcesso` (deve permanecer congelado até ficar offline)
+        // Atualizar SEMPRE online e ultimoAcesso (heartbeat a cada 10s)
+        console.log('[Audit] chatStatusManager.atualizarStatusOnline -> gravando online:true e ultimoAcesso (heartbeat) para', userId);
         await updateDoc(doc(db, 'users', userId), {
-            online: true
+            online: true,
+            ultimoAcesso: serverTimestamp()
         });
-        isOnline = true;
-        console.log('[StatusManager] Status: ONLINE');
+        
+        if (!isOnline) {
+            isOnline = true;
+            console.log('[StatusManager] Status: ONLINE');
+        }
     } catch (error) {
         console.error('[StatusManager] Erro ao marcar online:', error);
     }
@@ -212,24 +218,29 @@ async function atualizarStatusOffline() {
     if (!userId) return;
     
     try {
-        // Verificar se o usuário está invisível antes de atualizar ultimoAcesso
-        const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js");
-        const userDoc = await getDoc(doc(db, 'users', userId));
+        // IMPORTANTE: Quando fica offline por inatividade, atualizar o
+        // `ultimoAcesso` para o momento exato em que foi marcado offline,
+        // EXCETO se o usuário estiver com status 'invisivel' — nesse caso
+        // preservamos o ultimoAcesso definido quando ele ficou invisível.
+        const userRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userRef);
         const statusAtual = userDoc.exists() ? userDoc.data()?.status : null;
-        
-        const updateData = {
-            online: false
-        };
-        
-        // Se NÃO está invisível, atualizar ultimoAcesso
-        // Se está invisível, manter ultimoAcesso congelado
-        if (statusAtual !== 'invisivel') {
-            updateData.ultimoAcesso = serverTimestamp();
+
+        if (statusAtual === 'invisivel') {
+            console.log('[Audit] chatStatusManager.atualizarStatusOffline -> usuário invisível, preservando ultimoAcesso for', userId);
+            await updateDoc(userRef, { online: false });
+            isOnline = false;
+            return;
         }
-        
-        await updateDoc(doc(db, 'users', userId), updateData);
+
+        const updateData = {
+            online: false,
+            ultimoAcesso: serverTimestamp()
+        };
+        console.log('[Audit] chatStatusManager.atualizarStatusOffline -> gravando online:false e ultimoAcesso (offline) para', userId);
+        await updateDoc(userRef, updateData);
         isOnline = false;
-        console.log('[StatusManager] Status: OFFLINE');
+        console.log('[StatusManager] Status: OFFLINE - ultimoAcesso atualizado para o momento do offline');
     } catch (error) {
         console.error('[StatusManager] Erro ao marcar offline:', error);
     }

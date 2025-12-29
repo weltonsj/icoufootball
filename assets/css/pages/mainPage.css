@@ -1,0 +1,248 @@
+/* ====================================================================
+   mainPage.css - Estilos da Página Principal (Home)
+   Inclui RF12: Bloco Ao Vivo
+   ==================================================================== */
+
+/* Importa estilos da homepage existente */
+@import url('./homepage.css');
+
+/* ====================================================================
+   Estilos Adicionais para mainPage
+   ==================================================================== */
+
+.main-page-content {
+    padding: 20px;
+}
+
+/* Garante que os estilos da homepage sejam aplicados */
+
+/* ====================================================================
+   RF1 (v2.0): Players em Destaque - Ticker horizontal
+   ==================================================================== */
+
+.players-ticker-viewport {
+   width: 100%;
+   overflow: hidden;
+   border: 1px solid var(--chat-border-color);
+   border-radius: 14px;
+   background: var(--secondary-bg);
+   padding: 10px 0;
+}
+
+.players-ticker-track {
+   display: flex;
+   gap: 12px;
+   padding: 0 12px;
+   width: max-content;
+   animation: players-ticker-scroll 24s linear infinite;
+}
+
+.players-ticker-item {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   min-width: 260px;
+   padding: 10px 12px;
+   border-radius: 12px;
+   background: rgba(0, 0, 0, 0.12);
+   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Posição do ranking no ticker (Top 10) */
+.players-ticker-rank {
+   font-weight: 700;
+   font-size: 1.1em;
+   color: var(--highlight-color);
+   min-width: 28px;
+   text-align: center;
+}
+
+.players-ticker-photo {
+   width: 52px;
+   height: 52px;
+   border-radius: 50%;
+   object-fit: cover;
+   flex-shrink: 0;
+}
+
+.players-ticker-meta {
+   min-width: 0;
+}
+
+.players-ticker-name {
+   font-weight: 700;
+   color: var(--text-color);
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+.players-ticker-team {
+   font-size: 0.9em;
+   opacity: 0.8;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+@keyframes players-ticker-scroll {
+   0% { transform: translateX(0); }
+   100% { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+   .players-ticker-track {
+      animation: none;
+      overflow-x: auto;
+   }
+}
+
+/* ====================================================================
+   RF1 (v2.0): Tabela do campeonato sob demanda - seletor
+   ==================================================================== */
+
+.championship-standings-controls {
+   margin: 10px 0 14px;
+}
+
+/* Linha de filtros com ano e campeonato lado a lado */
+.championship-filters-row {
+   display: flex;
+   gap: 12px;
+   flex-wrap: wrap;
+}
+
+.championship-filters-row .input-group {
+   flex: 1;
+   min-width: 150px;
+}
+
+.championship-filters-row .input-group:first-child {
+   flex: 0 0 140px;
+   max-width: 160px;
+}
+
+.championship-standings-controls .input-group select {
+   width: 100%;
+   padding: 12px 15px;
+   background-color: var(--input-bg);
+   border: 1px solid var(--input-border);
+   border-radius: 8px;
+   color: var(--text-color);
+   font-size: 1em;
+   outline: none;
+   cursor: pointer;
+   transition: border-color 0.2s, opacity 0.2s;
+}
+
+.championship-standings-controls .input-group select:disabled {
+   opacity: 0.6;
+   cursor: not-allowed;
+   background-color: var(--secondary-bg);
+}
+
+.championship-standings-controls .input-group select:focus {
+   border-color: var(--highlight-color);
+}
+
+/* ====================================================================
+   Media Queries - Responsividade
+   ==================================================================== */
+
+/* Mobile pequeno (até 480px) */
+@media (max-width: 480px) {
+   .main-page-content {
+      padding: 10px;
+   }
+   
+   .players-ticker-viewport {
+      border-radius: 10px;
+      padding: 8px 0;
+   }
+   
+   .players-ticker-track {
+      gap: 8px;
+      padding: 0 8px;
+      animation-duration: 18s;
+   }
+   
+   .players-ticker-item {
+      min-width: 200px;
+      padding: 8px 10px;
+      gap: 8px;
+      border-radius: 10px;
+   }
+   
+   .players-ticker-photo {
+      width: 42px;
+      height: 42px;
+   }
+   
+   .players-ticker-name {
+      font-size: 0.9em;
+   }
+   
+   .players-ticker-team {
+      font-size: 0.8em;
+   }
+   
+   .championship-standings-controls {
+      margin: 8px 0 10px;
+   }
+   
+   .championship-filters-row {
+      flex-direction: column;
+      gap: 8px;
+   }
+   
+   .championship-filters-row .input-group:first-child {
+      flex: 1;
+      max-width: 100%;
+   }
+   
+   .championship-standings-controls .input-group select {
+      padding: 10px 12px;
+      font-size: 0.95em;
+   }
+}
+
+/* Mobile grande / Tablet pequeno (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+   .main-page-content {
+      padding: 15px;
+   }
+   
+   .players-ticker-viewport {
+      border-radius: 12px;
+   }
+   
+   .players-ticker-track {
+      gap: 10px;
+      animation-duration: 20s;
+   }
+   
+   .players-ticker-item {
+      min-width: 230px;
+      padding: 8px 10px;
+   }
+   
+   .players-ticker-photo {
+      width: 48px;
+      height: 48px;
+   }
+}
+
+/* Tablet (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+   .main-page-content {
+      padding: 20px;
+   }
+   
+   .players-ticker-track {
+      animation-duration: 22s;
+   }
+   
+   .players-ticker-item {
+      min-width: 250px;
+   }
+}

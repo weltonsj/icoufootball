@@ -213,3 +213,212 @@
         justify-content: flex-start;
     }
 }
+
+/* ====================================================================
+   RESPONSIVIDADE - Mobile Small (≤ 480px)
+   ====================================================================
+*/
+@media (max-width: 480px) {
+    .auth-content {
+        padding: 16px;
+        min-height: calc(100vh - 120px);
+    }
+    
+    .auth-card {
+        padding: 28px 22px;
+        border-radius: 16px;
+    }
+    
+    .auth-card-title h2 {
+        font-size: 1.7rem;
+        font-weight: 700;
+    }
+    
+    .auth-card-title > span {
+        font-size: 1rem;
+    }
+    
+    .auth-toggle {
+        margin-bottom: 22px;
+    }
+    
+    .toggle-button {
+        padding: 12px 10px;
+        font-size: 0.95rem;
+        min-height: 44px;
+    }
+    
+    .auth-form {
+        gap: 18px;
+    }
+    
+    .input-group label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    
+    .input-group input {
+        padding: 14px 16px;
+        font-size: 1rem;
+        min-height: 48px;
+        border-radius: 10px;
+    }
+    
+    .btn-primary {
+        padding: 14px 20px;
+        font-size: 1rem;
+        min-height: 48px;
+        border-radius: 10px;
+    }
+    
+    .forgot-password {
+        font-size: 0.95rem;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Mobile Large (481px - 768px)
+   ====================================================================
+*/
+@media (min-width: 481px) and (max-width: 768px) {
+    .auth-content {
+        padding: 20px;
+    }
+    
+    .auth-card {
+        max-width: 450px;
+        padding: 30px 25px;
+    }
+    
+    .input-group input {
+        font-size: 1rem;
+        min-height: 50px;
+    }
+    
+    .btn-primary {
+        font-size: 1rem;
+        min-height: 50px;
+    }
+}
+
+/* ====================================================================
+   MODAL DE AUTENTICAÇÃO - Estilo para o modal acionado pelo header
+   ====================================================================
+*/
+
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: fadeInModal 0.3s ease;
+}
+
+.auth-modal-overlay.hidden {
+    display: none !important;
+}
+
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.auth-modal-content {
+    position: relative;
+    background: transparent;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideInModal 0.3s ease;
+}
+
+@keyframes slideInModal {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.auth-modal-content .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.8rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s, transform 0.2s;
+    opacity: 0.7;
+}
+
+.auth-modal-content .modal-close:hover {
+    color: var(--highlight-color);
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.auth-card-modal {
+    background-color: var(--secondary-bg);
+    border-radius: 20px;
+    padding: 40px 30px;
+    border: 1px solid var(--chat-border-color);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+}
+
+.auth-card-modal .auth-card-title {
+    margin-bottom: 25px;
+}
+
+.auth-card-modal .auth-card-title h2 {
+    text-transform: none;
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: 2rem;
+}
+
+.auth-card-modal .auth-card-title h2 span {
+    color: var(--highlight-color);
+}
+
+.auth-card-modal .auth-card-title > span {
+    color: var(--text-color);
+    opacity: 0.7;
+    display: block;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+/* Responsivo para modal em mobile */
+@media (max-width: 480px) {
+    .auth-modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .auth-card-modal {
+        padding: 30px 22px;
+        border-radius: 16px;
+    }
+    
+    .auth-card-modal .auth-card-title h2 {
+        font-size: 1.6rem;
+    }
+}

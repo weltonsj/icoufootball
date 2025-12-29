@@ -351,7 +351,7 @@ export async function marcarComoEntregue(conversaId) {
 }
 
 // ===== STATUS ONLINE =====
-export async function atualizarStatusOnline(online = true) {
+export async function atualizarStatusOnline(online = true, options = {}) {
     const userId = auth.currentUser?.uid;
     if (!userId) {
         console.warn('[ChatService] ⚠️ atualizarStatusOnline: Usuário não autenticado');
@@ -359,25 +359,50 @@ export async function atualizarStatusOnline(online = true) {
     }
 
     try {
-        // Usar setDoc com merge para garantir que o campo seja criado mesmo se não existir
-        if (online) {
-            // Ao marcar online: NÃO atualizar `ultimoAcesso` (congelado até ficar offline)
-            await setDoc(doc(db, 'users', userId), {
-                online: true
-            }, { merge: true });
-            console.log(`[ChatService] ✅ Status online=true gravado para userId=${userId}`);
+        // Ler status atual para respeitar 'invisivel'
+        const userRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        const statusAtual = userDoc.exists() ? userDoc.data()?.status : null;
 
-            // Se ficou online, marcar mensagens pendentes de TODAS as conversas como entregues
+        // Se o usuário está atualmente 'invisivel', NUNCA devemos sobrescrever
+        // o `ultimoAcesso` automaticamente ao fazer operações de login/logout.
+        // - Ao tentar marcar ONLINE quando estiver 'invisivel' -> manter offline e não tocar em ultimoAcesso.
+        // - Ao marcar OFFLINE quando estiver 'invisivel' -> manter ultimoAcesso (preservar).
+        if (statusAtual === 'invisivel') {
+            if (online) {
+                await setDoc(userRef, { online: false }, { merge: true });
+                console.log('[ChatService] Usuário invisível - mantendo offline e preservando ultimoAcesso (login ignorado)');
+                return;
+            } else {
+                // já invisível: garantir que `online=false` e NÃO atualizar ultimoAcesso
+                await setDoc(userRef, { online: false }, { merge: true });
+                console.log('[ChatService] Usuário invisível - preservando ultimoAcesso ao marcar offline');
+                return;
+            }
+        }
+
+        const preserveLastAccess = options && options.preserveLastAccess === true;
+        const updateData = { online: !!online };
+
+        // Se estiver ficando online, atualizar ultimoAcesso para heartbeat
+        if (online) {
+            updateData.ultimoAcesso = serverTimestamp();
+        } else {
+            // Se estiver ficando offline, atualizar ultimoAcesso apenas quando
+            // não estivermos pedindo para preservar o valor (ex: logout)
+            if (!preserveLastAccess) {
+                updateData.ultimoAcesso = serverTimestamp();
+            }
+        }
+
+        await setDoc(userRef, updateData, { merge: true });
+        console.log(`[ChatService] ✅ Status atualizado para userId=${userId}:`, updateData);
+        
+        // Se ficou online, marcar mensagens pendentes de TODAS as conversas como entregues
+        if (online) {
             marcarTodasMensagensComoEntregue().catch(err => 
                 console.warn('[ChatService] Erro ao marcar mensagens entregues:', err)
             );
-        } else {
-            // Ao marcar offline: atualizar `ultimoAcesso` para o timestamp atual
-            await setDoc(doc(db, 'users', userId), {
-                online: false,
-                ultimoAcesso: serverTimestamp()
-            }, { merge: true });
-            console.log(`[ChatService] ✅ Status online=false e ultimoAcesso gravado para userId=${userId}`);
         }
     } catch (error) {
         console.error('[ChatService] ❌ Erro ao atualizar status online:', error);
@@ -470,9 +495,11 @@ export async function carregarStatusUsuarioLogado() {
         const userDoc = await getDoc(doc(db, 'users', userId));
         if (userDoc.exists()) {
             const dados = userDoc.data();
+            // IMPORTANTE: Garantir que online seja boolean false se não definido
+            const online = dados?.online === true;
             return {
                 status: dados?.status || 'disponivel',
-                online: dados?.online || false
+                online: online
             };
         }
         return { status: 'disponivel', online: false };
@@ -488,8 +515,10 @@ export function escutarStatusAmigo(amigoId, callback) {
     return onSnapshot(doc(db, 'users', amigoId), (docSnap) => {
         if (docSnap.exists()) {
             const dados = docSnap.data();
+            // IMPORTANTE: Garantir que online seja boolean false se não definido
+            const online = dados?.online === true;
             callback({
-                online: dados?.online || false,
+                online: online,
                 ultimoAcesso: dados?.ultimoAcesso || null,
                 digitando: dados?.digitando || {},
                 status: dados?.status || 'disponivel'
@@ -516,13 +545,18 @@ export async function buscarStatusAmigo(amigoId) {
         const amigoDoc = await getDoc(doc(db, 'users', amigoId));
         if (amigoDoc.exists()) {
             const dados = amigoDoc.data();
-            return {
-                online: dados?.online || false,
+            // IMPORTANTE: Garantir que online seja boolean false se não definido
+            const online = dados?.online === true;
+            const statusObj = {
+                online: online,
                 ultimoAcesso: dados?.ultimoAcesso || null,
                 digitando: dados?.digitando || {},
                 status: dados?.status || 'disponivel'
             };
+            console.log(`[ChatService] Status do amigo ${amigoId}:`, statusObj);
+            return statusObj;
         }
+        console.log(`[ChatService] Documento do amigo ${amigoId} não existe - retornando offline`);
         return { online: false, ultimoAcesso: null, status: 'disponivel', digitando: {} };
     } catch (error) {
         console.error('[ChatService] Erro ao buscar status do amigo:', error);
@@ -557,14 +591,17 @@ export async function alterarStatusUsuario(status) {
         };
 
         // Se invisível, aparece como offline para os outros
-        // IMPORTANTE: NÃO atualizar ultimoAcesso quando invisível (congela "visto por último")
+        // IMPORTANTE: Quando o usuário marca 'invisivel', devemos marcar como
+        // offline para os outros E registrar o momento exato em `ultimoAcesso`
+        // para congelar o visto por último naquele instante.
         if (status === 'invisivel') {
             updateData.online = false;
-            // ultimoAcesso NÃO é atualizado - fica congelado no último valor
+            updateData.ultimoAcesso = serverTimestamp();
+            console.log('[Audit] chatService.alterarStatusUsuario -> gravando invisivel: online:false e ultimoAcesso para', userId);
         } else {
-            // Ao mudar o status para disponível/ocupado/ausente, NÃO atualizar ultimoAcesso.
-            // `ultimoAcesso` só é atualizado quando o usuário efetivamente fica OFFLINE.
             updateData.online = true;
+            updateData.ultimoAcesso = serverTimestamp();
+            console.log('[Audit] chatService.alterarStatusUsuario -> gravando status:', status, 'com ultimoAcesso para', userId);
         }
 
         await updateDoc(doc(db, 'users', userId), updateData);
@@ -583,7 +620,16 @@ export async function atualizarUltimoAcesso() {
     if (!userId) return;
 
     try {
-        await updateDoc(doc(db, 'users', userId), {
+        // Verificar status atual antes de atualizar ultimoAcesso
+        const userRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        const statusAtual = userDoc.exists() ? userDoc.data()?.status : null;
+        if (statusAtual === 'invisivel') {
+            console.log('[Audit] chatService.atualizarUltimoAcesso -> usuário invisível, preservando ultimoAcesso for', userId);
+            return;
+        }
+        console.log('[Audit] chatService.atualizarUltimoAcesso -> gravando ultimoAcesso para', userId);
+        await updateDoc(userRef, {
             ultimoAcesso: serverTimestamp()
         });
     } catch (error) {

@@ -2,7 +2,10 @@
 <html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <title>iCouFootball - Classificação Geral</title>
         <link rel="stylesheet" href="./assets/css/main.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -34,12 +37,19 @@
     <body>
         <div class="app-container">
             <header class="app-header">
+                <!-- Menu Hambúrguer para Mobile -->
+                <button class="hamburger-menu" id="hamburger-menu" aria-label="Abrir menu de navegação" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
                 <div class="logo-area">
                     <img src="https://i.ibb.co/JRnDn3r7/logo-icoufootball-40x40.webp" alt="Logo iCouFootball"
                         class="logo-icon">
                     <h1 class="logo-text">iCou<span>Football</span></h1>
                 </div>
-                <nav class="main-nav">
+                <nav class="main-nav" id="main-nav">
                     <a href="#homepage" id="navHome" class="nav-item hidden">Home</a>
                     <a href="#dashboard" id="navDashboard" class="nav-item hidden">Dashboard</a>
                     <a href="#matches" id="navMatches" class="nav-item hidden">Partidas</a>
@@ -48,6 +58,12 @@
                     <a href="#admin" id="navAdmin" class="nav-item hidden">Admin</a>
                 </nav>
                 <div class="header-actions-container">
+                    <!-- Link de Login para usuários não autenticados -->
+                    <a href="#" class="header-login-link hidden" id="header-login-link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Fazer login</span>
+                    </a>
+                    
                     <div class="notification-bell hidden" id="notification-bell">
                         <i class="fas fa-bell"></i>
                         <span class="notification-badge" id="notification-badge">0</span>
@@ -55,7 +71,7 @@
 
                     <div class="header-actions">
                         <div class="profile-avatar-header">
-                            <img src="https://via.placeholder.com/40x40/e74c3c/ffffff?text=U" alt="Avatar do Usuário"
+                            <img src="./assets/img/avatar-placeholder.svg" alt="Avatar do Usuário"
                                 class="avatar-img">
                             <i class="fas fa-caret-down avatar-dropdown-icon"></i>
                         </div>
@@ -65,6 +81,32 @@
                     </div>
                 </div>
             </header>
+
+            <!-- Mobile Navigation Overlay -->
+            <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+            <nav class="mobile-nav-menu" id="mobile-nav-menu" aria-label="Menu de navegação mobile">
+                <button class="mobile-nav-close" id="mobile-nav-close" aria-label="Fechar menu">
+                    <i class="fas fa-times"></i>
+                </button>
+                <a href="#homepage" class="nav-item hidden" data-nav="navHome">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="#dashboard" class="nav-item hidden" data-nav="navDashboard">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="#matches" class="nav-item hidden" data-nav="navMatches">
+                    <i class="fas fa-futbol"></i> Partidas
+                </a>
+                <a href="#chat" class="nav-item hidden" data-nav="navChat">
+                    <i class="fas fa-comments"></i> Chat
+                </a>
+                <a href="#profile" class="nav-item hidden" data-nav="navProfile">
+                    <i class="fas fa-user"></i> Perfil
+                </a>
+                <a href="#admin" class="nav-item hidden" data-nav="navAdmin">
+                    <i class="fas fa-cog"></i> Admin
+                </a>
+            </nav>
 
             <main class="app-content"></main>
 

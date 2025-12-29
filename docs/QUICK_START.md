@@ -335,10 +335,9 @@ updateMenuVisibility(getCurrentUser(), getCurrentRole());
 
 ## Links Úteis
 
-- **Documentação Técnica:** `docs/FEATURES_IMPLEMENTED.md`
-- **Arquitetura:** `docs/ARCHITECTURE.md`
-- **Checklist:** `IMPLEMENTATION_CHECKLIST.md`
-- **PRD:** `docs/PRD_iCouFootball.md`
+- **Documentação Técnica:** `FEATURES_IMPLEMENTED.md`
+- **Arquitetura:** `ARCHITECTURE.md`
+- **PRD:** `PRD_iCouFootball.md`
 
 ---
 

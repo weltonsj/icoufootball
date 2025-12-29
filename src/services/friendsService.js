@@ -15,6 +15,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { showModal } from "../components/modal.js";
 
+function normalizeFriendRequest(docId, data) {
+  const fromId = data.remetenteId || data.deId || data.fromId || null;
+  const toId = data.destinatarioId || data.paraId || data.toId || null;
+  const fromName = data.remetenteNome || data.deNome || data.fromName || '';
+  const toName = data.destinatarioNome || data.paraNome || data.toName || '';
+  const createdAt = data.dataSolicitacao || data.criadoEm || data.createdAt || null;
+
+  return {
+    id: docId,
+    // Campos legados (mantém UI atual)
+    deId: fromId,
+    paraId: toId,
+    deNome: fromName,
+    paraNome: toName,
+    criadoEm: createdAt,
+    status: data.status,
+    // Campos PRD (mantém consistência futura)
+    remetenteId: fromId,
+    destinatarioId: toId,
+    remetenteNome: fromName,
+    destinatarioNome: toName,
+    dataSolicitacao: createdAt,
+    dataResposta: data.dataResposta || data.respondidoEm || null,
+    ...data
+  };
+}
+
 /**
  * Busca usuário por nome (case-insensitive)
  * @param {string} username - Nome do usuário a buscar
@@ -68,23 +95,43 @@ export async function canRequestFriendship(userId, friendId) {
     
     // Verifica solicitações pendentes (em ambas as direções)
     const requestsRef = collection(db, 'solicitacoesAmizade');
-    const q1 = query(requestsRef, 
-      where('deId', '==', userId), 
+
+    // Legacy schema
+    const qLegacySent = query(requestsRef,
+      where('deId', '==', userId),
       where('paraId', '==', friendId),
       where('status', '==', 'pendente')
     );
-    const q2 = query(requestsRef, 
-      where('deId', '==', friendId), 
+    const qLegacyReceived = query(requestsRef,
+      where('deId', '==', friendId),
       where('paraId', '==', userId),
       where('status', '==', 'pendente')
     );
-    
-    const [snapshot1, snapshot2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-    
-    if (!snapshot1.empty) {
+
+    // PRD schema
+    const qPrdSent = query(requestsRef,
+      where('remetenteId', '==', userId),
+      where('destinatarioId', '==', friendId),
+      where('status', '==', 'pendente')
+    );
+    const qPrdReceived = query(requestsRef,
+      where('remetenteId', '==', friendId),
+      where('destinatarioId', '==', userId),
+      where('status', '==', 'pendente')
+    );
+
+    const [legacySent, legacyReceived, prdSent, prdReceived] = await Promise.all([
+      getDocs(qLegacySent),
+      getDocs(qLegacyReceived),
+      getDocs(qPrdSent),
+      getDocs(qPrdReceived)
+    ]);
+
+    if (!legacySent.empty || !prdSent.empty) {
       return { canRequest: false, reason: 'request_sent' };
     }
-    if (!snapshot2.empty) {
+
+    if (!legacyReceived.empty || !prdReceived.empty) {
       return { canRequest: false, reason: 'request_received' };
     }
     
@@ -118,13 +165,22 @@ export async function sendFriendRequest(fromId, fromName, toId, toName) {
     
     // Cria solicitação
     const requestRef = doc(collection(db, 'solicitacoesAmizade'));
+    const now = Timestamp.now();
     await setDoc(requestRef, {
+      // PRD v2.0
+      remetenteId: fromId,
+      remetenteNome: fromName,
+      destinatarioId: toId,
+      destinatarioNome: toName,
+      status: 'pendente',
+      dataSolicitacao: now,
+
+      // Legacy (compatibilidade)
       deId: fromId,
       deNome: fromName,
       paraId: toId,
       paraNome: toName,
-      status: 'pendente',
-      criadoEm: Timestamp.now()
+      criadoEm: now
     });
     
     // Cria notificação para o destinatário
@@ -132,11 +188,19 @@ export async function sendFriendRequest(fromId, fromName, toId, toName) {
     await setDoc(notificationRef, {
       usuarioId: toId,
       tipo: 'solicitacao_amizade',
-      deId: fromId,
-      deNome: fromName,
       mensagem: `${fromName} enviou uma solicitação de amizade`,
       lida: false,
-      criadoEm: Timestamp.now(),
+      dataNotificacao: now,
+      metadados: {
+        remetenteId: fromId,
+        remetenteNome: fromName,
+        solicitacaoId: requestRef.id
+      },
+
+      // Legacy (compatibilidade)
+      deId: fromId,
+      deNome: fromName,
+      criadoEm: now,
       solicitacaoId: requestRef.id
     });
     
@@ -163,16 +227,21 @@ export async function acceptFriendRequest(requestId, currentUserId) {
     }
     
     const requestData = requestDoc.data();
+
+    const fromId = requestData.remetenteId || requestData.deId;
+    const toId = requestData.destinatarioId || requestData.paraId;
+    const fromName = requestData.remetenteNome || requestData.deNome;
+    const toName = requestData.destinatarioNome || requestData.paraNome;
     
     // Verifica se o usuário atual é o destinatário
-    if (requestData.paraId !== currentUserId) {
+    if (toId !== currentUserId) {
       throw new Error('Você não tem permissão para aceitar esta solicitação');
     }
     
     // Busca dados completos de ambos os usuários
     const [fromUserDoc, toUserDoc] = await Promise.all([
-      getDoc(doc(db, 'users', requestData.deId)),
-      getDoc(doc(db, 'users', requestData.paraId))
+      getDoc(doc(db, 'users', fromId)),
+      getDoc(doc(db, 'users', toId))
     ]);
     
     if (!fromUserDoc.exists() || !toUserDoc.exists()) {
@@ -186,9 +255,9 @@ export async function acceptFriendRequest(requestId, currentUserId) {
     const batch = writeBatch(db);
     
     // Adiciona amigo para o remetente
-    const friendRef1 = doc(db, `users/${requestData.deId}/amigos`, requestData.paraId);
+    const friendRef1 = doc(db, `users/${fromId}/amigos`, toId);
     batch.set(friendRef1, {
-      usuarioId: requestData.paraId,
+      usuarioId: toId,
       nome: toUserData.nome,
       nomeTime: toUserData.nomeTime || toUserData.timeName || 'Sem time',
       logoTime: toUserData.logoTime || toUserData.timeLogo || '',
@@ -198,9 +267,9 @@ export async function acceptFriendRequest(requestId, currentUserId) {
     });
     
     // Adiciona amigo para o destinatário
-    const friendRef2 = doc(db, `users/${requestData.paraId}/amigos`, requestData.deId);
+    const friendRef2 = doc(db, `users/${toId}/amigos`, fromId);
     batch.set(friendRef2, {
-      usuarioId: requestData.deId,
+      usuarioId: fromId,
       nome: fromUserData.nome,
       nomeTime: fromUserData.nomeTime || fromUserData.timeName || 'Sem time',
       logoTime: fromUserData.logoTime || fromUserData.timeLogo || '',
@@ -212,18 +281,27 @@ export async function acceptFriendRequest(requestId, currentUserId) {
     // Atualiza status da solicitação
     batch.update(requestRef, {
       status: 'aceita',
-      respondidoEm: Timestamp.now()
+      respondidoEm: Timestamp.now(),
+      dataResposta: Timestamp.now()
     });
     
     // Cria notificação para o remetente
     const notificationRef = doc(collection(db, 'notificacoes'));
     batch.set(notificationRef, {
-      usuarioId: requestData.deId,
+      usuarioId: fromId,
       tipo: 'amizade_aceita',
-      deId: requestData.paraId,
-      deNome: requestData.paraNome,
-      mensagem: `${requestData.paraNome} aceitou sua solicitação de amizade`,
+      mensagem: `${toName || 'Seu amigo'} aceitou sua solicitação de amizade`,
       lida: false,
+      dataNotificacao: Timestamp.now(),
+      metadados: {
+        remetenteId: currentUserId,
+        remetenteNome: toName || '',
+        solicitacaoId: requestId
+      },
+
+      // Legacy (compatibilidade)
+      deId: toId,
+      deNome: toName || '',
       criadoEm: Timestamp.now()
     });
     
@@ -250,14 +328,17 @@ export async function rejectFriendRequest(requestId, currentUserId) {
     }
     
     const requestData = requestDoc.data();
+
+    const toId = requestData.destinatarioId || requestData.paraId;
     
-    if (requestData.paraId !== currentUserId) {
+    if (toId !== currentUserId) {
       throw new Error('Você não tem permissão para recusar esta solicitação');
     }
     
     await updateDoc(requestRef, {
       status: 'recusada',
-      respondidoEm: Timestamp.now()
+      respondidoEm: Timestamp.now(),
+      dataResposta: Timestamp.now()
     });
   } catch (error) {
     console.error('Erro ao recusar solicitação:', error);
@@ -337,24 +418,28 @@ export async function getFriendsList(userId) {
 export async function getPendingRequests(userId) {
   try {
     const requestsRef = collection(db, 'solicitacoesAmizade');
-    const q = query(requestsRef, 
+    // Suporta schema legado (paraId) e schema PRD (destinatarioId)
+    const qLegacy = query(requestsRef,
       where('paraId', '==', userId),
       where('status', '==', 'pendente')
     );
-    const snapshot = await getDocs(q);
-    
-    const requests = [];
-    snapshot.forEach(doc => {
-      requests.push({
-        id: doc.id,
-        ...doc.data()
-      });
-    });
+    const qPrd = query(requestsRef,
+      where('destinatarioId', '==', userId),
+      where('status', '==', 'pendente')
+    );
+
+    const [legacySnap, prdSnap] = await Promise.all([getDocs(qLegacy), getDocs(qPrd)]);
+
+    const byId = new Map();
+    legacySnap.forEach(d => byId.set(d.id, normalizeFriendRequest(d.id, d.data())));
+    prdSnap.forEach(d => byId.set(d.id, normalizeFriendRequest(d.id, d.data())));
+
+    const requests = Array.from(byId.values());
     
     // Ordena no cliente para evitar necessidade de índice composto
     requests.sort((a, b) => {
-      const timeA = a.criadoEm?.toMillis() || 0;
-      const timeB = b.criadoEm?.toMillis() || 0;
+      const timeA = (a.dataSolicitacao || a.criadoEm)?.toMillis?.() || 0;
+      const timeB = (b.dataSolicitacao || b.criadoEm)?.toMillis?.() || 0;
       return timeB - timeA; // Mais recentes primeiro
     });
     

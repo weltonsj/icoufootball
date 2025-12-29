@@ -13,24 +13,65 @@ service cloud.firestore {
 
     // Checa se o usuário tem a custom claim 'admin'
     // A atribuição dessa claim deve ser feita por um script de backend seguro (Firebase Functions)
+    function role() {
+      return isAuthenticated()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.funcao
+        : null;
+    }
+
     function isAdmin() {
-      return request.auth.token.admin == true;
+      // Compatível: aceita custom claim OU role no documento do usuário
+      return request.auth.token.admin == true
+        || role() in ['Admin', 'Superadmin'];
+    }
+
+    function isSuperadmin() {
+      return role() == 'Superadmin';
+    }
+
+    function hasGestaoPermission(permission) {
+      return isAuthenticated()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissoesGestao[permission] == true;
+    }
+
+    function isChanging(fields) {
+      return request.resource.data.diff(resource.data).changedKeys().hasAny(fields);
+    }
+
+    function onlyChanges(fields) {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(fields);
+    }
+
+    function isConversationParticipant(conversaId) {
+      return isAuthenticated()
+        && request.auth.uid in get(/databases/$(database)/documents/conversas/$(conversaId)).data.participantes;
     }
 
     // ==== Coleção 'users' ====
     // Perfis de usuários.
     match /users/{userId} {
-      // Permite ler perfis básicos (para busca de amigos) ou perfil completo se for público/próprio/admin
-      allow read: if isAuthenticated() || resource.data.perfilPublico == true || isOwner(userId) || isAdmin();
+      // Permite ler perfis básicos (para busca de amigos, ranking público, players em destaque) 
+      // ou perfil completo se for público/próprio/admin
+      // Leitura pública permitida para exibir classificação e players em destaque na home
+      allow read: if true;
 
       // Escrita (Criar): Um usuário pode criar seu próprio documento.
       allow create: if isOwner(userId);
 
-      // Escrita (Atualizar): Um usuário pode atualizar seu próprio perfil, ou um admin pode atualizar qualquer perfil.
-      allow update: if isOwner(userId) || isAdmin();
+      // Atualizar:
+      // - Dono pode editar campos do próprio perfil, exceto campos sensíveis
+      // - Admin pode atualizar qualquer perfil
+      // - Inativação/exclusão de terceiros apenas Superadmin
+      allow update: if (
+        isOwner(userId)
+        && !isChanging(['funcao', 'permissoesGestao', 'ativo', 'estrelas', 'ultimoCampeao'])
+      ) || (
+        isAdmin()
+        && (!isChanging(['ativo']) || isSuperadmin())
+      );
 
-      // Deleção: Um usuário pode deletar sua própria conta, ou um admin pode deletar qualquer conta.
-      allow delete: if isOwner(userId) || isAdmin();
+      // Deleção: própria conta ok; conta de terceiros apenas Superadmin (RF3)
+      allow delete: if isOwner(userId) || isSuperadmin();
 
       // --- Subcoleção 'amigos' ---
       // Lista de amigos do usuário
@@ -49,46 +90,76 @@ service cloud.firestore {
       }
     }
 
-    // ==== Coleção 'solicitacoesAmizade' ====
-    // Solicitações de amizade
+    // ==== Coleção 'solicitacoesAmizade' (schema PRD) ====
     match /solicitacoesAmizade/{solicitacaoId} {
-      // Ler: Apenas remetente ou destinatário
-      allow read: if isAuthenticated() && 
-        (resource.data.deId == request.auth.uid || 
-         resource.data.paraId == request.auth.uid);
-      
-      // Criar: Apenas usuários autenticados, e deId deve ser o próprio usuário
-      allow create: if isAuthenticated() && 
-        request.resource.data.deId == request.auth.uid &&
-        request.resource.data.paraId != request.auth.uid;
-      
-      // Atualizar: Apenas destinatário pode aceitar/recusar
-      allow update: if isAuthenticated() && 
-        resource.data.paraId == request.auth.uid &&
-        resource.data.status == 'pendente' &&
-        request.resource.data.status in ['aceita', 'recusada'];
-      
-      // Deletar: Admin apenas
+      // Compatível com schema PRD (remetenteId/destinatarioId) e legado (deId/paraId)
+      allow read: if isAuthenticated()
+        && (
+          resource.data.remetenteId == request.auth.uid
+          || resource.data.destinatarioId == request.auth.uid
+          || resource.data.deId == request.auth.uid
+          || resource.data.paraId == request.auth.uid
+        );
+
+      // Criar: apenas o remetente (ou deId no legado) pode criar, e nunca para si mesmo
+      allow create: if isAuthenticated()
+        && request.resource.data.status == 'pendente'
+        && (
+          (
+            request.resource.data.remetenteId is string
+            && request.resource.data.destinatarioId is string
+            && request.resource.data.remetenteId == request.auth.uid
+            && request.resource.data.destinatarioId != request.auth.uid
+          )
+          ||
+          (
+            request.resource.data.deId is string
+            && request.resource.data.paraId is string
+            && request.resource.data.deId == request.auth.uid
+            && request.resource.data.paraId != request.auth.uid
+          )
+        );
+
+      // Atualizar: apenas o destinatário (ou paraId no legado) pode aceitar/recusar
+      allow update: if isAuthenticated()
+        && resource.data.status == 'pendente'
+        && request.resource.data.status in ['aceita', 'recusada']
+        && (
+          resource.data.destinatarioId == request.auth.uid
+          || resource.data.paraId == request.auth.uid
+        )
+        && onlyChanges(['status', 'respondidoEm', 'dataResposta']);
+
       allow delete: if isAdmin();
     }
 
-    // ==== Coleção 'notificacoes' ====
-    // Notificações in-app
+    // ==== Coleção 'notificacoes' (schema PRD: usuarioId) ====
     match /notificacoes/{notificacaoId} {
-      // Ler: Usuários autenticados podem ler notificações
-      // A query filtra por usuarioId no código
-      allow read: if isAuthenticated();
-      
-      // Criar: Sistema ou outros usuários (para notificar)
-      allow create: if isAuthenticated();
-      
-      // Atualizar: Apenas o próprio usuário (marcar como lida)
-      allow update: if isAuthenticated() && 
-        resource.data.usuarioId == request.auth.uid;
-      
-      // Deletar: Apenas o próprio usuário
-      allow delete: if isAuthenticated() && 
-        resource.data.usuarioId == request.auth.uid;
+      allow read: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+
+      // Permite criar notificação:
+      // - Para si mesmo OU
+      // - Para outro usuário se declarado como remetente (metadados.remetenteId ou campo remetenteId) OU
+      // - Se for Admin
+      allow create: if isAuthenticated()
+        && request.resource.data.usuarioId is string
+        && request.resource.data.tipo is string
+        && request.resource.data.lida == false
+        && (
+          request.resource.data.usuarioId == request.auth.uid ||
+          (request.resource.data.metadados is map && request.resource.data.metadados.remetenteId == request.auth.uid) ||
+          (request.resource.data.keys().hasAny(['remetenteId']) && request.resource.data.remetenteId == request.auth.uid) ||
+          isAdmin()
+        );
+
+      // Dono pode marcar como lida
+      allow update: if isAuthenticated()
+        && resource.data.usuarioId == request.auth.uid
+        && request.resource.data.usuarioId == resource.data.usuarioId
+        && onlyChanges(['lida'])
+        && request.resource.data.lida == true;
+
+      allow delete: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
     }
 
     // ==== Coleção 'campeonatos' ====
@@ -97,8 +168,26 @@ service cloud.firestore {
       // Leitura: Todos podem ver os campeonatos, tabelas, etc.
       allow read: if true;
 
-      // Escrita (Criar, Atualizar, Deletar): Apenas administradores podem gerenciar campeonatos.
-      allow write: if isAdmin();
+      // Escrita (Criar, Atualizar, Deletar): Admin ou usuários com permissão de gestão
+      allow write: if isAdmin() || (isAuthenticated() && hasGestaoPermission('iniciarRodadas'));
+
+      // --- Subcoleção 'convites' ---
+      // Convites/confirmação de presença em campeonatos
+      match /convites/{userId} {
+        allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+        allow create, delete: if isAdmin();
+
+        // Convidado pode apenas confirmar/recusar (e setar respondidoEm)
+        allow update: if isAuthenticated()
+          && request.auth.uid == userId
+          && resource.data.usuarioId == userId
+          && request.resource.data.usuarioId == resource.data.usuarioId
+          && request.resource.data.convidadoEm == resource.data.convidadoEm
+          && onlyChanges(['status', 'respondidoEm'])
+          && resource.data.status == 'pendente'
+          && request.resource.data.status in ['confirmado', 'recusado']
+          && request.resource.data.respondidoEm is timestamp;
+      }
 
       // --- Subcoleção 'rodadas' ---
       match /rodadas/{rodadaId} {
@@ -147,12 +236,39 @@ service cloud.firestore {
       allow read: if true;
     }
 
+    // ==== Coleção 'partidas' (RF11 - Partidas entre Amigos) ====
+    // Partidas criadas entre amigos fora de campeonatos ou de campeonatos
+    match /partidas/{partidaId} {
+      // Leitura: Público (para bloco Ao Vivo)
+      allow read: if true;
+      
+      // Criar: Usuários autenticados podem criar partidas
+      // - Admin pode criar qualquer partida
+      // - Usuário com permissão de gestão pode criar partidas de campeonatos
+      // - Usuário pode criar partida onde ele é jogadorA (amistosa)
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        hasGestaoPermission('iniciarRodadas') ||
+        request.resource.data.jogadorAId == request.auth.uid
+      );
+      
+      // Atualizar: Jogadores participantes, admin ou usuário com permissão de gestão
+      allow update: if isAdmin() || 
+        hasGestaoPermission('iniciarRodadas') ||
+        (isAuthenticated() && 
+         (resource.data.jogadorAId == request.auth.uid || 
+          resource.data.jogadorBId == request.auth.uid));
+      
+      // Deletar: Apenas admin ou usuário com permissão de gestão
+      allow delete: if isAdmin() || hasGestaoPermission('iniciarRodadas');
+    }
+
     // ==== Coleção 'conversas' (Chat) ====
     // Conversas entre usuários
     match /conversas/{conversaId} {
       // Ler: Usuários autenticados podem ler conversas que participam
       // resource == null permite queries antes de verificar documentos individuais
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.participantes;
       
       // Criar: Usuários autenticados podem criar conversas onde estão como participantes
       allow create: if isAuthenticated() && 
@@ -200,7 +316,8 @@ service cloud.firestore {
     // Logs de atividades críticas do sistema.
     match /logs/{logId} {
       // Apenas admins podem ler ou escrever logs.
-      allow read, write: if isAdmin();
+      allow read: if isAdmin() || hasGestaoPermission('visualizarLogs');
+      allow write: if isAdmin();
     }
   }
 }

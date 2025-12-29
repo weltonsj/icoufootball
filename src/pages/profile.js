@@ -1,3 +1,8 @@
+/**
+ * profile.js
+ * Template da página de perfil - SEM CONTEÚDO ESTÁTICO para evitar FOUC
+ * Todos os dados são carregados dinamicamente via profile.js (functions)
+ */
 export const profile = {
     name: 'profile',
     className: 'profile-content',
@@ -7,29 +12,33 @@ export const profile = {
 
             <div class="profile-header-area card-section">
                 <div class="profile-photo-upload">
-                    <img src="https://via.placeholder.com/100x100/e74c3c/ffffff?text=U" alt="Foto de Perfil"
-                        class="profile-photo">
+                    <!-- Skeleton loading para foto -->
+                    <div class="profile-photo-skeleton skeleton-loading" style="width: 100px; height: 100px; border-radius: 50%; background: var(--secondary-bg);"></div>
+                    <img src="" alt="Foto de Perfil" class="profile-photo" style="display: none;">
                     <button class="btn-upload">UPLOAD FOTO</button>
+                    <button class="btn-delete-photo" id="btnDeletePhoto" type="button">EXCLUIR FOTO</button>
                 </div>
 
                 <div class="profile-details-summary">
                     <div class="stars-display">
                         <span>Estrelas de Campeonato:</span>
                         <div class="player-stars">
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <i class="fas fa-star filled"></i>
-                            <span class="total-stars-hint">5 TOTAL</span>
+                            <!-- Renderizado dinamicamente -->
+                            <span class="skeleton-text" style="width: 80px; height: 16px; display: inline-block; background: var(--secondary-bg); border-radius: 4px;"></span>
+                            <span class="total-stars-hint">-- TOTAL</span>
                         </div>
                     </div>
+                    <div class="profile-visibility" id="profileVisibility" aria-live="polite">
+                        <!-- Renderizado dinamicamente -->
+                    </div>
                     <div class="team-info">
-                        <div class="time-profile-summary">
-                            <img src="https://via.placeholder.com/40x40/2980b9/ffffff?text=T" alt="Logo do time" class="profile-thumb">
+                        <div class="time-profile-summary" id="time-profile-summary">
+                            <!-- Skeleton para time -->
+                            <div class="team-logo-skeleton skeleton-loading" style="width: 40px; height: 40px; border-radius: 50%; background: var(--secondary-bg);"></div>
+                            <img src="./assets/img/team-placeholder.svg" alt="Logo do time" class="profile-thumb team-logo" style="display: none; width: 40px; height: 40px; object-fit: contain;">
                             <span class="team-name-display">Selecione seu time</span>
                         </div>
-                        <span class="team-motto">"A lenda da campianlone"</span>
+                        <span class="team-motto"></span>
                     </div>
                 </div>
             </div>
@@ -39,7 +48,7 @@ export const profile = {
                 <div class="input-group">
                     <label for="username">Nome de Usuário</label>
                     <div class="input-with-icon">
-                        <input type="text" id="username" value="Jogador Exemplo">
+                        <input type="text" id="username" placeholder="Carregando...">
                         <i class="fas fa-search input-icon"></i>
                     </div>
                 </div>
@@ -47,7 +56,7 @@ export const profile = {
                 <div class="input-group">
                     <label for="password">Senha</label>
                     <div class="input-with-icon">
-                        <input type="password" id="password" value="Esqueceu sua senha">
+                        <input type="password" id="password" value="*****" readonly>
                         <i class="fas fa-check-circle input-icon valid-icon"></i>
                     </div>
                     <span class="input-help-text">Clique para alterar sua senha.</span>

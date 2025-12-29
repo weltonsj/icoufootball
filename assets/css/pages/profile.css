@@ -3,9 +3,28 @@
    ====================================================================
 */
 
+/* Skeleton Loading Animation */
+.skeleton-loading {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.6; }
+}
+
+.skeleton-text {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
 /* Main Content para Perfil */
 .profile-content {
     padding: 20px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .profile-content h2 {
@@ -108,6 +127,38 @@
     font-weight: 900;
 }
 
+.btn-delete-photo {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-delete-photo:hover {
+    border-color: var(--highlight-color);
+    transform: translateY(-1px);
+}
+
+.btn-delete-photo:active {
+    transform: translateY(0);
+}
+
+.btn-delete-photo::before {
+    content: '\f2ed';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
 .profile-details-summary {
     text-align: center;
     /* Mobile: centralizado */
@@ -127,6 +178,34 @@
     /* Centralizado em mobile */
     gap: 10px;
     margin-bottom: 10px;
+}
+
+.profile-visibility {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.profile-visibility .visibility-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--text-color);
+    font-size: 0.8em;
+}
+
+.profile-visibility .visibility-badge i {
+    color: var(--highlight-color);
+}
+
+.player-stars .champion-trophy {
+    margin-left: 6px;
+    color: var(--highlight-color);
+    font-size: 0.95em;
 }
 
 .stars-display span {
@@ -179,6 +258,30 @@
 .time-profile-summary {
     display: flex;
     align-items: center;
+    gap: 10px;
+}
+
+.time-profile-summary .profile-thumb,
+.time-profile-summary .team-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+/* Placeholder quando não tem time selecionado */
+.time-profile-summary .profile-thumb[src*="team-placeholder"],
+.time-profile-summary .team-logo[src*="team-placeholder"] {
+    opacity: 0.7;
+    border: 2px dashed var(--input-border);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.time-profile-summary .team-name-display {
+    font-weight: 600;
+    color: var(--text-color);
 }
 
 /* Formulário de Edição de Perfil */
@@ -666,4 +769,214 @@
 
 .btn-confirm-team i {
     pointer-events: none;
+}
+
+/* ====================================================================
+   RESPONSIVIDADE ADICIONAL - Mobile Small (≤ 480px)
+   ====================================================================
+*/
+@media (max-width: 480px) {
+    .profile-content {
+        padding: 16px;
+    }
+    
+    .profile-content h2 {
+        font-size: 1.15rem;
+        margin-bottom: 18px;
+        font-weight: 700;
+    }
+    
+    .profile-header-area {
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+    
+    .profile-photo {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .btn-upload,
+    .btn-delete-photo {
+        padding: 12px 18px;
+        font-size: 0.9rem;
+        min-height: 44px;
+        border-radius: 8px;
+    }
+    
+    .profile-details-summary h3 {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .stars-display {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .player-stars {
+        font-size: 1.15em;
+    }
+    
+    .team-info {
+        font-size: 0.95rem;
+    }
+    
+    /* Form responsivo - MAIORES */
+    .profile-edit-form {
+        gap: 18px;
+    }
+    
+    .profile-edit-form .input-group {
+        width: 100%;
+    }
+    
+    .profile-edit-form .input-group label {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+    
+    .input-with-icon input,
+    .input-with-icon textarea,
+    .input-group select {
+        padding: 14px 14px;
+        padding-right: 40px;
+        font-size: 1rem;
+        min-height: 48px;
+        border-radius: 10px;
+    }
+    
+    .input-icon {
+        right: 14px;
+        font-size: 1.1em;
+    }
+    
+    .btn-search-team {
+        right: 44px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .input-help-text {
+        font-size: 0.85rem;
+        margin-top: 6px;
+    }
+    
+    .form-actions {
+        gap: 16px;
+    }
+    
+    .form-actions .btn-primary {
+        padding: 14px 20px;
+        font-size: 1rem;
+        min-height: 48px;
+        border-radius: 10px;
+    }
+    
+    .public-profile-toggle {
+        font-size: 0.95rem;
+    }
+    
+    /* Danger zone mobile */
+    .danger-zone-trigger {
+        padding: 18px 0;
+    }
+    
+    .btn-show-danger {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        min-height: 44px;
+    }
+    
+    .danger-zone {
+        padding: 18px;
+        gap: 14px;
+        border-radius: 12px;
+    }
+    
+    .danger-zone h3 {
+        font-size: 1.05rem;
+    }
+    
+    .danger-description {
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .danger-warning {
+        padding: 12px 14px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+    
+    .btn-danger {
+        padding: 14px 24px;
+        font-size: 1rem;
+        min-height: 48px;
+        border-radius: 10px;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Mobile Large (481px - 768px)
+   ====================================================================
+*/
+@media (min-width: 481px) and (max-width: 768px) {
+    .profile-content {
+        padding: 20px;
+    }
+    
+    .profile-content h2 {
+        font-size: 1.2rem;
+    }
+    
+    .profile-header-area {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    
+    .profile-details-summary {
+        text-align: left;
+    }
+    
+    .profile-details-summary h3 {
+        font-size: 1.05rem;
+    }
+    
+    .stars-display,
+    .team-info {
+        justify-content: flex-start;
+    }
+    
+    .profile-edit-form .input-group {
+        width: 100%;
+    }
+    
+    .profile-edit-form .input-group label {
+        font-size: 0.95rem;
+    }
+    
+    .input-with-icon input,
+    .input-with-icon textarea,
+    .input-group select {
+        font-size: 1rem;
+        min-height: 50px;
+    }
+    
+    .form-actions .btn-primary {
+        font-size: 1rem;
+        min-height: 50px;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Tablet (769px - 1024px)
+   ====================================================================
+*/
+@media (min-width: 769px) and (max-width: 1024px) {
+    .profile-edit-form .input-group {
+        width: 70%;
+    }
 }

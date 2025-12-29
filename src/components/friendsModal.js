@@ -9,13 +9,14 @@ import {
 import { showModal } from "./modal.js";
 import { showSpinner, hideSpinner } from "./spinner.js";
 import { showFriendProfile } from "./friendProfileModal.js";
-import { getCurrentUser } from "../utils/authManager.js";
+// Obs: import de `getCurrentUser` é feito dinamicamente para evitar
+// dependência circular com `authManager.js` (que importa este módulo).
 
 /**
  * Abre o modal de amigos
  */
-export async function showFriendsModal() {
-  const user = getCurrentUser();
+export async function showFriendsModal(passedUser) {
+  const user = passedUser || (await import('../utils/authManager.js')).getCurrentUser();
   if (!user) {
     showModal('error', 'Sessão inválida', 'Faça login para acessar seus amigos');
     return;
@@ -211,7 +212,7 @@ function showAddFriendForm(userId, modal) {
         btnSend.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
         
         try {
-          const currentUser = getCurrentUser();
+          const currentUser = (await import('../utils/authManager.js')).getCurrentUser();
           const currentUserData = await getCurrentUserData();
           
           await sendFriendRequest(
@@ -453,6 +454,7 @@ function formatDate(date) {
  * Busca dados do usuário atual
  */
 async function getCurrentUserData() {
+  const { getCurrentUser } = await import('../utils/authManager.js');
   const user = getCurrentUser();
   const { getUser } = await import('../services/usersService.js');
   return await getUser(user.uid);

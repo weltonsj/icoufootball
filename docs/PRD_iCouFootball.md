@@ -52,11 +52,15 @@ O iCouFootball é um **sistema de gerenciamento e exibição de estatísticas** 
 
 ### RF1: Home Page (Pública)
 
-  * **Exibição de Estatísticas:** A página inicial deve exibir, **sem necessidade de login**, a tabela atual do campeonato em Pontos Corridos.
-  * **Tabela Dinâmica:** A tabela deve ser atualizada em **tempo real** via `onSnapshot` do Firestore assim que um placar for confirmado.
-  * **Tabela de Classificação:** Deve listar o ranking por: **Pontos (P), Vitórias (V), Saldo de Gols (SG), Gols Pró (GP), Gols Contra (GC)**, e o critério de desempate (**Confronto Direto**).
-  * **Lista de Players:** Exibição da lista de jogadores com nome, time e o nível de estrelas (parcialmente).
-  * **Estatísticas Avançadas:** Exibir métricas como Melhor Ataque, Melhor Defesa, Maior Goleada, etc.
+  * **Ranking Anual (Classificação Geral):** A Home deve exibir, **sem necessidade de login**, a **classificação anual acumulada** (amistosas + campeonatos) do ano corrente.
+  * **Atualização em Tempo Real:** A classificação anual deve ser atualizada em **tempo real** via `onSnapshot` assim que um placar for confirmado.
+  * **Tabela de Classificação (Anual):** Deve listar o ranking por: **Pontos (P), Vitórias (V), Saldo de Gols (SG), Gols Pró (GP), Gols Contra (GC)**, e o critério de desempate (**Confronto Direto**).
+  * **Tabela de Campeonato (Sob Demanda):** Deve existir uma segunda tabela para classificação de campeonatos.
+      * **Estado inicial:** a seção fica **oculta** quando não existir campeonato.
+      * **Ativação:** ao criar o primeiro campeonato, a seção passa a existir e pode ser exibida com a classificação do campeonato selecionado/ativo.
+      * **Limite:** até **5 campeonatos simultâneos**.
+  * **Players em Destaque (Ticker):** A Home deve exibir um **ticker horizontal** (rolagem suave) com players em destaque, logo abaixo do header.
+  * **Estatísticas Avançadas:** Exibir métricas como Melhor Ataque, Melhor Defesa, Maior Goleada, etc., com base no recorte anual.
 
 ### RF2: Autenticação e Perfis
 
@@ -89,11 +93,31 @@ O iCouFootball é um **sistema de gerenciamento e exibição de estatísticas** 
 
 ### RF4: Gerenciamento de Campeonatos e Rodadas
 
-  * **Sistema de Pontos Corridos:** A lógica do sistema deve calcular pontos (**Vitória: 3, Empate: 1, Derrota: 0**) e atualizar a tabela.
+  * **Tipos de Campeonato:** O Administrador deve conseguir criar campeonatos do tipo:
+      * **Pontos Corridos** (mínimo **3** participantes)
+      * **Chave (Mata-mata)** (mínimo **4** participantes)
+  * **Sistema de Pontuação:** A lógica do sistema deve calcular pontos (**Vitória: 3, Empate: 1, Derrota: 0**) e atualizar a tabela.
+  * **Limite de Campeonatos Simultâneos:** Deve ser permitido manter até **5 campeonatos ativos** simultaneamente.
+  * **Participantes (Nome + Time):** Ao criar campeonato, o Admin deve selecionar participantes exibindo **nome do usuário** e **time**.
+  * **Confrontos (Manual ou Aleatório):** Ao criar um campeonato, o Admin deve conseguir definir a composição dos confrontos:
+      * **Manual (determinístico)**
+      * **Aleatório (randomizado)**
+  * **Convites e Confirmação de Presença:** Ao criar um campeonato, o sistema deve:
+      * Enviar **notificações** de convite aos participantes.
+      * Exigir **confirmação de presença** de todos os participantes antes de permitir o início do campeonato.
   * **Registro de Data/Hora:** O sistema deve registrar a data e hora de início e fim de cada campeonato para fins de histórico.
-  * **Rodadas Fixas:** O Administrador deve poder **pré-definir todos os confrontos** de todas as rodadas antes do início do campeonato.
+  * **Rodadas Fixas (Amistosas):** Rodadas fixas devem ser tratadas como **partidas amistosas** (fora de campeonatos).
+      * Devem permitir **contestação** (registrando motivo) e exibir uma coluna **Detalhes** com esse motivo.
   * **Arquivamento:** Campeonatos finalizados serão armazenados e consultáveis por no máximo **12 meses**.
   * **Exportação:** O Administrador deve poder exportar a tabela final do campeonato em formato **PDF**.
+
+#### Regras adicionais (PRD 2.0)
+
+  * **Recusa/Substituição:** Se um jogador recusar o convite, o Admin poderá substituir o participante (reemitindo convite) ou cancelar o campeonato.
+  * **Prazo de Confirmação:** Convites devem ter um prazo de confirmação (configurável no futuro). Após o prazo, o campeonato não pode iniciar sem ação do Admin.
+  * **Participação em Múltiplos Campeonatos:** Um jogador pode participar de mais de um campeonato simultaneamente.
+  * **Auditoria:** Criação/edição/início/finalização/cancelamento de campeonatos e alterações de participantes devem ser auditadas em logs.
+  * **Pontuação Anual:** O ranking anual deve somar partidas amistosas e partidas de campeonatos (desde que confirmadas).
 
 ### RF5: Inserção e Validação de Placar (Fair Play)
 
@@ -426,50 +450,144 @@ match /logs/{logId} {
 
 -----
 
-## 8\. 💾 Proposta de Firestore Schema (Atualizado v2.0)
+## 8\. 💾 Firestore Schema — **Fonte da Verdade (PT-BR)**
 
-| Coleção | Documento (ID) | Descrição dos Campos Chave | Regras de Acesso |
-| :--- | :--- | :--- | :--- |
-| **users** | `[userId]` | `nome`, `email`, `funcao`, `timeId`, `timeName`, `timeLogo`, `lastTeamChange`, `fotoUrl`, `estrelas`, `ultimoCampeao` (boolean), `perfilPublico`, `redesSociais`, `descricao`, `amigos` (array de userId), `permissoesGestao` (objeto), `log` (subcoleção) | Privado (leitura pública parcial) |
-| **solicitacoesAmizade** | `[solicitacaoId]` | `remetenteId`, `destinatarioId`, `status` ('pendente', 'aceita', 'recusada'), `dataSolicitacao`, `dataResposta` | Privado (usuários envolvidos) |
-| **notificacoes** | `[notificacaoId]` | `userId`, `tipo`, `mensagem`, `lida` (boolean), `dataNotificacao`, `metadados` (objeto) | Privado (usuário) |
-| **campeonatos** | `[campeonatoId]` | `nome`, `status`, `dataInicio`, `dataFim`, `campeoes` (array), `rodadas` (subcoleção), `tabelaFinal` | Público |
-| **rodadas** (Subcoleção de **campeonatos**) | `[rodadaId]` | `numero`, `dataPrevista`, `partidas` (subcoleção) | Público |
-| **partidas** | `[partidaId]` | `jogadorAId`, `jogadorBId`, `placarA`, `placarB`, `placarStatus`, `vencedorId`, `linkTransmissao`, `plataformaStreaming`, `dataPartida`, `dataInicio`, `status` ('aguardando', 'em_andamento', 'finalizada'), `oficial` (boolean), `campeonatoId`, `rodadaId` | Público |
-| **chats** | `[chatId]` | `participantes` (array), `ultimaMensagem`, `dataUltimaMensagem`, `mensagens` (subcoleção) | Privado (participantes) |
-| **mensagens** (Subcoleção de **chats**) | `[mensagemId]` | `remetenteId`, `conteudo`, `dataMensagem`, `lida` (boolean) | Privado (participantes) |
-| **logs** (Admin) | `[logId]` | `data`, `acao`, `userIdResponsavel`, `tipoUsuario` ('admin', 'superadmin', 'gestao'), `detalhes`, `entidadeAfetada` | **Apenas Admin/Superadmin** |
+> Este bloco é a **referência única**.  
+> Qualquer divergência em código, rules ou índices deve ser ajustada para seguir este padrão.
 
-### Campos Adicionados v2.0:
+### ⚠️ Convenções Críticas
 
-#### Coleção `users`:
-- **`timeName`** (string): Nome do time escolhido
-- **`timeLogo`** (string): URL do logo do time
-- **`lastTeamChange`** (Timestamp): Data/hora da última alteração de time (controle de 2h)
-- **`ultimoCampeao`** (boolean): Indica se venceu o último campeonato (para exibir troféu)
-- **`amigos`** (array): Lista de IDs dos amigos conectados
-- **`permissoesGestao`** (objeto): Permissões individuais de gestão, exemplo:
-  ```javascript
-  {
-    forcarPlacar: true,
-    editarPartidas: true,
-    iniciarRodadas: false,
-    visualizarLogs: true,
-    excluirContas: false // sempre false, exceto superadmin
-  }
-  ```
+**1. Campo de identificação de usuário em notificações:**
+- ✅ **USAR:** `usuarioId` (padrão em português)
+- ❌ **NÃO USAR:** `userId` (campo legado/inglês)
+- **Motivo:** Sistema utiliza nomenclatura em português. Firestore Security Rules validam `usuarioId`
 
-#### Coleção `partidas`:
-- **`plataformaStreaming`** (string): Plataforma selecionada ('youtube', 'twitch', 'kick', etc.)
-- **`dataInicio`** (Timestamp): Horário de início da transmissão
-- **`status`** (string): 'aguardando', 'em_andamento', 'finalizada'
-- **`oficial`** (boolean): Se conta pontos no campeonato (true) ou é amistosa (false)
-- **`campeonatoId`** e **`rodadaId`**: Referências para partidas oficiais
+**2. Metadados de notificações:**
+- Sempre incluir `metadados.remetenteId` para rastreabilidade
+- Exemplo:
+```javascript
+metadados: {
+  remetenteId: 'xyz123',
+  remetenteNome: 'João Silva'
+}
+```
 
-#### Novas Coleções:
-- **`solicitacoesAmizade`**: Gerencia solicitações de amizade
-- **`notificacoes`**: Sistema de notificações in-app
-- **`chats`** e **`mensagens`**: Sistema de mensagens diretas
+**3. Timestamps:**
+- Usar `serverTimestamp()` para campos de data
+- Campos padrão: `criadoEm`, `atualizadoEm`, `dataNotificacao`
+
+### 8.1 Coleções e Documentos
+
+#### `users/{userId}`
+Campos:
+- `nome` (string)
+- `email` (string)
+- `funcao` (string: 'Jogador' | 'Admin' | 'Superadmin')
+- `criadoEm` (timestamp)
+- `fotoUrl` (string)
+- `estrelas` (number)
+- `ultimoCampeao` (boolean)
+- `perfilPublico` (boolean)
+- `descricao` (string)
+- `redesSociais` (map)
+- `timeId` (string)
+- `timeName` (string)
+- `timeLogo` (string)
+- `lastTeamChange` (timestamp)
+- `permissoesGestao` (map)
+- `amigos` (array<string>)
+- (chat/status) `online` (boolean), `ultimoAcesso` (timestamp), `digitando` (map)
+
+#### `solicitacoesAmizade/{solicitacaoId}`
+Campos:
+- `remetenteId` (string)
+- `destinatarioId` (string)
+- `status` (string: 'pendente' | 'aceita' | 'recusada')
+- `dataSolicitacao` (timestamp)
+- `dataResposta` (timestamp|null)
+
+#### `notificacoes/{notificacaoId}`
+Campos:
+- `usuarioId` (string)  // **OBRIGATÓRIO** - ID do destinatário da notificação
+- `tipo` (string: 'solicitacao_amizade' | 'amizade_aceita' | 'placar_pendente' | 'partida_criada' | 'mensagem_chat' | 'convite_campeonato' | 'convite_amistosa' | 'placar_confirmado' | 'placar_contestado' | 'placar_forcado')
+- `mensagem` (string)
+- `lida` (boolean)
+- `dataNotificacao` (timestamp)
+- `metadados` (map)
+  - `remetenteId` (string) // ID do usuário que gerou a notificação
+  - `remetenteNome` (string) // Nome do remetente
+
+> **⚠️ IMPORTANTE:** O campo para identificar o destinatário é `usuarioId` (português, não `userId`). Todas as notificações devem usar este padrão para compatibilidade com as Firestore Security Rules.
+
+#### `conversas/{conversaId}`
+Campos:
+- `participantes` (array<string> size=2)
+- `ultimaMensagem` (string)
+- `dataUltimaMensagem` (timestamp)
+- `naoLidas` (map: { [userId]: number })
+- `arquivada` (map: { [userId]: boolean })
+- `tema` (map: { [userId]: string })
+
+Subcoleção: `conversas/{conversaId}/mensagens/{mensagemId}`
+Campos:
+- `remetenteId` (string)
+- `conteudo` (string)
+- `tipo` (string: 'texto' | 'imagem')
+- `urlImagem` (string|null)
+- `dataEnvio` (timestamp)
+- `entregue` (boolean)
+- `lida` (boolean)
+
+#### `campeonatos/{campeonatoId}`
+Campos:
+- `nome` (string)
+- `status` (string: 'rascunho' | 'aguardando_confirmacoes' | 'ativo' | 'finalizado' | 'cancelado')
+- `tipoCompeticao` (string: 'pontos_corridos' | 'chave')
+- `agendaTipo` (string: 'manual' | 'aleatoria')
+- `participantesIds` (array<string>)
+- `criadoPorId` (string)
+- `criadoEm` (timestamp)
+- `finalizadoEm` (timestamp|null)
+
+Subcoleção: `campeonatos/{campeonatoId}/convites/{userId}`
+Campos:
+- `usuarioId` (string)
+- `statusConvite` (string: 'pendente' | 'aceito' | 'recusado')
+- `convidadoEm` (timestamp)
+- `respondidoEm` (timestamp|null)
+
+Subcoleções de jogos (mantém compatibilidade com collectionGroup `partidas`):
+- `campeonatos/{campeonatoId}/rodadas/{rodadaId}`
+  - `numero` (number)
+  - `dataPrevista` (timestamp|null)
+- `campeonatos/{campeonatoId}/rodadas/{rodadaId}/partidas/{partidaId}` (mesmos campos de `partidas`)
+
+#### `partidas/{partidaId}`  (amistosas e/ou oficiais via vínculo)
+Campos:
+- `jogadorAId`, `jogadorBId` (string)
+- `timeAName`, `timeBName` (string)
+- `placarA`, `placarB` (number|null)
+- `placarStatus` (string: 'pending' | 'confirmed' | 'contested')
+- `vencedorId` (string|null)
+- `dataPartida` (timestamp)
+- `oficial` (boolean)
+- `campeonatoId` (string|null)
+- `rodadaId` (string|null)
+- `linkTransmissao` (string|null)
+- `plataformaStreaming` (string|null)
+- `dataInicio` (timestamp|null)
+- `status` (string: 'aguardando' | 'em_andamento' | 'finalizada')
+- `contestada` (boolean)
+- `motivoContestacao` (string|null)
+
+#### `logs/{logId}` (Admin)
+Campos:
+- `data` (timestamp)
+- `acao` (string)
+- `userIdResponsavel` (string)
+- `tipoUsuario` (string: 'admin' | 'superadmin' | 'gestao')
+- `detalhes` (map)
+- `entidadeAfetada` (string)
 
 -----
 

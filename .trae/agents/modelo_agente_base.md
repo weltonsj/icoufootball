@@ -25,7 +25,8 @@ REGRAS FIXAS:
 10. Se houver múltiplas tarefas, divida a resposta em **subseções organizadas**.
 11. Para pedidos muito amplos, entregue um **MVP funcional** primeiro e só depois sugestões de expansão.
 12. Consulte rigorosamente o PRD fornecido. 
-    - Não invente requisitos.  
+    - Não invente requisitos.
+    - Não crie tests, os testes serão realizados manualmente.  
     - Não extrapole funcionalidades.  
     - Se o PRD não estiver presente, responda: 
       "Não sei — preciso do PRD para validar o escopo antes de responder."

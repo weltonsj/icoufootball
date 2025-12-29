@@ -2,6 +2,7 @@
  * chat.js
  * Template do chat - SEM CONTEÚDO ESTÁTICO para evitar FOUC
  * Todo o conteúdo é renderizado dinamicamente após carregamento dos dados
+ * COMPORTAMENTO WHATSAPP: Em mobile, lista de conversas primeiro
  */
 export const chat = {
     name: "chat",
@@ -25,6 +26,10 @@ export const chat = {
         <section class="chat-main card-section">
             <!-- Header oculto por padrão - exibido após selecionar conversa -->
             <div class="chat-header">
+                <!-- Botão voltar para lista (visível apenas em mobile) -->
+                <button class="btn-voltar-conversas" id="btn-voltar-conversas" title="Voltar para conversas">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
                 <div class="chat-recipient-info" style="display: none;">
                     <img src="" alt="Avatar" class="avatar-medium">
                     <div class="recipient-details" style="display: none;">

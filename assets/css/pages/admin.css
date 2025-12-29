@@ -54,6 +54,20 @@
     width: 100%;
     border-collapse: collapse;
     min-width: 400px; /* Largura mínima para tabelas em mobile */
+    table-layout: auto;
+}
+
+/* Colunas devem ocupar o tamanho do conteúdo (principalmente Ações) */
+.admin-card-table th:last-child,
+.admin-card-table td:last-child {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.admin-card-table th.numeric,
+.admin-card-table td.numeric {
+    width: 1%;
+    white-space: nowrap;
 }
 
 .admin-card-table th, .admin-card-table td {
@@ -164,6 +178,366 @@
 	border: none;
 }
 
+/* ====================================================================
+   Card Header com Botão de Ação
+   ====================================================================
+*/
+.card-header-with-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.card-header-with-action .card-title {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.btn-add-new {
+    background-color: var(--highlight-color);
+    color: var(--button-text-color, #1a1a1a);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 0.8em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.btn-add-new:hover {
+    background-color: var(--highlight-hover, #e6c200);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.btn-add-new i {
+    font-size: 0.9em;
+}
+
+/* ====================================================================
+   Colunas de Ações - Largura fixa baseada em quantidade de botões
+   ====================================================================
+*/
+.col-acoes {
+    width: 100px !important;
+    min-width: 100px;
+}
+
+.col-acoes-lg {
+    width: 150px !important;
+    min-width: 150px;
+}
+
+.col-acoes-xl {
+    width: 250px !important;
+    min-width: 250px;
+}
+
+/* ====================================================================
+   Status Badges
+   ====================================================================
+*/
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.ativo,
+.status-badge.em-andamento {
+    background-color: rgba(40, 167, 69, 0.15);
+    color: var(--action-green, #28a745);
+    border: 1px solid var(--action-green, #28a745);
+}
+
+.status-badge.inativo,
+.status-badge.cancelado {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: var(--action-red, #dc3545);
+    border: 1px solid var(--action-red, #dc3545);
+}
+
+.status-badge.finalizado {
+    background-color: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+    border: 1px solid #6c757d;
+}
+
+.status-badge.pendente,
+.status-badge.aguardando {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: var(--action-orange, #ffc107);
+    border: 1px solid var(--action-orange, #ffc107);
+}
+
+.status-badge i {
+    font-size: 0.8em;
+}
+
+/* ====================================================================
+   Estilos Específicos para Tabelas de Usuários
+   ====================================================================
+*/
+.user-avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.user-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ====================================================================
+   Estilos para Modais de Admin
+   ====================================================================
+*/
+.modal-form-group {
+    margin-bottom: 16px;
+}
+
+.modal-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.modal-form-group input,
+.modal-form-group select,
+.modal-form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    color: var(--text-color);
+    font-size: 0.9em;
+    transition: border-color 0.3s ease;
+}
+
+.modal-form-group input:focus,
+.modal-form-group select:focus,
+.modal-form-group textarea:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+}
+
+.modal-form-group input:disabled,
+.modal-form-group select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modal-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.modal-form-hint {
+    font-size: 0.75em;
+    color: var(--text-muted, #888);
+    margin-top: 4px;
+}
+
+/* ====================================================================
+   Modal de Status do Campeonato - Stats Grid
+   ====================================================================
+*/
+.campeonato-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+}
+
+.stat-card .stat-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--highlight-color);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.stat-card .stat-label {
+    font-size: 0.75em;
+    color: var(--text-muted, #888);
+    text-transform: uppercase;
+}
+
+.campeonato-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.campeonato-info-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9em;
+}
+
+.campeonato-info-list li:last-child {
+    border-bottom: none;
+}
+
+.campeonato-info-list .info-label {
+    color: var(--text-muted, #888);
+}
+
+.campeonato-info-list .info-value {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* ====================================================================
+   Modal Cancelar Campeonato
+   ====================================================================
+*/
+.cancelar-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.cancelar-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.cancelar-option:hover {
+    border-color: var(--highlight-color);
+}
+
+.cancelar-option input[type="radio"] {
+    margin-top: 2px;
+}
+
+.cancelar-option-content {
+    flex: 1;
+}
+
+.cancelar-option-title {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.cancelar-option-desc {
+    font-size: 0.8em;
+    color: var(--text-muted, #888);
+}
+
+/* ====================================================================
+   Modal Excluir Usuário
+   ====================================================================
+*/
+.excluir-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--action-red);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.excluir-warning i {
+    color: var(--action-red);
+    font-size: 1.5em;
+    flex-shrink: 0;
+}
+
+.excluir-warning-content {
+    flex: 1;
+}
+
+.excluir-warning-title {
+    font-weight: bold;
+    color: var(--action-red);
+    margin-bottom: 4px;
+}
+
+.excluir-warning-text {
+    font-size: 0.85em;
+    color: var(--text-color);
+    line-height: 1.4;
+}
+
+.excluir-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background-color: var(--input-bg);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.excluir-user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.excluir-user-details {
+    flex: 1;
+}
+
+.excluir-user-name {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 1em;
+}
+
+.excluir-user-email {
+    font-size: 0.85em;
+    color: var(--text-muted, #888);
+}
+
 /*
    ====================================================================
    Responsividade para Telas Maiores (PC)
@@ -229,5 +603,546 @@
 @media (min-width: 1024px) {
     .admin-table-group {
         grid-template-columns: repeat(3, 1fr); /* Mantém 3 colunas */
+    }
+}
+
+/* ====================================================================
+   INFO BOX: PERMISSÕES DO ADMIN
+   ====================================================================
+*/
+.admin-permissions-info {
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
+    border: 1px solid rgba(253, 138, 36, 0.3);
+    border-radius: 12px;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.permissions-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: rgba(253, 138, 36, 0.1);
+    cursor: pointer;
+    user-select: none;
+}
+
+.permissions-header i:first-child {
+    color: var(--highlight-color);
+    font-size: 1.1em;
+}
+
+.permissions-header span {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 0.95em;
+}
+
+.btn-toggle-permissions {
+    background: none;
+    border: none;
+    color: var(--secondary-text);
+    cursor: pointer;
+    padding: 4px;
+    transition: transform 0.3s ease;
+}
+
+.btn-toggle-permissions.rotated {
+    transform: rotate(180deg);
+}
+
+.permissions-content {
+    padding: 18px;
+    display: none;
+}
+
+.permissions-content.expanded {
+    display: block;
+}
+
+.permissions-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.permissions-column h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.permissions-column.can-do h4 {
+    color: var(--action-green);
+}
+
+.permissions-column.cannot-do h4 {
+    color: var(--action-red);
+}
+
+.permissions-column ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.permissions-column li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 0.85em;
+    color: var(--text-color);
+}
+
+.permissions-column.can-do li i {
+    color: var(--action-green);
+    font-size: 0.8em;
+}
+
+.permissions-column.cannot-do li i {
+    color: var(--action-red);
+    font-size: 0.8em;
+}
+
+.permissions-note {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: rgba(255, 193, 7, 0.1);
+    border-radius: 8px;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.permissions-note i {
+    color: var(--action-orange);
+}
+
+/* ====================================================================
+   ADMIN TOOLTIP
+   ====================================================================
+*/
+.admin-tooltip {
+    position: relative;
+    cursor: help;
+    color: var(--secondary-text);
+    font-size: 0.9em;
+}
+
+.admin-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--secondary-bg);
+    color: var(--text-color);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75em;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    z-index: 100;
+}
+
+.admin-tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+    bottom: calc(100% + 8px);
+}
+
+/* ====================================================================
+   BARRA DE FILTROS
+   ====================================================================
+*/
+.admin-filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.filter-group.filter-search {
+    flex: 1;
+    min-width: 180px;
+}
+
+.filter-group.filter-search i {
+    position: absolute;
+    left: 12px;
+    color: var(--secondary-text);
+    font-size: 0.85em;
+}
+
+.filter-input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    color: var(--text-color);
+    font-size: 0.85em;
+    transition: border-color 0.2s ease;
+}
+
+.filter-input:focus {
+    border-color: var(--highlight-color);
+    outline: none;
+}
+
+.filter-select {
+    padding: 10px 30px 10px 12px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    color: var(--text-color);
+    font-size: 0.85em;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color 0.2s ease;
+}
+
+.filter-select:focus {
+    border-color: var(--highlight-color);
+    outline: none;
+}
+
+.btn-clear-filters {
+    padding: 10px 12px;
+    background: transparent;
+    border: 1px solid var(--secondary-text);
+    border-radius: 6px;
+    color: var(--secondary-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-clear-filters:hover {
+    border-color: var(--action-red);
+    color: var(--action-red);
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.filter-results-info {
+    font-size: 0.8em;
+    color: var(--secondary-text);
+    margin-bottom: 10px;
+    padding: 0 4px;
+}
+
+.filter-results-info:empty {
+    display: none;
+}
+
+/* ====================================================================
+   AVISO DE AÇÕES CRÍTICAS
+   ====================================================================
+*/
+.critical-actions-warning {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 0.85em;
+    color: var(--action-orange);
+}
+
+.critical-actions-warning i {
+    font-size: 1.1em;
+}
+
+/* ====================================================================
+   MODAL DE IMPACTO - AÇÕES CRÍTICAS
+   ====================================================================
+*/
+.impact-analysis {
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--input-bg);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.impact-analysis-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.impact-analysis-header i {
+    color: var(--action-orange);
+    font-size: 1.2em;
+}
+
+.impact-analysis-header span {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.impact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.9em;
+}
+
+.impact-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.impact-item.impact-danger i {
+    color: var(--action-red);
+}
+
+.impact-item.impact-warning i {
+    color: var(--action-orange);
+}
+
+.impact-item.impact-info i {
+    color: var(--action-blue);
+}
+
+.impact-item .impact-label {
+    color: var(--secondary-text);
+    min-width: 140px;
+}
+
+.impact-item .impact-value {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.impact-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    color: var(--secondary-text);
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Mobile Small (≤ 480px)
+   ELEMENTOS MAIORES PARA MELHOR LEGIBILIDADE
+   ====================================================================
+*/
+@media (max-width: 480px) {
+    .admin-content {
+        padding: 16px;
+        gap: 20px;
+    }
+    
+    .section-admin-dashboard h2 {
+        font-size: 1.25rem;
+        margin-bottom: 20px;
+    }
+    
+    .card-section {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+        padding-bottom: 10px;
+        margin-bottom: 14px;
+        font-weight: 600;
+    }
+    
+    /* Card Header with Action - Mobile */
+    .card-header-with-action {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .btn-add-new {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    /* Colunas de ações - Mobile */
+    .col-acoes,
+    .col-acoes-lg,
+    .col-acoes-xl {
+        width: auto !important;
+        min-width: auto !important;
+    }
+    
+    /* Modal form - Mobile */
+    .modal-form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .modal-form-group input,
+    .modal-form-group select,
+    .modal-form-group textarea {
+        padding: 12px;
+        font-size: 1rem;
+        min-height: 44px;
+    }
+    
+    /* Stats grid - Mobile */
+    .campeonato-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .stat-card {
+        padding: 12px 8px;
+    }
+    
+    .stat-card .stat-value {
+        font-size: 1.4em;
+    }
+    
+    .stat-card .stat-label {
+        font-size: 0.7em;
+    }
+    
+    /* Tables - Fontes maiores */
+    .admin-card-table {
+        margin-bottom: 16px;
+    }
+    
+    .admin-card-table .table-container {
+        border-radius: 8px;
+    }
+    
+    .admin-card-table table {
+        min-width: 500px;
+    }
+    
+    .admin-card-table th,
+    .admin-card-table td {
+        padding: 12px 10px;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .admin-card-table th {
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+    
+    .admin-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-icon {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+        min-height: 44px;
+        border-radius: 8px;
+    }
+    
+    /* Critical actions - Maiores */
+    .critical-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .btn-critical {
+        padding: 16px 12px;
+        font-size: 0.9rem;
+        min-height: 80px;
+        border-radius: 10px;
+    }
+    
+    .btn-critical i {
+        font-size: 1.6em;
+        margin-bottom: 8px;
+    }
+    
+    .btn-critical span {
+        font-size: 0.85rem;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Mobile Large (481px - 768px)
+   ====================================================================
+*/
+@media (min-width: 481px) and (max-width: 768px) {
+    .admin-content {
+        padding: 20px;
+        gap: 25px;
+    }
+    
+    .section-admin-dashboard h2 {
+        font-size: 1.3rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .admin-card-table th,
+    .admin-card-table td {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+    
+    .critical-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+    
+    .btn-critical {
+        padding: 18px 14px;
+        font-size: 0.95rem;
+    }
+    
+    .admin-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .btn-icon {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        min-height: 44px;
     }
 }

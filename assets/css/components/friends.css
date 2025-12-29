@@ -1078,11 +1078,35 @@
         max-width: none;
         width: 100%;
     }
+    
+    /* Notifications responsive */
+    .notifications-modal {
+        max-width: 95vw;
+        max-height: 85vh;
+    }
+    
+    .notifications-content {
+        padding: 15px;
+    }
+    
+    .notification-item {
+        padding: 12px;
+        gap: 12px;
+    }
+    
+    .notification-icon {
+        font-size: 1.3em;
+        min-width: 25px;
+    }
 }
 
 @media (max-width: 480px) {
     .header-actions {
         gap: 10px;
+    }
+    
+    .header-actions-container {
+        gap: 8px;
     }
 
     .notification-bell {
@@ -1107,5 +1131,163 @@
     .btn-reject {
         width: 100%;
         justify-content: center;
+    }
+    
+    /* Friends modal full mobile */
+    .friends-modal {
+        max-width: 100%;
+        max-height: 100vh;
+        height: 100vh;
+        border-radius: 0;
+        margin: 0;
+    }
+    
+    .friends-modal .modal-header {
+        padding: 15px;
+        position: sticky;
+        top: 0;
+    }
+    
+    .friends-modal .modal-header h3 {
+        font-size: 1.1em;
+    }
+    
+    .friends-modal .modal-close {
+        width: 36px;
+        height: 36px;
+        font-size: 1.2em;
+    }
+    
+    .add-friend-section,
+    .friend-search-container,
+    .pending-requests-section,
+    .friends-list-section {
+        padding: 12px 15px;
+    }
+    
+    .btn-add-friend {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+    
+    .friend-search-container input {
+        padding: 10px 14px;
+        font-size: 0.95em;
+        min-height: 40px;
+    }
+    
+    .search-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    #btn-search-friend,
+    #btn-cancel-search {
+        width: 100%;
+    }
+    
+    .user-result-card {
+        padding: 12px;
+    }
+    
+    .user-result-card .user-avatar {
+        font-size: 2em;
+    }
+    
+    .request-card,
+    .friend-card {
+        padding: 12px;
+    }
+    
+    .request-avatar,
+    .friend-team-logo,
+    .friend-team-logo-fallback {
+        width: 35px;
+        height: 35px;
+        font-size: 1.8em;
+    }
+    
+    /* Friend profile modal mobile */
+    .friend-profile-modal {
+        max-width: 100%;
+        max-height: 100vh;
+        height: auto;
+        border-radius: 0;
+    }
+    
+    .profile-header {
+        padding: 20px 15px;
+    }
+    
+    .profile-photo-large {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .friend-name {
+        font-size: 1.2em;
+    }
+    
+    .friend-team {
+        font-size: 0.85em;
+    }
+    
+    .profile-badges,
+    .profile-actions {
+        gap: 8px;
+    }
+    
+    .profile-actions button {
+        padding: 10px 16px;
+        font-size: 0.85em;
+    }
+    
+    /* Notifications mobile */
+    .notifications-modal {
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+    
+    .notifications-content {
+        padding: 12px;
+        max-height: calc(100vh - 120px);
+    }
+    
+    .notification-item {
+        padding: 10px;
+        gap: 10px;
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .notification-icon {
+        font-size: 1.2em;
+    }
+    
+    .notification-content strong {
+        font-size: 0.9em;
+    }
+    
+    .notification-content small {
+        font-size: 0.8em;
+    }
+    
+    .btn-view-request {
+        padding: 6px 10px;
+        font-size: 0.8em;
+        white-space: nowrap;
+    }
+    
+    .notifications-actions {
+        padding: 12px;
+    }
+    
+    .notifications-modal #btn-mark-all-read {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 16px;
+        font-size: 0.85em;
     }
 }

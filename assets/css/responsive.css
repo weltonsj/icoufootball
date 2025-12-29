@@ -1,0 +1,968 @@
+/* ====================================================================
+   SISTEMA DE RESPONSIVIDADE - iCouFootball
+   Breakpoints e Media Queries Organizadas
+   PRD v2.0 - Mobile First Approach
+   ====================================================================
+
+   BREAKPOINTS DEFINIDOS:
+   - Mobile Small:    ≤ 480px
+   - Mobile Large:    481px - 768px
+   - Tablet:          769px - 1024px
+   - Desktop:         > 1024px
+   - Widescreen:      > 1440px
+   ==================================================================== */
+
+/* ====================================================================
+   CSS CUSTOM PROPERTIES - BREAKPOINTS
+   ==================================================================== */
+:root {
+    --bp-mobile-small: 480px;
+    --bp-mobile-large: 768px;
+    --bp-tablet: 1024px;
+    --bp-desktop: 1280px;
+    --bp-widescreen: 1440px;
+    
+    /* Spacing responsivo */
+    --spacing-xs: 8px;
+    --spacing-sm: 12px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+}
+
+/* ====================================================================
+   MENU HAMBÚRGUER - MOBILE
+   ==================================================================== */
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 28px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001;
+}
+
+.hamburger-menu span {
+    width: 100%;
+    height: 3px;
+    background-color: var(--text-color);
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    transform-origin: center;
+}
+
+.hamburger-menu.active span:first-child {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger-menu.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.active span:last-child {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* ====================================================================
+   MOBILE OVERLAY NAVIGATION
+   ==================================================================== */
+.mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-nav-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    max-width: 85%;
+    height: 100%;
+    background: var(--secondary-bg);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 80px 20px 20px;
+    overflow-y: auto;
+}
+
+.mobile-nav-menu.active {
+    right: 0;
+}
+
+.mobile-nav-menu .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1.1em;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+}
+
+.mobile-nav-menu .nav-item:hover,
+.mobile-nav-menu .nav-item.active {
+    background: var(--highlight-color);
+    color: var(--primary-bg);
+}
+
+.mobile-nav-menu .nav-item i {
+    width: 24px;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+.mobile-nav-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.8em;
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.2s ease;
+}
+
+.mobile-nav-close:hover {
+    color: var(--highlight-color);
+}
+
+/* ====================================================================
+   MOBILE SMALL (≤ 480px)
+   ==================================================================== */
+@media (max-width: 480px) {
+    /* Container principal */
+    html, body {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    
+    .app-container {
+        max-width: 100%;
+        width: 100%;
+        border-radius: 0;
+        min-height: 100vh;
+        min-height: 100dvh; /* Dynamic viewport height para mobile */
+        overflow-x: hidden;
+    }
+
+    /* Header */
+    .app-header {
+        padding: 12px 15px;
+        flex-wrap: nowrap;
+        gap: 10px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .hamburger-menu {
+        display: flex !important;
+        order: -1;
+    }
+
+    /* IMPORTANTE: Menu horizontal DEVE ser oculto quando hamburguer visível */
+    .main-nav {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    .logo-area {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .logo-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .logo-text {
+        font-size: 1em;
+    }
+
+    .header-actions-container {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .notification-bell {
+        padding: 6px 10px;
+    }
+
+    .notification-bell i {
+        font-size: 1.1em;
+    }
+
+    .profile-avatar-header .avatar-img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .avatar-dropdown-icon {
+        display: none;
+    }
+
+    .profile-status {
+        display: none !important;
+    }
+
+    /* Content */
+    .app-content {
+        padding: 15px;
+        min-height: calc(100vh - 140px);
+    }
+
+    .app-content h2,
+    .app-content h3 {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    /* Footer */
+    .app-footer {
+        padding: 12px 15px;
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .dark-mode-toggle {
+        order: -1;
+        margin-bottom: 8px;
+    }
+
+    /* Tables */
+    .table-container {
+        margin: 0 -15px;
+        width: calc(100% + 30px);
+        border-radius: 0;
+    }
+
+    table th,
+    table td {
+        padding: 10px 8px;
+        font-size: 0.8em;
+    }
+
+    .team-cell {
+        gap: 6px;
+    }
+
+    .player-avatar-small {
+        width: 22px;
+        height: 22px;
+    }
+
+    .team-logo {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Cards */
+    .card-section {
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .stats-cards {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 12px 10px;
+        min-height: 70px;
+    }
+
+    .stat-card h4 {
+        font-size: 0.7em;
+    }
+
+    .stat-card p {
+        font-size: 0.8em;
+    }
+
+    /* Player Cards */
+    .players-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .player-card {
+        padding: 12px;
+    }
+
+    .player-photo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .player-card h4 {
+        font-size: 0.9em;
+    }
+
+    /* Auth Card */
+    .auth-card {
+        padding: 20px 15px;
+    }
+
+    .auth-card-title h2 {
+        font-size: 1.4rem;
+    }
+
+    .toggle-button {
+        padding: 8px 6px;
+        font-size: 0.8em;
+    }
+
+    /* Modals */
+    .modal {
+        max-width: 95%;
+        max-height: 90dvh;
+        overflow-y: auto;
+        padding: 15px;
+        margin: 10px;
+    }
+
+    .modal h3 {
+        font-size: 1em;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-btn {
+        width: 100%;
+        padding: 12px;
+    }
+
+    /* Avatar Popover */
+    .avatar-popover {
+        position: fixed;
+        top: 60px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+        border-radius: 12px;
+    }
+
+    .avatar-menu-item {
+        padding: 14px 16px;
+    }
+
+    /* Bloco Ao Vivo */
+    .section-live {
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .live-streams-list {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .stream-match-info {
+        padding: 12px;
+    }
+
+    .stream-teams {
+        font-size: 0.9em;
+    }
+
+    /* KPIs Dashboard */
+    .kpi-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .kpi-card {
+        padding: 12px;
+        min-height: 100px;
+    }
+
+    .kpi-icon {
+        font-size: 1.5em;
+    }
+
+    .kpi-value {
+        font-size: 1.3em;
+    }
+
+    .kpi-label {
+        font-size: 0.75em;
+    }
+
+    /* Match Items */
+    .match-item {
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        overflow: hidden;
+        max-width: 100%;
+    }
+
+    .match-date {
+        font-size: 0.8em;
+    }
+
+    .match-teams {
+        font-size: 0.9em;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .match-status.badge {
+        font-size: 0.7em;
+        padding: 4px 8px;
+    }
+
+    /* Chat */
+    .chat-content {
+        flex-direction: column;
+    }
+
+    .chat-sidebar {
+        max-height: 40vh;
+        overflow-y: auto;
+        padding: 15px;
+    }
+
+    .chat-messages {
+        padding: 15px;
+        max-height: 35vh;
+    }
+
+    .chat-input-area {
+        padding: 12px 15px;
+    }
+
+    .chat-input-container .btn-send,
+    .chat-input-container .btn-attach {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+    }
+
+    /* Profile */
+    .profile-content {
+        padding: 15px;
+    }
+
+    .profile-photo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .profile-edit-form .input-group {
+        width: 100%;
+    }
+
+    .btn-upload,
+    .btn-delete-photo {
+        padding: 10px 15px;
+        font-size: 0.85em;
+    }
+
+    /* Matches Form */
+    .matches-content {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-row .input-group {
+        min-width: 100%;
+    }
+
+    .score-inputs-group {
+        margin: 15px 10px;
+        gap: 10px;
+    }
+
+    .score-input-item input {
+        max-width: 60px;
+        padding: 10px;
+        font-size: 1em;
+    }
+
+    /* Friends Modal */
+    .friends-modal {
+        max-height: 85vh;
+    }
+
+    .friends-list-container {
+        max-height: 50vh;
+    }
+
+    .friend-item {
+        padding: 12px;
+    }
+
+    .friend-avatar {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ====================================================================
+   MOBILE LARGE (481px - 768px)
+   ==================================================================== */
+@media (min-width: 481px) and (max-width: 768px) {
+    html, body {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    
+    .app-container {
+        max-width: 100%;
+        width: 100%;
+        border-radius: 0;
+        overflow-x: hidden;
+    }
+
+    .hamburger-menu {
+        display: flex !important;
+    }
+
+    /* IMPORTANTE: Menu horizontal DEVE ser oculto quando hamburguer visível */
+    .main-nav {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    .app-header {
+        padding: 15px 20px;
+    }
+
+    .logo-text {
+        font-size: 1.1em;
+    }
+
+    .app-content {
+        padding: 20px;
+    }
+
+    /* Grid Layout */
+    .main-page-content {
+        grid-template-areas:
+            "standings"
+            "live"
+            "auth"
+            "stats"
+            "players" !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    html.authenticated .main-page-content {
+        grid-template-areas:
+            "standings"
+            "live"
+            "stats"
+            "players" !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .players-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* KPIs */
+    .kpi-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Chat */
+    .chat-sidebar {
+        max-height: 35vh;
+    }
+
+    /* Modals */
+    .modal {
+        max-width: 90%;
+        max-height: 90dvh;
+        overflow-y: auto;
+    }
+
+    .avatar-popover {
+        right: 15px;
+        left: auto;
+        min-width: 220px;
+    }
+}
+
+/* ====================================================================
+   TABLET (769px - 1024px)
+   ==================================================================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .app-container {
+        max-width: 100%;
+        border-radius: 0;
+    }
+
+    .hamburger-menu {
+        display: none;
+    }
+
+    .main-nav {
+        display: flex;
+        gap: 15px;
+        flex-basis: auto;
+        margin-top: 0;
+    }
+
+    .app-header {
+        flex-wrap: nowrap;
+        padding: 15px 25px;
+    }
+
+    .nav-item {
+        font-size: 0.85em;
+    }
+
+    .app-content {
+        padding: 25px;
+    }
+
+    /* Grid Layout - 2 colunas */
+    .main-page-content {
+        grid-template-areas:
+            "standings auth"
+            "live live"
+            "stats stats"
+            "players players" !important;
+        grid-template-columns: 1.5fr 1fr !important;
+    }
+
+    html.authenticated .main-page-content {
+        grid-template-areas:
+            "standings stats"
+            "live live"
+            "players players" !important;
+        grid-template-columns: 1.5fr 1fr !important;
+    }
+
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .players-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* KPIs */
+    .kpi-cards {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* Chat */
+    .chat-content {
+        flex-direction: row;
+    }
+
+    .chat-sidebar {
+        flex-basis: 280px;
+        min-width: 240px;
+        max-height: none;
+    }
+
+    /* Profile */
+    .profile-header-area {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .profile-edit-form .input-group {
+        width: 80%;
+    }
+
+    /* Matches */
+    .form-row {
+        flex-direction: row;
+    }
+}
+
+/* ====================================================================
+   DESKTOP (1025px - 1440px)
+   ==================================================================== */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    body {
+        background-color: #444;
+    }
+
+    .app-container {
+        max-width: 100%;
+        border-radius: 0;
+    }
+
+    .hamburger-menu {
+        display: none;
+    }
+
+    .main-nav {
+        gap: 25px;
+        margin-left: 30px;
+    }
+
+    .nav-item {
+        font-size: 0.9em;
+    }
+
+    .app-content {
+        padding: 30px;
+    }
+
+    /* Grid Layout - 3 colunas */
+    .main-page-content {
+        grid-template-areas:
+            "standings stats auth"
+            "live live live"
+            "players players players" !important;
+        grid-template-columns: 1.5fr 1fr 1fr !important;
+    }
+
+    html.authenticated .main-page-content {
+        grid-template-areas:
+            "standings stats"
+            "live live"
+            "players players" !important;
+        grid-template-columns: 1.5fr 1fr !important;
+    }
+
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .players-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* KPIs */
+    .kpi-cards {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .kpi-card {
+        min-height: 130px;
+    }
+
+    /* Chat */
+    .chat-sidebar {
+        flex-basis: 320px;
+    }
+
+    /* Profile */
+    .profile-edit-form .input-group {
+        width: 60%;
+    }
+}
+
+/* ====================================================================
+   WIDESCREEN (> 1440px)
+   ==================================================================== */
+@media (min-width: 1441px) {
+    body {
+        background-color: #333;
+    }
+
+    .app-container {
+        max-width: 100%;
+        border-radius: 0;
+    }
+
+    .app-content {
+        padding: 40px 60px;
+    }
+
+    .main-nav {
+        gap: 30px;
+        margin-left: 40px;
+    }
+
+    /* Grid Layout */
+    .main-page-content {
+        grid-template-columns: 1.5fr 1fr 1fr !important;
+        gap: 30px !important;
+    }
+
+    .live-streams-list {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+
+    .players-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    /* KPIs */
+    .kpi-cards {
+        gap: 25px;
+    }
+
+    .kpi-card {
+        min-height: 150px;
+        padding: 25px;
+    }
+
+    /* Chat */
+    .chat-sidebar {
+        flex-basis: 380px;
+    }
+
+    /* Profile */
+    .profile-edit-form .input-group {
+        width: 50%;
+        max-width: 600px;
+    }
+}
+
+/* ====================================================================
+   UTILITÁRIOS RESPONSIVOS
+   ==================================================================== */
+
+/* Ocultar em mobile */
+.hide-mobile {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Mostrar apenas em mobile */
+.show-mobile-only {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .show-mobile-only {
+        display: block;
+    }
+}
+
+/* Ocultar em desktop */
+.hide-desktop {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .hide-desktop {
+        display: block;
+    }
+}
+
+/* Texto responsivo */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Container fluido */
+.container-fluid {
+    width: 100%;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+}
+
+@media (min-width: 769px) {
+    .container-fluid {
+        padding-left: var(--spacing-lg);
+        padding-right: var(--spacing-lg);
+    }
+}
+
+/* Stack vertical em mobile */
+.stack-mobile {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+    .stack-mobile {
+        flex-direction: column;
+    }
+}
+
+/* Touch-friendly targets */
+@media (max-width: 768px) {
+    button,
+    .btn-primary,
+    .btn-upload,
+    .nav-item,
+    .avatar-menu-item {
+        min-height: 44px;
+    }
+}
+
+/* Safe area insets para dispositivos com notch */
+@supports (padding: max(0px)) {
+    .app-header {
+        padding-top: max(15px, env(safe-area-inset-top));
+    }
+
+    .app-footer {
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
+    }
+
+    .mobile-nav-menu {
+        padding-top: max(80px, calc(60px + env(safe-area-inset-top)));
+    }
+}
+
+/* Prevenir scroll horizontal */
+html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* Scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Melhor legibilidade em mobile */
+@media (max-width: 480px) {
+    body {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+}

@@ -169,6 +169,11 @@ async function carregarConversas() {
         if (todasConversas.length === 0 && !conversaAtualId) {
             mostrarSemConversas();
         }
+
+        // COMPORTAMENTO WHATSAPP (mobile):
+        // - 0 conversas => mostra painel principal (estado vazio)
+        // - 1+ conversas => mostra lista (sidebar)
+        atualizarLayoutMobileSemConversas(conversas.length);
     });
 }
 
@@ -629,9 +634,42 @@ function exibirVistoUltimo(statusEl, ultimoAcesso) {
         return;
     }
 
-    const data = ultimoAcesso.toDate?.() || new Date(ultimoAcesso);
+    // Tratamento robusto de data - pode ser Timestamp do Firebase ou Date
+    let data;
+    try {
+        if (ultimoAcesso.toDate && typeof ultimoAcesso.toDate === 'function') {
+            data = ultimoAcesso.toDate();
+        } else if (ultimoAcesso instanceof Date) {
+            data = ultimoAcesso;
+        } else if (typeof ultimoAcesso === 'number') {
+            data = new Date(ultimoAcesso);
+        } else if (ultimoAcesso.seconds) {
+            // Timestamp do Firestore no formato {seconds, nanoseconds}
+            data = new Date(ultimoAcesso.seconds * 1000);
+        } else {
+            data = new Date(ultimoAcesso);
+        }
+        
+        // Verificar se a data é válida
+        if (isNaN(data.getTime())) {
+            throw new Error('Data inválida');
+        }
+    } catch (err) {
+        console.warn('[Chat] Erro ao parsear ultimoAcesso:', err, ultimoAcesso);
+        statusEl.textContent = 'offline';
+        statusEl.style.color = '#AAA';
+        return;
+    }
+
     const agora = new Date();
     const diferenca = Math.floor((agora - data) / 1000); // segundos
+    
+    // Verificar se a data está no futuro (erro de sincronização)
+    if (diferenca < 0) {
+        statusEl.textContent = 'visto por último agora';
+        statusEl.style.color = '#AAA';
+        return;
+    }
     
     // Menos de 1 minuto
     if (diferenca < 60) {
@@ -650,22 +688,27 @@ function exibirVistoUltimo(statusEl, ultimoAcesso) {
         });
         statusEl.textContent = `visto por último às ${hora}`;
     }
-    // Ontem
-    else if (agora.getDate() - data.getDate() === 1 && agora.getMonth() === data.getMonth()) {
-        const hora = data.toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        statusEl.textContent = `visto por último ontem às ${hora}`;
-    }
-    // Data anterior
+    // Ontem (verificação mais robusta)
     else {
-        const dataFormatada = data.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: '2-numeric'
-        });
-        statusEl.textContent = `visto por último em ${dataFormatada}`;
+        const ontem = new Date(agora);
+        ontem.setDate(ontem.getDate() - 1);
+        
+        if (ontem.toDateString() === data.toDateString()) {
+            const hora = data.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            statusEl.textContent = `visto por último ontem às ${hora}`;
+        }
+        // Data anterior
+        else {
+            const dataFormatada = data.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            statusEl.textContent = `visto por último em ${dataFormatada}`;
+        }
     }
     statusEl.style.color = '#AAA';
 }
@@ -705,7 +748,7 @@ function renderizarMensagens(mensagens) {
                 <img src="${m.urlImagem}" alt="Imagem" 
                      style="max-width: 200px; max-height: 200px; border-radius: 8px; cursor: pointer;"
                      onclick="window.open('${m.urlImagem}', '_blank')"
-                     onerror="this.src='https://via.placeholder.com/200x150?text=Imagem+Expirada'">
+                     onerror="this.src='/assets/img/image-expired.svg'">
             `;
         }
 
@@ -1053,7 +1096,17 @@ function configurarEventos() {
             const conversationItem = e.target.closest('.conversation-item');
             if (conversationItem && conversationItem.dataset.id) {
                 selecionarConversa(conversationItem.dataset.id);
+                // COMPORTAMENTO WHATSAPP: Adicionar classe para mobile
+                abrirConversaMobile();
             }
+        });
+    }
+    
+    // BOTÃO VOLTAR (WHATSAPP STYLE) - Mobile
+    const btnVoltar = document.getElementById('btn-voltar-conversas');
+    if (btnVoltar) {
+        btnVoltar.addEventListener('click', () => {
+            voltarParaListaConversas();
         });
     }
     
@@ -1119,6 +1172,75 @@ function configurarEventos() {
 
     // Ações do chat
     configurarAcoesChat();
+}
+
+/**
+ * COMPORTAMENTO WHATSAPP: Abre a conversa em mobile (oculta lista, mostra chat)
+ */
+function abrirConversaMobile() {
+    const chatContent = document.querySelector('.chat-content');
+    if (chatContent && isMobileView()) {
+        chatContent.classList.remove('sem-conversas');
+        chatContent.classList.add('conversa-aberta');
+    }
+}
+
+/**
+ * COMPORTAMENTO WHATSAPP: Volta para a lista de conversas em mobile
+ */
+function voltarParaListaConversas() {
+    const chatContent = document.querySelector('.chat-content');
+    if (chatContent) {
+        chatContent.classList.remove('conversa-aberta');
+    }
+    // Limpar conversa ativa
+    conversaAtualId = null;
+    
+    // Cancelar listeners de mensagens
+    if (unsubscribeMensagens) {
+        unsubscribeMensagens();
+        unsubscribeMensagens = null;
+    }
+    if (unsubscribeStatus) {
+        unsubscribeStatus();
+        unsubscribeStatus = null;
+    }
+    
+    // Remover destaque das conversas
+    document.querySelectorAll('.conversation-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Ocultar header e input
+    ocultarHeaderChat();
+    ocultarInputChat();
+    
+    // Mostrar estado vazio
+    mostrarSemConversas();
+
+    // Recalcular estado (0 conversas vs lista)
+    atualizarLayoutMobileSemConversas(todasConversas.length + conversasArquivadas.length);
+}
+
+/**
+ * Verifica se está em viewport mobile (comportamento WhatsApp)
+ */
+function isMobileView() {
+    return window.innerWidth <= 768;
+}
+
+function atualizarLayoutMobileSemConversas(totalConversas) {
+    const chatContent = document.querySelector('.chat-content');
+    if (!chatContent || !isMobileView()) return;
+
+    const hasAny = Number(totalConversas) > 0;
+    if (hasAny) {
+        chatContent.classList.remove('sem-conversas');
+        return;
+    }
+
+    chatContent.classList.add('sem-conversas');
+    chatContent.classList.remove('conversa-aberta');
 }
 
 function configurarAcoesChat() {

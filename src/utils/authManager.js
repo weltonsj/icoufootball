@@ -9,6 +9,22 @@ import { doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.
 let currentUser = null;
 let currentRole = null;
 
+function normalizeRole(role) {
+  const r = String(role || '').trim().toLowerCase();
+  if (!r) return 'Jogador';
+  if (r === 'admin') return 'Admin';
+  if (r === 'superadmin' || r === 'super-admin' || r === 'super admin') return 'Superadmin';
+  if (r === 'gestao' || r === 'gestão') return 'Gestao';
+  if (r === 'jogador' || r === 'player') return 'Jogador';
+  // fallback: mantém capitalização razoável
+  return role;
+}
+
+function isAdminRole(role) {
+  const n = normalizeRole(role);
+  return n === 'Admin' || n === 'Superadmin';
+}
+
 const NAV_ITEMS = {
   home: 'navHome',
   login: 'navLogin',
@@ -71,6 +87,7 @@ function updateMenuVisibility(user, role) {
   const navAdmin = getNavElement('admin');
   const headerAvatar = document.querySelector('.profile-avatar-header');
   const notificationBell = document.getElementById('notification-bell');
+  const headerLoginLink = document.getElementById('header-login-link');
 
   if (!user) {
     // Usuário não autenticado
@@ -83,6 +100,28 @@ function updateMenuVisibility(user, role) {
     navAdmin && navAdmin.classList.add('hidden');
     headerAvatar && headerAvatar.classList.add('hidden');
     notificationBell && notificationBell.classList.add('hidden');
+    
+    // Exibir link de login no header
+    headerLoginLink && headerLoginLink.classList.remove('hidden');
+
+    // Parar listener de notificações (evita cache stale e erros de permissão)
+    try {
+      import('../services/notificationsService.js')
+        .then(({ pararListenerNotificacoes }) => {
+          if (typeof pararListenerNotificacoes === 'function') {
+            pararListenerNotificacoes();
+          }
+        })
+        .catch(() => {});
+    } catch (e) {
+      // ignore
+    }
+
+    const badge = document.getElementById('notification-badge');
+    if (badge) {
+      badge.style.display = 'none';
+      badge.textContent = '';
+    }
 
     // Remove classes de autenticação do HTML
     document.documentElement.classList.remove('authenticated');
@@ -91,8 +130,9 @@ function updateMenuVisibility(user, role) {
 
     // Salva estado no cache
     saveAuthStateToCache(false, null);
-  } else if (role === 'Jogador') {
+  } else if (normalizeRole(role) === 'Jogador') {
     // Usuário autenticado como Jogador
+    headerLoginLink && headerLoginLink.classList.add('hidden');
     navHome && navHome.classList.remove('hidden');
     navLogin && navLogin.classList.add('hidden');
     navDashboard && navDashboard.classList.remove('hidden');
@@ -113,8 +153,9 @@ function updateMenuVisibility(user, role) {
     
     // Inicializa notificações
     initializeNotifications(user);
-  } else if (role === 'Admin') {
-    // Usuário autenticado como Admin
+  } else if (isAdminRole(role)) {
+    // Usuário autenticado como Admin/Superadmin
+    headerLoginLink && headerLoginLink.classList.add('hidden');
     navHome && navHome.classList.remove('hidden');
     navLogin && navLogin.classList.add('hidden');
     navDashboard && navDashboard.classList.remove('hidden');
@@ -131,7 +172,7 @@ function updateMenuVisibility(user, role) {
     document.documentElement.classList.remove('role-jogador');
 
     // Salva estado no cache
-    saveAuthStateToCache(true, 'Admin');
+    saveAuthStateToCache(true, normalizeRole(role));
     
     // Inicializa notificações
     initializeNotifications(user);
@@ -552,11 +593,13 @@ async function handleLogout() {
     sessionStorage.removeItem('conversaAtivaId');
     
     // IMPORTANTE: Marcar usuário como offline antes de deslogar
+    // NÃO atualizar ultimoAcesso - deixar congelado no último valor do heartbeat
     try {
       const { atualizarStatusOnline, atualizarConversaAtiva } = await import('../services/chatService.js');
       await atualizarConversaAtiva(null);
-      await atualizarStatusOnline(false);
-      console.log('[Auth] ✅ Usuário marcado como offline');
+      // Marcar como offline SEM tocar em ultimoAcesso (mantém o último valor do heartbeat)
+      await atualizarStatusOnline(false, { preserveLastAccess: true });
+      console.log('[Auth] ✅ Usuário marcado como offline - ultimoAcesso preservado');
     } catch (err) {
       console.warn('[Auth] Erro ao marcar usuário como offline:', err);
     }
@@ -628,6 +671,40 @@ function initAuthManager() {
         const statusObj = await carregarStatusUsuarioLogado();
         const status = statusObj?.status || 'disponivel';
 
+          let loginOfflineTimeout = null;
+
+          // Após login, agendar fallback: se o usuário NÃO acessar a sessão de chat
+          // dentro de 60s, marcar como offline (comportamento solicitado).
+          try {
+            if (loginOfflineTimeout) {
+              clearTimeout(loginOfflineTimeout);
+              loginOfflineTimeout = null;
+            }
+            loginOfflineTimeout = setTimeout(async () => {
+              // Se já estiver na rota de chat, manter online
+              const inChatRoute = window.location && window.location.hash && window.location.hash.startsWith('#chat');
+              if (!inChatRoute) {
+                try {
+                  const { atualizarStatusOnline } = await import('../services/chatService.js');
+                  await atualizarStatusOnline(false);
+                  console.log('[Auth] Usuário inativo após login - marcado offline (fallback 60s)');
+                } catch (e) {
+                  console.warn('[Auth] Erro no fallback de marcar offline:', e);
+                }
+              }
+            }, 60000);
+
+            // Cancelar fallback se navegar para chat
+            const cancelOnChat = () => {
+              if (window.location.hash && window.location.hash.startsWith('#chat')) {
+                if (loginOfflineTimeout) { clearTimeout(loginOfflineTimeout); loginOfflineTimeout = null; }
+                window.removeEventListener('hashchange', cancelOnChat);
+              }
+            };
+            window.addEventListener('hashchange', cancelOnChat);
+          } catch (e) {
+            console.warn('[Auth] Erro ao agendar fallback offline após login:', e);
+          }
         const statusLabels = {
           'disponivel': 'Online',
           'ocupado': 'Ocupado',
@@ -692,7 +769,22 @@ function initAuthManager() {
 
       try {
         const profile = await getUser(user.uid);
-        currentRole = (profile && profile.funcao) || 'Jogador';
+        // Bloqueio por conta inativa (campo `ativo: false`)
+        const ativo = profile && Object.prototype.hasOwnProperty.call(profile, 'ativo') ? !!profile.ativo : true;
+        if (!ativo) {
+          currentRole = null;
+          updateMenuVisibility(null, null);
+          try {
+            await logout();
+          } catch (e) {
+            console.warn('[Auth] Erro ao deslogar usuário inativo:', e);
+          }
+          showModal('error', 'Conta inativa', 'Sua conta foi inativada. Contate o administrador.');
+          if (!resolved) { resolved = true; resolve(null); }
+          return;
+        }
+
+        currentRole = normalizeRole((profile && profile.funcao) || 'Jogador');
         updateMenuVisibility(user, currentRole);
 
         // Carrega avatar do usuário
@@ -719,6 +811,10 @@ function getCurrentRole() {
   return currentRole;
 }
 
+function isCurrentUserAdmin() {
+  return isAdminRole(currentRole);
+}
+
 /**
  * Inicializa sistema de notificações
  */
@@ -726,7 +822,16 @@ let notificationUnsubscribe = null;
 let userStatusUnsubscribe = null;
 
 async function initializeNotifications(user) {
-  if (!user) return;
+  if (!user) {
+    console.warn('[Auth] Tentativa de inicializar notificações sem usuário autenticado');
+    return;
+  }
+  
+  // Verifica se o usuário tem UID válido
+  if (!user.uid) {
+    console.warn('[Auth] Usuário sem UID válido, ignorando inicialização de notificações');
+    return;
+  }
   
   try {
     const { 
@@ -741,7 +846,7 @@ async function initializeNotifications(user) {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     // Iniciar listener de notificações (atualiza badge automaticamente)
-    console.log('[Auth] 🔔 Iniciando listener de notificações');
+    console.log('[Auth] 🔔 Iniciando listener de notificações para usuário:', user.uid);
     iniciarListenerNotificacoes(user.uid);
     
     // Configurar click no notification-bell
@@ -750,7 +855,7 @@ async function initializeNotifications(user) {
     console.log('[Auth] ✅ Sistema de notificações inicializado');
     
   } catch (error) {
-    console.error('Erro ao inicializar notificações:', error);
+    console.error('[Auth] Erro ao inicializar notificações:', error);
     
     // Fallback: tentar método antigo
     try {
@@ -783,6 +888,7 @@ export {
   setActiveNavItem,
   getCurrentUser,
   getCurrentRole,
+  isCurrentUserAdmin,
   loadAuthStateFromCache,
   saveAuthStateToCache,
   clearAuthCache
