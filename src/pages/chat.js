@@ -8,9 +8,13 @@ export const chat = {
     name: "chat",
     className: "chat-content",
     content: `
-        <aside class="chat-sidebar card-section">
-            <h2>Conversas</h2>
-            <div class="search-chat">
+        <aside class="chat-sidebar icou-card">
+            <div class="card-header">
+                <i class="fas fa-comments"></i>
+                <h3>CONVERSAS</h3>
+            </div>
+            <div class="card-content">
+                <div class="search-chat">
                 <input type="text" placeholder="Buscar Conversa..." disabled>
                 <i class="fas fa-search"></i>
             </div>
@@ -21,9 +25,10 @@ export const chat = {
                     <p style="margin: 0; font-size: 0.9em;">Carregando conversas...</p>
                 </div>
             </div>
+            </div>
         </aside>
 
-        <section class="chat-main card-section">
+        <section class="chat-main icou-card">
             <!-- Header oculto por padrão - exibido após selecionar conversa -->
             <div class="chat-header">
                 <!-- Botão voltar para lista (visível apenas em mobile) -->

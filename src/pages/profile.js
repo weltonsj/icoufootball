@@ -7,10 +7,14 @@ export const profile = {
     name: 'profile',
     className: 'profile-content',
     content: `
-        <section class="section-profile-info">
-            <h2>Meu Perfil</h2>
-
-            <div class="profile-header-area card-section">
+        <!-- Seção: Meu Perfil Header -->
+        <section class="section-profile-info icou-card">
+            <div class="card-header">
+                <i class="fas fa-user-circle"></i>
+                <h3>MEU PERFIL</h3>
+            </div>
+            <div class="card-content">
+                <div class="profile-header-area">
                 <div class="profile-photo-upload">
                     <!-- Skeleton loading para foto -->
                     <div class="profile-photo-skeleton skeleton-loading" style="width: 100px; height: 100px; border-radius: 50%; background: var(--secondary-bg);"></div>
@@ -41,10 +45,18 @@ export const profile = {
                         <span class="team-motto"></span>
                     </div>
                 </div>
+                </div>
             </div>
+        </section>
 
-            <form class="profile-edit-form card-section">
-                <h3>Informações Pessoais</h3>
+        <!-- Seção: Informações Pessoais -->
+        <section class="section-profile-form icou-card">
+            <div class="card-header">
+                <i class="fas fa-id-card"></i>
+                <h3>INFORMAÇÕES PESSOAIS</h3>
+            </div>
+            <div class="card-content">
+                <form class="profile-edit-form">
                 <div class="input-group">
                     <label for="username">Nome de Usuário</label>
                     <div class="input-with-icon">
@@ -104,10 +116,12 @@ export const profile = {
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> SALVAR ALTERAÇÕES</button>
-                </div>
-            </form>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> SALVAR ALTERAÇÕES</button>
+                    </div>
+                </form>
+            </div>
+        </section>
 
             <div class="danger-zone-trigger">
                 <button class="btn-show-danger" id="btnShowDangerZone">
@@ -116,27 +130,29 @@ export const profile = {
                 </button>
             </div>
 
-            <section class="danger-zone card-section" style="display: none;">
-                <div class="danger-zone-header">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Zona de Perigo</h3>
+            <section class="danger-zone icou-card" style="display: none;">
+                <div class="card-header danger-header">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>ZONA DE PERIGO</h3>
                     <button class="btn-close-danger" id="btnCloseDangerZone" title="Fechar">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <p class="danger-description">
-                    A exclusão da sua conta é <strong>permanente e irreversível</strong>. 
-                    Todos os seus dados, incluindo perfil, estatísticas, histórico de partidas 
-                    e informações pessoais serão removidos permanentemente da plataforma.
-                </p>
-                <p class="danger-warning">
-                    <i class="fas fa-info-circle"></i>
-                    Esta ação não pode ser desfeita. Certifique-se de que realmente deseja excluir sua conta.
-                </p>
-                <button class="btn-danger" id="btnDeleteAccount">
-                    <i class="fas fa-trash-alt"></i>
-                    Excluir Conta Permanentemente
-                </button>
+                <div class="card-content">
+                    <p class="danger-description">
+                        A exclusão da sua conta é <strong>permanente e irreversível</strong>. 
+                        Todos os seus dados, incluindo perfil, estatísticas, histórico de partidas 
+                        e informações pessoais serão removidos permanentemente da plataforma.
+                    </p>
+                    <p class="danger-warning">
+                        <i class="fas fa-info-circle"></i>
+                        Esta ação não pode ser desfeita. Certifique-se de que realmente deseja excluir sua conta.
+                    </p>
+                    <button class="btn-danger" id="btnDeleteAccount">
+                        <i class="fas fa-trash-alt"></i>
+                        Excluir Conta Permanentemente
+                    </button>
+                </div>
             </section>
-        </section>
     `
 };

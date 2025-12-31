@@ -3,6 +3,122 @@
    ====================================================================
 */
 
+/* ====================================================================
+   COMPONENTE PADRÃO: ICOU-CARD
+   Card padronizado com header interno (ícone + título)
+   ==================================================================== */
+.icou-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+/* Header do Card - Ícone + Título */
+.icou-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.icou-card .card-header i {
+    color: var(--highlight-color);
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+.icou-card .card-header h3,
+.icou-card .card-header h2 {
+    color: var(--text-color);
+    font-size: 1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Link "Ver todas" no header */
+.icou-card .card-header .view-all-link {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85em;
+    color: var(--highlight-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.icou-card .card-header .view-all-link:hover {
+    color: #ff9d3d;
+    transform: translateX(3px);
+}
+
+.icou-card .card-header .view-all-link i {
+    font-size: 0.8em;
+    transition: transform 0.2s ease;
+}
+
+.icou-card .card-header .view-all-link:hover i {
+    transform: translateX(3px);
+}
+
+/* Conteúdo do Card */
+.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+/* Scroll estilizado para conteúdos com lista */
+.icou-card .card-content.scrollable {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.icou-card .card-content.scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.icou-card .card-content.scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.icou-card .card-content.scrollable::-webkit-scrollbar-thumb {
+    background: var(--highlight-color);
+    border-radius: 3px;
+}
+
+.icou-card .card-content.scrollable::-webkit-scrollbar-thumb:hover {
+    background: #e67e22;
+}
+
+/* ====================================================================
+   ESTILOS DE SEÇÕES DA DASHBOARD (ajustes para .icou-card)
+   ==================================================================== */
+
+/* Remove margin-bottom duplicado já que o .icou-card já tem */
+.section-kpis.icou-card,
+.section-active-matches.icou-card,
+.section-match-history.icou-card {
+    margin-bottom: 20px;
+}
+
+/* Ajustes específicos para seções existentes */
+.section-kpis.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+.section-active-matches.icou-card .card-content,
+.section-match-history.icou-card .card-content {
+    padding: 10px 16px;
+}
+
 .dashboard-content {
     padding: 20px;
     width: 100%;
@@ -11,27 +127,19 @@
     overflow-x: hidden; /* CORREÇÃO: Impede scroll horizontal */
 }
 
-.section-kpis {
-    margin-bottom: 30px;
-}
+/* Os margin-bottom das seções são gerenciados pelo .icou-card */
 
 .kpis-header {
     display: flex;
 	align-items: center;
 	flex-direction: row;
 	gap: 15px;
-	margin-bottom: 20px;
+	margin-bottom: 0;
     justify-content: flex-start;
     flex-wrap: wrap;
 }
 
-.kpis-header h2 {
-    font-size: 1.1em;
-    text-align: left; /* Alinhamento à esquerda na dashboard */
-    margin-bottom: 0; /* Remove margin-bottom padrão de h2 */
-    text-transform: uppercase;
-    color: var(--text-color);
-}
+/* O título h2 agora está no card-header, esses estilos são de legado */
 
 .time-profile-summary {
     display: flex;
@@ -149,45 +257,19 @@
     color: #AAA;
 }
 
-/* Seção de Partidas Ativas/Pendentes */
-.section-active-matches {
-    margin-bottom: 20px;
-}
-
-.section-active-matches h3 {
-    text-align: left;
-    margin-bottom: 15px;
-    font-size: 1em;
-    text-transform: uppercase;
-    color: var(--highlight-color);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.section-active-matches h3 i {
-    color: var(--highlight-color);
-}
+/* Seção de Partidas Ativas/Pendentes - usa .icou-card */
 
 .section-match-history {
-    margin-bottom: 20px;
     overflow-x: hidden; /* CORREÇÃO: Impede scroll horizontal */
     overflow-y: auto;
-    padding-bottom: 20px;
-    min-height: 300px;
-    max-height: 600px;
+    min-height: 200px;
+    max-height: 400px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
 }
 
-.section-match-history h3 {
-    text-align: left; /* Alinhamento à esquerda */
-    margin-bottom: 20px;
-    font-size: 1em;
-    text-transform: uppercase;
-    color: var(--text-color);
-}
+/* Título h3 agora está no card-header */
 
 .match-history-list {
     display: flex;
@@ -196,6 +278,10 @@
     width: 100%;
     max-width: 100%;
     overflow: hidden; /* CORREÇÃO: Impede overflow */
+}
+
+.partida-list, .match-history-list, .match-list {
+    max-height: 600px;
 }
 
 .match-item {
@@ -846,7 +932,8 @@
 }
 
 /* ====================================================================
-   SEÇÃO: CARDS DE DASHBOARD (Ranking + Campeonato)
+   SEÇÃO: CARDS DE DASHBOARD (Ranking + Campeonato + Amigos)
+   Agora usando padrão .icou-card
    ====================================================================
 */
 .section-dashboard-cards {
@@ -856,16 +943,20 @@
     margin-bottom: 25px;
 }
 
-.dashboard-card {
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--chat-border-color);
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+/* Ajustes específicos para os dashboard-cards com .icou-card */
+.section-dashboard-cards .dashboard-card.icou-card {
+    margin-bottom: 0; /* Remove margin pois o grid já controla o gap */
 }
 
+.section-dashboard-cards .dashboard-card.icou-card .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+}
+
+/* Estilos legado - mantidos para compatibilidade */
 .dashboard-card-header {
     display: flex;
     align-items: center;

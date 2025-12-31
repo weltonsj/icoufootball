@@ -8,7 +8,7 @@ import { subscribeToActiveChampionships, subscribeToStandings, subscribeToAnnual
 import { getUserMap } from "./services/usersService.js";
 import { initAuthManager, loadAuthStateFromCache, updateMenuVisibility, getCurrentUser } from "./utils/authManager.js";
 import { initThemeManager } from "./utils/themeManager.js";
-import { onTransmissoesAoVivo, PLATAFORMAS_STREAMING, converterParaEmbed } from "./services/matchesService.js";
+import { onTransmissoesAoVivo, PLATAFORMAS_STREAMING, converterParaEmbed, onUltimasPartidasFinalizadas } from "./services/matchesService.js";
 import { initMobileNav, syncMobileNavVisibility, initViewportListener, setActiveMobileNavItem } from "./utils/mobileNav.js";
 
 // ====================================================================
@@ -33,16 +33,16 @@ async function renderTable(ranking, tbodyId = "standings-body", limitResults = t
     const userMap = await getUserMap(ids);
 
     const fallbackAvatarSvg = "data:image/svg+xml;utf8," + encodeURIComponent(
-        "<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26'>" +
-        "<rect width='100%' height='100%' rx='13' ry='13' fill='%23606060'/>" +
-        "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='12' fill='%23ffffff'>P</text>" +
+        "<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'>" +
+        "<circle cx='14' cy='14' r='13' fill='%23606060'/>" +
+        "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='11' fill='%23ffffff'>J</text>" +
         "</svg>"
     );
 
     const fallbackShieldSvg = "data:image/svg+xml;utf8," + encodeURIComponent(
-        "<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'>" +
-        "<rect width='100%' height='100%' fill='%23606060'/>" +
-        "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='12' fill='%23ffffff'>T</text>" +
+        "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'>" +
+        "<rect width='100%' height='100%' rx='4' fill='%23606060'/>" +
+        "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='10' fill='%23ffffff'>T</text>" +
         "</svg>"
     );
 
@@ -59,10 +59,10 @@ async function renderTable(ranking, tbodyId = "standings-body", limitResults = t
         return u?.perfilPublico !== false;
     }
 
+    let posicao = 0;
     for (const r of displayRanking) {
+        posicao++;
         const tr = document.createElement("tr");
-        const tdTeam = document.createElement("td");
-        tdTeam.className = "team-cell";
 
         const u = userMap.get(r.id) || {};
         const nome = u.nome || u.email || String(r.id);
@@ -73,64 +73,141 @@ async function renderTable(ranking, tbodyId = "standings-body", limitResults = t
         // Verifica se é o usuário atual para destacar
         const isCurrentUser = currentUserId && r.id === currentUserId;
         if (isCurrentUser) {
-            tr.classList.add('standings-row-highlight');
+            tr.classList.add('row-highlight');
         }
 
-        // Escudo do time
-        const imgShield = document.createElement("img");
-        imgShield.className = "team-logo";
-        imgShield.alt = "Escudo";
-        imgShield.src = teamLogo || fallbackShieldSvg;
-        imgShield.onerror = () => { imgShield.src = fallbackShieldSvg; };
+        // === COLUNA: POSIÇÃO ===
+        const tdPos = document.createElement("td");
+        tdPos.className = "col-pos";
+        const posDiv = document.createElement("div");
+        posDiv.className = `cell-posicao${posicao <= 3 ? ` pos-${posicao}` : ''}`;
+        posDiv.textContent = String(posicao);
+        tdPos.appendChild(posDiv);
+
+        // === COLUNA: TIME (separada) ===
+        const tdTime = document.createElement("td");
+        tdTime.className = "col-time";
+        const timeCell = document.createElement("div");
+        timeCell.className = "cell-time";
+
+        // Logo do time
+        if (teamLogo) {
+            const imgShield = document.createElement("img");
+            imgShield.className = "time-logo";
+            imgShield.alt = "Escudo do time";
+            imgShield.src = teamLogo;
+            imgShield.onerror = () => { 
+                imgShield.style.display = 'none';
+                const fallback = document.createElement('div');
+                fallback.className = 'time-logo-fallback';
+                fallback.textContent = 'T';
+                timeCell.insertBefore(fallback, timeCell.firstChild);
+            };
+            timeCell.appendChild(imgShield);
+        } else {
+            const fallback = document.createElement('div');
+            fallback.className = 'time-logo-fallback';
+            fallback.textContent = 'T';
+            timeCell.appendChild(fallback);
+        }
 
         // Nome do time
         const teamNameSpan = document.createElement('span');
-        teamNameSpan.className = 'team-name-text';
+        teamNameSpan.className = 'time-nome';
         teamNameSpan.textContent = timeLabel || 'Sem time';
+        teamNameSpan.title = timeLabel || 'Sem time';
+        timeCell.appendChild(teamNameSpan);
+        tdTime.appendChild(timeCell);
 
-        // Separador
-        const separator = document.createElement('span');
-        separator.className = 'team-separator';
-        separator.textContent = ' | ';
+        // === COLUNA: JOGADOR (separada) ===
+        const tdJogador = document.createElement("td");
+        tdJogador.className = "col-jogador";
+        const jogadorCell = document.createElement("div");
+        jogadorCell.className = "cell-jogador";
 
         // Avatar do jogador
-        const imgAvatar = document.createElement('img');
-        imgAvatar.className = 'player-avatar-small';
-        imgAvatar.alt = 'Foto do jogador';
-        imgAvatar.src = canShowPhoto ? u.fotoUrl : fallbackAvatarSvg;
-        imgAvatar.onerror = () => { imgAvatar.src = fallbackAvatarSvg; };
-
-        // Nome do jogador com badge "Você" se for o usuário atual
-        const playerNameSpan = document.createElement('span');
-        playerNameSpan.className = 'player-name-text';
-        playerNameSpan.textContent = nome;
-
-        // Badge "Você" para o usuário atual
-        if (isCurrentUser) {
-            const youBadge = document.createElement('span');
-            youBadge.className = 'standings-you-badge';
-            youBadge.textContent = 'Você';
-            playerNameSpan.appendChild(youBadge);
+        if (canShowPhoto && u.fotoUrl) {
+            const imgAvatar = document.createElement('img');
+            imgAvatar.className = 'jogador-avatar';
+            imgAvatar.alt = 'Foto do jogador';
+            imgAvatar.src = u.fotoUrl;
+            imgAvatar.onerror = () => { imgAvatar.src = fallbackAvatarSvg; };
+            jogadorCell.appendChild(imgAvatar);
+        } else {
+            const avatarFallback = document.createElement('div');
+            avatarFallback.className = 'jogador-avatar-fallback';
+            avatarFallback.textContent = nome.charAt(0).toUpperCase();
+            jogadorCell.appendChild(avatarFallback);
         }
 
-        // Montar célula: logo time + nome time | foto jogador + nome jogador
-        tdTeam.appendChild(imgShield);
-        tdTeam.appendChild(teamNameSpan);
-        tdTeam.appendChild(separator);
-        tdTeam.appendChild(imgAvatar);
-        tdTeam.appendChild(playerNameSpan);
+        // Wrapper para nome + badge (garante espaço reservado)
+        const nomeWrapper = document.createElement('div');
+        nomeWrapper.className = 'jogador-nome-wrapper';
 
-        // Colunas: Pts, PJ, V, E, D, GM, GC, SG
-        const tdPts = document.createElement("td"); tdPts.className = "numeric"; tdPts.textContent = String(r.P || 0);
-        const tdPJ = document.createElement("td"); tdPJ.className = "numeric"; tdPJ.textContent = String((r.V || 0) + (r.E || 0) + (r.D || 0));
-        const tdV = document.createElement("td"); tdV.className = "numeric"; tdV.textContent = String(r.V || 0);
-        const tdE = document.createElement("td"); tdE.className = "numeric"; tdE.textContent = String(r.E || 0);
-        const tdD = document.createElement("td"); tdD.className = "numeric"; tdD.textContent = String(r.D || 0);
-        const tdGM = document.createElement("td"); tdGM.className = "numeric"; tdGM.textContent = String(r.GM || r.GP || 0);
-        const tdGC = document.createElement("td"); tdGC.className = "numeric"; tdGC.textContent = String(r.GC || 0);
-        const tdSG = document.createElement("td"); tdSG.className = "numeric"; tdSG.textContent = String(r.SG || 0);
+        // Nome do jogador
+        const playerNameSpan = document.createElement('span');
+        playerNameSpan.className = 'jogador-nome';
+        playerNameSpan.textContent = nome;
+        playerNameSpan.title = nome;
+        nomeWrapper.appendChild(playerNameSpan);
 
-        tr.appendChild(tdTeam);
+        // Badge "Você" para o usuário atual (dentro do wrapper)
+        if (isCurrentUser) {
+            const youBadge = document.createElement('span');
+            youBadge.className = 'badge-voce';
+            youBadge.textContent = 'Você';
+            nomeWrapper.appendChild(youBadge);
+        }
+        
+        jogadorCell.appendChild(nomeWrapper);
+        tdJogador.appendChild(jogadorCell);
+
+        // === COLUNAS NUMÉRICAS: Pts, PJ, V, E, D, GM, GC, SG ===
+        // Adicionando data-label para responsividade mobile (cards)
+        const tdPts = document.createElement("td"); 
+        tdPts.className = "col-numeric"; 
+        tdPts.setAttribute("data-label", "Pts");
+        tdPts.textContent = String(r.P || 0);
+        
+        const tdPJ = document.createElement("td"); 
+        tdPJ.className = "col-numeric"; 
+        tdPJ.setAttribute("data-label", "PJ");
+        tdPJ.textContent = String((r.V || 0) + (r.E || 0) + (r.D || 0));
+        
+        const tdV = document.createElement("td"); 
+        tdV.className = "col-numeric"; 
+        tdV.setAttribute("data-label", "V");
+        tdV.textContent = String(r.V || 0);
+        
+        const tdE = document.createElement("td"); 
+        tdE.className = "col-numeric"; 
+        tdE.setAttribute("data-label", "E");
+        tdE.textContent = String(r.E || 0);
+        
+        const tdD = document.createElement("td"); 
+        tdD.className = "col-numeric"; 
+        tdD.setAttribute("data-label", "D");
+        tdD.textContent = String(r.D || 0);
+        
+        const tdGM = document.createElement("td"); 
+        tdGM.className = "col-numeric"; 
+        tdGM.setAttribute("data-label", "GM");
+        tdGM.textContent = String(r.GM || r.GP || 0);
+        
+        const tdGC = document.createElement("td"); 
+        tdGC.className = "col-numeric"; 
+        tdGC.setAttribute("data-label", "GC");
+        tdGC.textContent = String(r.GC || 0);
+        
+        const tdSG = document.createElement("td"); 
+        tdSG.className = "col-numeric"; 
+        tdSG.setAttribute("data-label", "SG");
+        tdSG.textContent = String(r.SG || 0);
+
+        // Montar linha com colunas SEPARADAS
+        tr.appendChild(tdPos);
+        tr.appendChild(tdTime);
+        tr.appendChild(tdJogador);
         tr.appendChild(tdPts);
         tr.appendChild(tdPJ);
         tr.appendChild(tdV);
@@ -199,6 +276,7 @@ let unsubscribeAnnual = null;
 let unsubscribeChampionship = null;
 let unsubscribeActiveCamps = null;
 let unsubscribeUserStatus = null;
+let unsubscribeLatestResults = null;
 let activeCampsCache = [];
 let selectedChampionshipId = null;
 
@@ -218,6 +296,10 @@ function clearHomepageListeners() {
     if (unsubscribeUserStatus) {
         unsubscribeUserStatus();
         unsubscribeUserStatus = null;
+    }
+    if (unsubscribeLatestResults) {
+        unsubscribeLatestResults();
+        unsubscribeLatestResults = null;
     }
     if (unsubscribeTicker) {
         unsubscribeTicker();
@@ -372,6 +454,9 @@ async function initHomepage() {
     if (champControls) {
         champControls.classList.remove('hidden');
     }
+
+    // 4) Bloco de Últimas Partidas
+    initLatestResults();
 }
 
 let unsubscribeTicker = null;
@@ -552,6 +637,106 @@ function renderUserStatusBlock(status, elements) {
             `;
         }
     }
+}
+
+// ====================================================================
+// BLOCO DE ÚLTIMAS PARTIDAS
+// ====================================================================
+
+/**
+ * Inicializa o bloco de últimas partidas finalizadas na Home Page
+ * Exibe até 4 partidas com placar confirmado
+ */
+function initLatestResults() {
+    const container = document.getElementById('latest-results-container');
+    
+    if (!container) {
+        console.log('[main] Container de últimas partidas não encontrado');
+        return;
+    }
+    
+    // Cancela listener anterior se existir
+    if (unsubscribeLatestResults) {
+        unsubscribeLatestResults();
+        unsubscribeLatestResults = null;
+    }
+    
+    // Inicia listener em tempo real (limite de 4 partidas)
+    unsubscribeLatestResults = onUltimasPartidasFinalizadas((partidas) => {
+        console.log('[main] Últimas partidas atualizadas:', partidas.length);
+        
+        if (partidas.length === 0) {
+            container.innerHTML = renderEmptyLatestResults();
+            return;
+        }
+        
+        container.innerHTML = partidas.map(partida => renderLatestResultItem(partida)).join('');
+    }, 4);
+    
+    console.log('[main] Listener de últimas partidas iniciado');
+}
+
+/**
+ * Renderiza o estado vazio do bloco de últimas partidas
+ */
+function renderEmptyLatestResults() {
+    return `
+        <div class="latest-results-empty">
+            <i class="fas fa-futbol"></i>
+            <p>Nenhuma partida finalizada ainda.<br>Os resultados aparecerão aqui assim que as partidas forem concluídas.</p>
+        </div>
+    `;
+}
+
+/**
+ * Renderiza um item de resultado de partida
+ * @param {Object} partida - Dados da partida
+ * @returns {string} - HTML do item
+ */
+function renderLatestResultItem(partida) {
+    const fallbackShield = "data:image/svg+xml;utf8," + encodeURIComponent(
+        "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36'>" +
+        "<rect width='100%' height='100%' rx='50%' fill='%23606060'/>" +
+        "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='14' fill='%23ffffff'>T</text>" +
+        "</svg>"
+    );
+    
+    const timeALogo = partida.jogadorATimeLogo || fallbackShield;
+    const timeBLogo = partida.jogadorBTimeLogo || fallbackShield;
+    const timeANome = partida.jogadorATimeNome || 'Time A';
+    const timeBNome = partida.jogadorBTimeNome || 'Time B';
+    const jogadorANome = partida.jogadorANome || 'Jogador A';
+    const jogadorBNome = partida.jogadorBNome || 'Jogador B';
+    const placarA = partida.placarA ?? '-';
+    const placarB = partida.placarB ?? '-';
+    
+    // Determina vencedor
+    const isVitoriaA = placarA > placarB;
+    const isVitoriaB = placarB > placarA;
+    
+    return `
+        <div class="latest-result-item">
+            <div class="result-team-a ${isVitoriaA ? 'winner' : ''}">
+                <img class="team-logo" src="${timeALogo}" alt="${timeANome}" onerror="this.src='${fallbackShield}'">
+                <div class="team-info">
+                    <span class="team-name">${timeANome}</span>
+                    <span class="player-name">${jogadorANome}</span>
+                </div>
+            </div>
+            <div class="result-score">
+                <span class="score">${placarA}</span>
+                <span class="score-separator">x</span>
+                <span class="score">${placarB}</span>
+            </div>
+            <div class="result-team-b ${isVitoriaB ? 'winner' : ''}">
+                <img class="team-logo" src="${timeBLogo}" alt="${timeBNome}" onerror="this.src='${fallbackShield}'">
+                <div class="team-info">
+                    <span class="team-name">${timeBNome}</span>
+                    <span class="player-name">${jogadorBNome}</span>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // ====================================================================

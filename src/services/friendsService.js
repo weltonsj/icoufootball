@@ -379,6 +379,7 @@ export async function getFriendsList(userId) {
           nome: fullProfile.nome || data.nome || 'Usuário',
           nomeTime: fullProfile.nomeTime || fullProfile.timeName || data.nomeTime || 'Sem time',
           logoTime: fullProfile.logoTime || fullProfile.timeLogo || data.logoTime || '',
+          fotoUrl: fullProfile.fotoUrl || data.fotoUrl || '',
           estrelas: fullProfile.estrelas !== undefined ? fullProfile.estrelas : data.estrelas || 0,
           ultimoCampeao: fullProfile.ultimoCampeao !== undefined ? fullProfile.ultimoCampeao : data.ultimoCampeao || false,
           criadoEm: data.criadoEm

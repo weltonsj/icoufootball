@@ -55,6 +55,14 @@
       "fields": [
         { "fieldPath": "entregue", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "partidas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "placarStatus", "order": "ASCENDING" },
+        { "fieldPath": "dataFim", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

@@ -1018,61 +1018,113 @@ function adminInit() {
     tbodyUsers.innerHTML = '';
 
     if (!usersList.length) {
-      setTableState(tbodyUsers, { empty: true, colSpan: 7, message: 'Nenhum usuário encontrado com os filtros aplicados.' });
+      setTableState(tbodyUsers, { empty: true, colSpan: 5, message: 'Nenhum usuário encontrado com os filtros aplicados.' });
       return;
     }
 
+    // Fallback para avatar
+    const fallbackAvatarSvg = "data:image/svg+xml;utf8," + encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'>" +
+      "<circle cx='14' cy='14' r='13' fill='%23606060'/>" +
+      "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='11' fill='%23ffffff'>J</text>" +
+      "</svg>"
+    );
+
     usersList.forEach((u) => {
       const tr = document.createElement('tr');
-      const tdUser = document.createElement('td');
       
-      // Adiciona avatar se disponível
-      const userCell = document.createElement('div');
-      userCell.className = 'user-name-cell';
-      if (u.avatarUrl || u.photoURL) {
+      // === COLUNA: USUÁRIO (Avatar + Nome) ===
+      const tdUser = document.createElement('td');
+      tdUser.className = 'col-jogador';
+      tdUser.setAttribute('data-label', 'Usuário');
+      const jogadorCell = document.createElement('div');
+      jogadorCell.className = 'cell-jogador';
+      
+      // Avatar do jogador
+      if (u.avatarUrl || u.photoURL || u.fotoUrl) {
         const avatar = document.createElement('img');
-        avatar.className = 'user-avatar-small';
-        avatar.src = u.avatarUrl || u.photoURL;
+        avatar.className = 'jogador-avatar';
+        avatar.src = u.avatarUrl || u.photoURL || u.fotoUrl;
         avatar.alt = '';
-        avatar.onerror = () => { avatar.style.display = 'none'; };
-        userCell.appendChild(avatar);
+        avatar.onerror = () => { avatar.src = fallbackAvatarSvg; };
+        jogadorCell.appendChild(avatar);
+      } else {
+        const avatarFallback = document.createElement('div');
+        avatarFallback.className = 'jogador-avatar-fallback';
+        const nome = u.nome || u.email || u.id;
+        avatarFallback.textContent = nome.charAt(0).toUpperCase();
+        jogadorCell.appendChild(avatarFallback);
       }
+      
+      // Nome do jogador
       const nameSpan = document.createElement('span');
+      nameSpan.className = 'jogador-nome';
       nameSpan.textContent = u.nome || u.email || u.id;
-      userCell.appendChild(nameSpan);
-      tdUser.appendChild(userCell);
+      nameSpan.title = u.nome || u.email || u.id;
+      jogadorCell.appendChild(nameSpan);
+      tdUser.appendChild(jogadorCell);
 
+      // === COLUNA: TIME (Logo + Nome) ===
       const tdTime = document.createElement('td');
-      tdTime.textContent = u.nomeTime || u.timeName || u.timeId || '—';
+      tdTime.className = 'col-time';
+      tdTime.setAttribute('data-label', 'Time');
+      const timeCell = document.createElement('div');
+      timeCell.className = 'cell-time';
+      
+      const timeLogo = u.logoTime || u.timeLogo || '';
+      const timeNome = u.nomeTime || u.timeName || u.timeId || '';
+      
+      if (timeLogo) {
+        const imgLogo = document.createElement('img');
+        imgLogo.className = 'time-logo';
+        imgLogo.src = timeLogo;
+        imgLogo.alt = '';
+        imgLogo.onerror = () => { imgLogo.style.display = 'none'; };
+        timeCell.appendChild(imgLogo);
+      }
+      
+      const timeNameSpan = document.createElement('span');
+      timeNameSpan.className = 'time-nome';
+      timeNameSpan.textContent = timeNome || '—';
+      timeNameSpan.title = timeNome || 'Sem time';
+      timeCell.appendChild(timeNameSpan);
+      tdTime.appendChild(timeCell);
 
-      const tdStars = document.createElement('td');
-      tdStars.className = 'numeric';
-      tdStars.textContent = String(Number(u.estrelas || 0));
-
-      const tdCreated = document.createElement('td');
-      tdCreated.textContent = formatDateTime(u.criadoEm || u.createdAt || null);
-
+      // === COLUNA: STATUS ===
       const tdStatus = document.createElement('td');
+      tdStatus.className = 'col-status';
+      tdStatus.setAttribute('data-label', 'Status');
       const ativo = Object.prototype.hasOwnProperty.call(u, 'ativo') ? !!u.ativo : true;
       const statusBadge = document.createElement('span');
-      statusBadge.className = `status-badge ${ativo ? 'ativo' : 'inativo'}`;
+      statusBadge.className = `badge-status status-${ativo ? 'ativo' : 'inativo'}`;
       statusBadge.innerHTML = `<i class="fas fa-${ativo ? 'check-circle' : 'times-circle'}"></i> ${ativo ? 'Ativo' : 'Inativo'}`;
       tdStatus.appendChild(statusBadge);
 
+      // === COLUNA: FUNÇÃO ===
       const tdRole = document.createElement('td');
-      tdRole.textContent = u.funcao || 'Jogador';
+      tdRole.className = 'col-funcao';
+      tdRole.setAttribute('data-label', 'Função');
+      const funcaoNorm = normalizeRole(u.funcao || 'Jogador');
+      const funcaoBadge = document.createElement('span');
+      const funcaoClass = funcaoNorm.toLowerCase().replace('superadmin', 'superadmin');
+      funcaoBadge.className = `badge-funcao funcao-${funcaoClass}`;
+      funcaoBadge.textContent = funcaoNorm;
+      tdRole.appendChild(funcaoBadge);
 
+      // === COLUNA: AÇÕES (apenas ícones) ===
       const tdActions = document.createElement('td');
-      tdActions.className = 'admin-actions';
+      tdActions.className = 'col-actions';
+      const actionsCell = document.createElement('div');
+      actionsCell.className = 'cell-actions';
 
       // Botão Inativar/Reativar
       const btnToggle = document.createElement('button');
-      btnToggle.className = `btn-icon ${ativo ? 'action-orange' : 'action-green'}`;
+      btnToggle.className = `btn-table-action ${ativo ? 'btn-warning' : 'btn-success'}`;
       btnToggle.innerHTML = `<i class="fas fa-${ativo ? 'user-slash' : 'user-check'}"></i>`;
-      btnToggle.title = ativo ? 'Inativar' : 'Reativar';
+      btnToggle.title = ativo ? 'Inativar usuário' : 'Reativar usuário';
       if (!isSuperadmin(role) || u.id === user.uid || isRoleAdminLike(u.funcao)) {
         btnToggle.disabled = true;
-        btnToggle.title = isSuperadmin(role) ? 'Não é possível alterar este usuário' : 'Apenas Superadmin pode inativar/reativar';
+        btnToggle.title = isSuperadmin(role) ? 'Não é possível alterar este usuário' : 'Apenas Superadmin';
       }
 
       btnToggle.onclick = async () => {
@@ -1087,9 +1139,9 @@ function adminInit() {
 
       // Botão Editar
       const btnEdit = document.createElement('button');
-      btnEdit.className = 'btn-icon action-blue';
+      btnEdit.className = 'btn-table-action btn-edit';
       btnEdit.innerHTML = '<i class="fas fa-user-edit"></i>';
-      btnEdit.title = 'Editar';
+      btnEdit.title = 'Editar usuário';
 
       btnEdit.onclick = async () => {
         // Modal mais completo (função + permissões de gestão)
@@ -1212,7 +1264,7 @@ function adminInit() {
 
       // Botão Excluir (apenas Superadmin) - COM ANÁLISE DE IMPACTO
       const btnDelete = document.createElement('button');
-      btnDelete.className = 'btn-icon action-red';
+      btnDelete.className = 'btn-table-action btn-delete';
       btnDelete.innerHTML = '<i class="fas fa-trash-alt"></i>';
       btnDelete.title = isSuperadmin(role) ? 'Excluir' : 'Apenas Superadmin pode excluir usuários';
       if (!isSuperadmin(role) || u.id === user.uid || isRoleAdminLike(u.funcao)) {
@@ -1305,14 +1357,14 @@ function adminInit() {
         }
       };
 
-      tdActions.appendChild(btnToggle);
-      tdActions.appendChild(btnEdit);
-      tdActions.appendChild(btnDelete);
+      // Adiciona botões ao container de ações
+      actionsCell.appendChild(btnToggle);
+      actionsCell.appendChild(btnEdit);
+      actionsCell.appendChild(btnDelete);
+      tdActions.appendChild(actionsCell);
 
       tr.appendChild(tdUser);
       tr.appendChild(tdTime);
-      tr.appendChild(tdStars);
-      tr.appendChild(tdCreated);
       tr.appendChild(tdStatus);
       tr.appendChild(tdRole);
       tr.appendChild(tdActions);
@@ -1353,46 +1405,51 @@ function adminInit() {
     tbodyCamps.innerHTML = '';
 
     if (!campsList.length) {
-      setTableState(tbodyCamps, { empty: true, colSpan: 7, message: 'Nenhum campeonato encontrado com os filtros aplicados.' });
+      setTableState(tbodyCamps, { empty: true, colSpan: 4, message: 'Nenhum campeonato encontrado com os filtros aplicados.' });
       return;
     }
 
     campsList.forEach((c) => {
         const tr = document.createElement('tr');
+        
+        // === COLUNA: CAMPEONATO (Nome + Tipo) ===
         const tdC = document.createElement('td');
-        tdC.textContent = c.nome || c.id;
+        tdC.setAttribute('data-label', 'Campeonato');
+        tdC.innerHTML = `<strong>${c.nome || c.id}</strong><br><small style="color: var(--secondary-text)">${c.tipo || '—'}</small>`;
 
-        const tdTipo2 = document.createElement('td');
-        tdTipo2.textContent = c.tipo || '—';
-
+        // === COLUNA: STATUS ===
         const tdS = document.createElement('td');
+        tdS.className = 'col-status';
+        tdS.setAttribute('data-label', 'Status');
         const statusClass = (c.status || '').toLowerCase().replace(/\s+/g, '-');
         const statusBadge = document.createElement('span');
-        statusBadge.className = `status-badge ${statusClass === 'ativo' ? 'em-andamento' : statusClass}`;
+        const badgeStatusClass = statusClass === 'ativo' ? 'ativo' : 
+                                 statusClass === 'finalizado' ? 'finalizado' :
+                                 statusClass === 'cancelado' ? 'inativo' : 'pendente';
+        statusBadge.className = `badge-status status-${badgeStatusClass}`;
         const statusIcon = statusClass === 'ativo' || statusClass === 'em-andamento' ? 'play-circle' :
                           statusClass === 'finalizado' ? 'check-circle' :
                           statusClass === 'cancelado' ? 'times-circle' : 'clock';
         statusBadge.innerHTML = `<i class="fas fa-${statusIcon}"></i> ${c.status || '-'}`;
         tdS.appendChild(statusBadge);
 
-        const tdCriado2 = document.createElement('td');
-        tdCriado2.textContent = formatDateTime(c.criadoEm || null);
-
-        const tdFim2 = document.createElement('td');
-        tdFim2.textContent = formatDateTime(c.dataFim || c.finalizadoEm || null);
-
+        // === COLUNA: PARTICIPANTES ===
         const tdParticipantes = document.createElement('td');
-        tdParticipantes.className = 'numeric';
+        tdParticipantes.className = 'col-numeric';
+        tdParticipantes.setAttribute('data-label', 'Participantes');
         tdParticipantes.textContent = Array.isArray(c.participantesIds) ? c.participantesIds.length : '—';
 
+        // === COLUNA: AÇÕES (apenas ícones) ===
         const tdA = document.createElement('td');
-        tdA.className = 'admin-actions';
+        tdA.className = 'col-actions';
+        const actionsCell = document.createElement('div');
+        actionsCell.className = 'cell-actions';
 
-        // Botão Status (estatísticas)
+        // Botão Status (estatísticas) - sempre visível
         const btnStatus = document.createElement('button');
-        btnStatus.className = 'btn-icon action-blue';
+        btnStatus.className = 'btn-table-action btn-view';
         btnStatus.innerHTML = '<i class="fas fa-chart-bar"></i>';
-        btnStatus.title = 'Ver Status';
+        btnStatus.title = 'Ver estatísticas';
         btnStatus.onclick = async () => {
           const wrapper = document.createElement('div');
           
@@ -1431,6 +1488,7 @@ function adminInit() {
             <li><span class="info-label">Tipo</span><span class="info-value">${c.tipo || '—'}</span></li>
             <li><span class="info-label">Status</span><span class="info-value">${c.status || '—'}</span></li>
             <li><span class="info-label">Criado em</span><span class="info-value">${formatDateTime(c.criadoEm)}</span></li>
+            <li><span class="info-label">Finalizado em</span><span class="info-value">${formatDateTime(c.dataFim || c.finalizadoEm)}</span></li>
             <li><span class="info-label">Campeão</span><span class="info-value">${c.campeaoId || '—'}</span></li>
           `;
           
@@ -1440,11 +1498,12 @@ function adminInit() {
           await createOverlayForm({ title: `Status: ${c.nome || 'Campeonato'}`, bodyEl: wrapper, primaryText: 'Fechar', secondaryText: '' });
         };
 
+        // Botão Iniciar (apenas para ConvitesPendentes)
         if (c.status === 'ConvitesPendentes') {
           const btnStart = document.createElement('button');
-          btnStart.className = 'btn-icon action-orange';
-          btnStart.innerHTML = '<i class="fas fa-flag-checkered"></i>';
-          btnStart.title = 'Iniciar';
+          btnStart.className = 'btn-table-action btn-success';
+          btnStart.innerHTML = '<i class="fas fa-play"></i>';
+          btnStart.title = 'Iniciar campeonato';
           btnStart.onclick = async () => {
             const ok = await showConfirmModal('Iniciar campeonato', 'Iniciar este campeonato? Só será permitido se todos os convites estiverem confirmados.');
             if (!ok) return;
@@ -1455,13 +1514,15 @@ function adminInit() {
               showModal('error', 'Erro', e?.message || 'Falha ao iniciar campeonato.');
             }
           };
-
-          tdA.appendChild(btnStart);
-        } else if (c.status === 'Ativo') {
+          actionsCell.appendChild(btnStart);
+        } 
+        
+        // Botão Finalizar (apenas para Ativo)
+        if (c.status === 'Ativo') {
           const btnFin = document.createElement('button');
-          btnFin.className = 'btn-icon action-green';
+          btnFin.className = 'btn-table-action btn-success';
           btnFin.innerHTML = '<i class="fas fa-flag-checkered"></i>';
-          btnFin.title = 'Finalizar';
+          btnFin.title = 'Finalizar campeonato';
           btnFin.onclick = async () => {
             const ok = await showConfirmModal('Finalizar campeonato', 'Calcular campeão e finalizar? Esta ação será registrada no log.');
             if (!ok) return;
@@ -1472,20 +1533,18 @@ function adminInit() {
               showModal('error', 'Erro', e?.message || 'Falha ao finalizar campeonato.');
             }
           };
-
-          tdA.appendChild(btnFin);
+          actionsCell.appendChild(btnFin);
         }
 
-        // Botão Cancelar (apenas para campeonatos ativos ou pendentes) - COM ANÁLISE DE IMPACTO
+        // Botão Cancelar (apenas para ativos ou pendentes)
         if (c.status === 'Ativo' || c.status === 'ConvitesPendentes') {
           const btnCancel = document.createElement('button');
-          btnCancel.className = 'btn-icon action-orange';
+          btnCancel.className = 'btn-table-action btn-danger';
           btnCancel.innerHTML = '<i class="fas fa-ban"></i>';
-          btnCancel.title = 'Cancelar';
+          btnCancel.title = 'Cancelar campeonato';
           btnCancel.onclick = async () => {
             const wrapper = document.createElement('div');
             
-            // Warning
             const warning = document.createElement('div');
             warning.className = 'excluir-warning';
             warning.innerHTML = `
@@ -1497,11 +1556,9 @@ function adminInit() {
             `;
             wrapper.appendChild(warning);
 
-            // Análise de impacto (inicialmente com loading)
             const impactEl = createImpactAnalysisElement('Análise de Impacto', [], true);
             wrapper.appendChild(impactEl);
 
-            // Busca impacto em background
             getCancelChampionshipImpact(c.id, c).then(impact => {
               const items = [
                 { icon: 'users', label: 'Participantes afetados', value: impact.participantes, type: impact.participantes > 0 ? 'impact-warning' : 'impact-info' },
@@ -1512,7 +1569,6 @@ function adminInit() {
               impactEl.replaceWith(newImpactEl);
             });
 
-            // Opções de modo
             const optionsDiv = document.createElement('div');
             optionsDiv.innerHTML = `
               <p style="margin: 16px 0 12px 0; font-weight: 500;">Modo de cancelamento:</p>
@@ -1557,7 +1613,6 @@ function adminInit() {
                 motivoCancelamento: modo === 'notificar' ? 'Cancelado pelo administrador' : null
               });
               
-              // Registra no log
               await addLogEntry({
                 acao: 'cancelar_campeonato',
                 userIdResponsavel: user.uid,
@@ -1566,7 +1621,6 @@ function adminInit() {
               });
               
               if (modo === 'notificar' && Array.isArray(c.participantesIds)) {
-                // Envia notificações aos participantes
                 const { addDoc, collection } = await import('https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js');
                 for (const participanteId of c.participantesIds) {
                   await addDoc(collection(db, 'notificacoes'), {
@@ -1586,14 +1640,13 @@ function adminInit() {
               showModal('error', 'Erro', e?.message || 'Falha ao cancelar campeonato.');
             }
           };
-          
-          tdA.appendChild(btnCancel);
+          actionsCell.appendChild(btnCancel);
         }
 
-        // Botão PDF (apenas para finalizados ou ativos com tabela)
+        // Botão PDF (para finalizados ou ativos com tabela)
         if (c.status === 'Finalizado' || (c.status === 'Ativo' && Array.isArray(c.tabelaFinal))) {
           const btnPdf = document.createElement('button');
-          btnPdf.className = 'btn-icon action-green';
+          btnPdf.className = 'btn-table-action btn-success';
           btnPdf.innerHTML = '<i class="fas fa-file-pdf"></i>';
           btnPdf.title = 'Gerar PDF';
           btnPdf.onclick = async () => {
@@ -1611,16 +1664,15 @@ function adminInit() {
               showModal('error', 'Erro', e?.message || 'Falha ao gerar PDF.');
             }
           };
-          
-          tdA.appendChild(btnPdf);
+          actionsCell.appendChild(btnPdf);
         }
 
-        // Botão Excluir (apenas para cancelados ou finalizados)
+        // Botão Excluir (para cancelados ou finalizados)
         if (c.status === 'Cancelado' || c.status === 'Finalizado') {
           const btnDelete = document.createElement('button');
-          btnDelete.className = 'btn-icon action-red';
+          btnDelete.className = 'btn-table-action btn-delete';
           btnDelete.innerHTML = '<i class="fas fa-trash-alt"></i>';
-          btnDelete.title = 'Excluir';
+          btnDelete.title = 'Excluir campeonato';
           btnDelete.onclick = async () => {
             const ok = await showConfirmModal('Excluir campeonato', `Deseja excluir permanentemente o campeonato "${c.nome}"? Esta ação não pode ser desfeita.`);
             if (!ok) return;
@@ -1643,17 +1695,15 @@ function adminInit() {
               showModal('error', 'Erro', e?.message || 'Falha ao excluir campeonato.');
             }
           };
-          
-          tdA.appendChild(btnDelete);
+          actionsCell.appendChild(btnDelete);
         }
 
-        tdA.appendChild(btnStatus);
+        // Status sempre por último
+        actionsCell.appendChild(btnStatus);
+        tdA.appendChild(actionsCell);
 
         tr.appendChild(tdC);
-        tr.appendChild(tdTipo2);
         tr.appendChild(tdS);
-        tr.appendChild(tdCriado2);
-        tr.appendChild(tdFim2);
         tr.appendChild(tdParticipantes);
         tr.appendChild(tdA);
         tbodyCamps.appendChild(tr);
@@ -1672,7 +1722,7 @@ function adminInit() {
     const un = subscribeRodadasFixas(async (matches, err) => {
       if (err) {
         console.error('[admin] rodadas err', err);
-        setTableState(tbodyRodadas, { error: err, colSpan: 5, message: 'Erro ao carregar rodadas fixas.' });
+        setTableState(tbodyRodadas, { error: err, colSpan: 4, message: 'Erro ao carregar rodadas fixas.' });
         return;
       }
 
@@ -1686,35 +1736,100 @@ function adminInit() {
       tbodyRodadas.innerHTML = '';
 
       if (!list.length) {
-        setTableState(tbodyRodadas, { empty: true, colSpan: 5, message: 'Nenhum amistoso encontrado.' });
+        setTableState(tbodyRodadas, { empty: true, colSpan: 4, message: 'Nenhum amistoso encontrado.' });
         return;
       }
 
       list.forEach((m) => {
         const tr = document.createElement('tr');
 
+        // === COLUNA: PARTIDA (Time A vs Time B com jogadores) ===
         const tdMatch = document.createElement('td');
-        tdMatch.textContent = `${m.jogadorANome || m.jogadorAId} vs ${m.jogadorBNome || m.jogadorBId}`;
+        tdMatch.className = 'col-partida';
+        tdMatch.setAttribute('data-label', 'Partida');
+        
+        // Cria estrutura visual da partida
+        const matchCell = document.createElement('div');
+        matchCell.className = 'cell-time-jogador';
+        matchCell.style.flexWrap = 'wrap';
+        matchCell.style.gap = '6px';
+        
+        // Time A
+        const timeASection = document.createElement('span');
+        timeASection.className = 'time-section';
+        if (m.timeALogo) {
+          const logoA = document.createElement('img');
+          logoA.className = 'time-logo';
+          logoA.src = m.timeALogo;
+          logoA.alt = '';
+          logoA.onerror = () => { logoA.style.display = 'none'; };
+          timeASection.appendChild(logoA);
+        }
+        const nomeA = document.createElement('span');
+        nomeA.className = 'time-nome';
+        nomeA.textContent = m.jogadorANome || m.jogadorAId || 'Jogador A';
+        nomeA.title = m.jogadorANome || m.jogadorAId;
+        timeASection.appendChild(nomeA);
+        
+        // VS
+        const vs = document.createElement('span');
+        vs.style.color = 'var(--table-highlight)';
+        vs.style.fontWeight = '700';
+        vs.style.margin = '0 8px';
+        vs.textContent = 'vs';
+        
+        // Time B
+        const timeBSection = document.createElement('span');
+        timeBSection.className = 'time-section';
+        if (m.timeBLogo) {
+          const logoB = document.createElement('img');
+          logoB.className = 'time-logo';
+          logoB.src = m.timeBLogo;
+          logoB.alt = '';
+          logoB.onerror = () => { logoB.style.display = 'none'; };
+          timeBSection.appendChild(logoB);
+        }
+        const nomeB = document.createElement('span');
+        nomeB.className = 'time-nome';
+        nomeB.textContent = m.jogadorBNome || m.jogadorBId || 'Jogador B';
+        nomeB.title = m.jogadorBNome || m.jogadorBId;
+        timeBSection.appendChild(nomeB);
+        
+        matchCell.appendChild(timeASection);
+        matchCell.appendChild(vs);
+        matchCell.appendChild(timeBSection);
+        tdMatch.appendChild(matchCell);
 
+        // === COLUNA: DATA/HORA ===
         const tdDate = document.createElement('td');
+        tdDate.className = 'col-data';
+        tdDate.setAttribute('data-label', 'Data');
         tdDate.textContent = formatDateTime(m.dataPartida || m.criadoEm);
 
+        // === COLUNA: STATUS ===
         const tdStatus = document.createElement('td');
+        tdStatus.className = 'col-status';
+        tdStatus.setAttribute('data-label', 'Status');
         const statusClass = (m.placarStatus || m.status || '').toLowerCase().replace(/\s+/g, '-');
         const statusBadge = document.createElement('span');
-        statusBadge.className = `status-badge ${statusClass === 'confirmado' ? 'ativo' : statusClass === 'contestado' ? 'inativo' : 'pendente'}`;
-        statusBadge.textContent = m.placarStatus || m.status || '-';
+        const badgeClass = statusClass === 'confirmado' || statusClass === 'confirmed' ? 'ativo' : 
+                          statusClass === 'contestado' || statusClass === 'contested' ? 'inativo' : 'pendente';
+        statusBadge.className = `badge-status status-${badgeClass}`;
+        const statusIcon = badgeClass === 'ativo' ? 'check-circle' : 
+                          badgeClass === 'inativo' ? 'exclamation-triangle' : 'clock';
+        statusBadge.innerHTML = `<i class="fas fa-${statusIcon}"></i> ${m.placarStatus || m.status || 'Pendente'}`;
         tdStatus.appendChild(statusBadge);
 
-        const tdDetails = document.createElement('td');
-        tdDetails.textContent = String(m.placarStatus || '').toLowerCase() === 'contestado' ? (m.motivoContestacao || '-') : '-';
-
+        // === COLUNA: AÇÕES ===
         const tdActions = document.createElement('td');
-        tdActions.className = 'admin-actions';
+        tdActions.className = 'col-actions';
+        tdActions.setAttribute('data-label', 'Ações');
+        const actionsCell = document.createElement('div');
+        actionsCell.className = 'cell-actions';
 
         // Botão Forçar Placar - COM ANÁLISE DE IMPACTO
         const btnEdit = document.createElement('button');
-        btnEdit.className = 'btn-icon action-blue';
+        btnEdit.className = 'btn-table-action btn-view';
         btnEdit.innerHTML = '<i class="fas fa-edit"></i>';
         btnEdit.title = 'Resolver contestação / Forçar placar';
         btnEdit.onclick = async () => {
@@ -1796,7 +1911,7 @@ function adminInit() {
         };
 
         const btnDel = document.createElement('button');
-        btnDel.className = 'btn-icon action-red';
+        btnDel.className = 'btn-table-action btn-delete';
         btnDel.innerHTML = '<i class="fas fa-trash-alt"></i>';
         btnDel.title = 'Excluir';
         btnDel.onclick = async () => {
@@ -1810,13 +1925,13 @@ function adminInit() {
           }
         };
 
-        tdActions.appendChild(btnEdit);
-        tdActions.appendChild(btnDel);
+        actionsCell.appendChild(btnEdit);
+        actionsCell.appendChild(btnDel);
+        tdActions.appendChild(actionsCell);
 
         tr.appendChild(tdMatch);
         tr.appendChild(tdDate);
         tr.appendChild(tdStatus);
-        tr.appendChild(tdDetails);
         tr.appendChild(tdActions);
         tbodyRodadas.appendChild(tr);
       });
@@ -1848,21 +1963,61 @@ function adminInit() {
       const ids = Array.from(new Set(list.map((l) => l.userIdResponsavel).filter(Boolean)));
       const map = ids.length ? await getUserMap(ids) : new Map();
 
+      // Fallback para avatar
+      const fallbackAvatarSvg = "data:image/svg+xml;utf8," + encodeURIComponent(
+        "<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'>" +
+        "<circle cx='14' cy='14' r='13' fill='%23606060'/>" +
+        "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='11' fill='%23ffffff'>?</text>" +
+        "</svg>"
+      );
+
       tbodyLogs.innerHTML = '';
       list.forEach((l) => {
         const tr = document.createElement('tr');
 
+        // === COLUNA: DATA/HORA ===
         const tdDate = document.createElement('td');
+        tdDate.className = 'col-data';
+        tdDate.setAttribute('data-label', 'Data');
         tdDate.textContent = formatDateTime(l.data);
 
+        // === COLUNA: RESPONSÁVEL (como cell-jogador) ===
         const tdResp = document.createElement('td');
+        tdResp.className = 'col-jogador';
+        tdResp.setAttribute('data-label', 'Responsável');
         const u = l.userIdResponsavel ? (map.get(l.userIdResponsavel) || {}) : null;
-        tdResp.textContent = u ? (u.nome || u.email || l.userIdResponsavel) : 'Sistema';
+        
+        const respCell = document.createElement('div');
+        respCell.className = 'cell-jogador';
+        
+        if (u && (u.avatarUrl || u.photoURL || u.fotoUrl)) {
+          const avatar = document.createElement('img');
+          avatar.className = 'jogador-avatar';
+          avatar.src = u.avatarUrl || u.photoURL || u.fotoUrl;
+          avatar.alt = '';
+          avatar.onerror = () => { avatar.src = fallbackAvatarSvg; };
+          respCell.appendChild(avatar);
+        } else {
+          const avatarFallback = document.createElement('div');
+          avatarFallback.className = 'jogador-avatar-fallback';
+          avatarFallback.textContent = u ? (u.nome || 'S').charAt(0).toUpperCase() : 'S';
+          respCell.appendChild(avatarFallback);
+        }
+        
+        const respName = document.createElement('span');
+        respName.className = 'jogador-nome';
+        respName.textContent = u ? (u.nome || u.email || l.userIdResponsavel) : 'Sistema';
+        respCell.appendChild(respName);
+        tdResp.appendChild(respCell);
 
+        // === COLUNA: AÇÃO ===
         const tdAcao = document.createElement('td');
+        tdAcao.setAttribute('data-label', 'Ação');
         tdAcao.textContent = friendlyAction(l.acao);
 
+        // === COLUNA: DETALHES ===
         const tdDet = document.createElement('td');
+        tdDet.setAttribute('data-label', 'Detalhes');
         tdDet.textContent = friendlyDetails({ acao: l.acao, detalhes: l.detalhes, entidadeAfetada: l.entidadeAfetada });
 
         tr.appendChild(tdDate);

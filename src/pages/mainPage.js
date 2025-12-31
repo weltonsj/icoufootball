@@ -18,109 +18,153 @@ export const main = {
             </div>
         </section>
 
-        <section class="section-players">
-            <h3>PLAYERS EM DESTAQUE</h3>
-            <div class="players-ticker-viewport" id="players-ticker">
-                <div class="players-ticker-track" id="players-ticker-track"></div>
+        <section class="section-players icou-card">
+            <div class="card-header">
+                <i class="fas fa-star"></i>
+                <h3>PLAYERS EM DESTAQUE</h3>
+            </div>
+            <div class="card-content">
+                <div class="players-ticker-viewport" id="players-ticker">
+                    <div class="players-ticker-track" id="players-ticker-track"></div>
+                </div>
             </div>
         </section>
 
         <!-- RF12: Bloco Ao Vivo -->
-        <section class="section-live" id="section-live">
-            <h2><i class="fas fa-broadcast-tower"></i> AO VIVO</h2>
-            <div id="live-streams-container" class="live-streams-list">
-                <div class="live-loading">
-                    <i class="fas fa-spinner fa-spin"></i> Carregando transmissões...
+        <section class="section-live icou-card" id="section-live">
+            <div class="card-header">
+                <i class="fas fa-broadcast-tower"></i>
+                <h3>AO VIVO</h3>
+            </div>
+            <div class="card-content">
+                <div id="live-streams-container" class="live-streams-list">
+                    <div class="live-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Carregando transmissões...
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="section-standings">
-            <h2>CLASSIFICAÇÃO GERAL</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th class="numeric">Pts</th>
-                            <th class="numeric">PJ</th>
-                            <th class="numeric">V</th>
-                            <th class="numeric">E</th>
-                            <th class="numeric">D</th>
-                            <th class="numeric">GM</th>
-                            <th class="numeric">GC</th>
-                            <th class="numeric">SG</th>
-                        </tr>
-                    </thead>
-                    <tbody id="standings-body"></tbody>
-                </table>
+        <section class="section-standings icou-card">
+            <div class="card-header">
+                <i class="fas fa-trophy"></i>
+                <h3>CLASSIFICAÇÃO GERAL</h3>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table class="icou-table table-standings">
+                        <thead>
+                            <tr>
+                                <th class="col-pos">#</th>
+                                <th class="col-time" style="text-align: center;">Time</th>
+                                <th class="col-jogador">Jogador</th>
+                                <th class="col-numeric">Pts</th>
+                                <th class="col-numeric">PJ</th>
+                                <th class="col-numeric">V</th>
+                                <th class="col-numeric">E</th>
+                                <th class="col-numeric">D</th>
+                                <th class="col-numeric">GM</th>
+                                <th class="col-numeric">GC</th>
+                                <th class="col-numeric">SG</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-body"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
-        <section class="section-championship " id="section-championship-standings">
-            <h2 id="championship-standings-title">TABELA DO CAMPEONATO</h2>
-            <div class="championship-standings-controls" id="championship-standings-controls">
-                <div class="championship-filters-row">
-                    <div class="input-group">
-                        <label for="championship-year-select" class="sr-only">Selecione o ano</label>
-                        <select id="championship-year-select" aria-label="Selecione o ano">
-                            <option value="">Selecione o ano</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="championship-select" class="sr-only">Selecione o campeonato</label>
-                        <select id="championship-select" aria-label="Selecione o campeonato" disabled>
-                            <option value="">Selecione o campeonato</option>
-                        </select>
-                    </div>
-                </div>
+        <section class="section-championship icou-card" id="section-championship-standings">
+            <div class="card-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h3 id="championship-standings-title">TABELA DO CAMPEONATO</h3>
             </div>
-            <div class="table-container" id="championship-table-container">
-                <!-- Mensagem inicial antes de selecionar campeonato -->
-                <div class="empty-championship-state" id="empty-championship-state">
-                    <div class="empty-championship-icon">
-                        <i class="fas fa-calendar-alt"></i>
+            <div class="card-content">
+                <div class="championship-standings-controls" id="championship-standings-controls">
+                    <div class="championship-filters-row">
+                        <div class="input-group">
+                            <label for="championship-year-select" class="sr-only">Selecione o ano</label>
+                            <select id="championship-year-select" aria-label="Selecione o ano">
+                                <option value="">Selecione o ano</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="championship-select" class="sr-only">Selecione o campeonato</label>
+                            <select id="championship-select" aria-label="Selecione o campeonato" disabled>
+                                <option value="">Selecione o campeonato</option>
+                            </select>
+                        </div>
                     </div>
-                    <h4>Selecione um campeonato</h4>
-                    <p>Escolha o ano e o campeonato acima para visualizar a tabela de classificação detalhada.</p>
                 </div>
-                <table class="hidden" id="championship-table">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th class="numeric">Pts</th>
-                            <th class="numeric">PJ</th>
-                            <th class="numeric">V</th>
-                            <th class="numeric">E</th>
-                            <th class="numeric">D</th>
-                            <th class="numeric">GM</th>
-                            <th class="numeric">GC</th>
-                            <th class="numeric">SG</th>
-                        </tr>
-                    </thead>
-                    <tbody id="championship-standings-body"></tbody>
-                </table>
+                <div class="table-container" id="championship-table-container">
+                    <!-- Mensagem inicial antes de selecionar campeonato -->
+                    <div class="empty-championship-state" id="empty-championship-state">
+                        <div class="empty-championship-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h4>Selecione um campeonato</h4>
+                        <p>Escolha o ano e o campeonato acima para visualizar a tabela de classificação detalhada.</p>
+                    </div>
+                    <table class="icou-table table-standings hidden" id="championship-table">
+                        <thead>
+                            <tr>
+                                <th class="col-pos">#</th>
+                                <th class="col-time" style="text-align: center;">Time</th>
+                                <th class="col-jogador">Jogador</th>
+                                <th class="col-numeric">Pts</th>
+                                <th class="col-numeric">PJ</th>
+                                <th class="col-numeric">V</th>
+                                <th class="col-numeric">E</th>
+                                <th class="col-numeric">D</th>
+                                <th class="col-numeric">GM</th>
+                                <th class="col-numeric">GC</th>
+                                <th class="col-numeric">SG</th>
+                            </tr>
+                        </thead>
+                        <tbody id="championship-standings-body"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
-        <section class="section-stats">
-            <h3>ESTATÍSTICAS AVANÇADAS</h3>
-            <div class="stats-cards">
-                <div class="stat-card">
-                    <h4>CAMPEÃO ANTERIOR:</h4>
-                    <p id="stat-campeao-anterior">-</p>
+        <!-- Bloco de Últimas Partidas -->
+        <section class="section-latest-results icou-card" id="section-latest-results">
+            <div class="card-header">
+                <i class="fas fa-history"></i>
+                <h3>ÚLTIMAS PARTIDAS</h3>
+            </div>
+            <div class="card-content">
+                <div class="latest-results-container" id="latest-results-container">
+                    <div class="latest-results-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Carregando resultados...
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h4>MELHOR ATAQUE:</h4>
-                    <p id="stat-melhor-ataque">-</p>
-                </div>
-                <div class="stat-card">
-                    <h4>MELHOR DEFESA:</h4>
-                    <p id="stat-melhor-defesa">-</p>
-                </div>
-                <div class="stat-card">
-                    <h4>MAIOR GOLEADA:</h4>
-                    <p id="stat-maior-goleada">-</p>
+            </div>
+        </section>
+
+        <section class="section-stats icou-card">
+            <div class="card-header">
+                <i class="fas fa-chart-bar"></i>
+                <h3>ESTATÍSTICAS AVANÇADAS</h3>
+            </div>
+            <div class="card-content">
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <h4>CAMPEÃO ANTERIOR:</h4>
+                        <p id="stat-campeao-anterior">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>MELHOR ATAQUE:</h4>
+                        <p id="stat-melhor-ataque">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>MELHOR DEFESA:</h4>
+                        <p id="stat-melhor-defesa">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>MAIOR GOLEADA:</h4>
+                        <p id="stat-maior-goleada">-</p>
+                    </div>
                 </div>
             </div>
         </section>

@@ -4,6 +4,55 @@
    ====================================================================
 */
 
+/* ====================================================================
+   COMPONENTE PADRÃO: ICOU-CARD
+   Card padronizado com header interno (ícone + título)
+   ==================================================================== */
+.icou-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+/* Header do Card - Ícone + Título */
+.icou-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.icou-card .card-header i {
+    color: var(--highlight-color);
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+.icou-card .card-header h3,
+.icou-card .card-header h2 {
+    color: var(--text-color);
+    font-size: 1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Conteúdo do Card */
+.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+/* ====================================================================
+   ESTILOS ESPECÍFICOS DA PÁGINA DE PARTIDAS
+   ==================================================================== */
+
 /* Custom Modal Overlay */
 .custom-modal {
     position: fixed;
@@ -34,11 +83,6 @@
 }
 
 /* Main Content para Partidas */
-.app-content h3 {
-	margin-bottom: 10px;
-	font-size: .85em;
-}
-
 .matches-content {
     padding: 20px;
     display: flex;
@@ -47,34 +91,24 @@
 }
 
 /* ====================================================================
-   Seções de Cards
+   Seções de Cards - Estilos legado (mantidos para compatibilidade)
    ==================================================================== */
 .card-section {
     background-color: var(--secondary-bg);
-	border: 1px solid var(--chat-border-color);
+    border: 1px solid var(--chat-border-color);
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.card-section h2 {
-    color: var(--highlight-color);
-    font-size: 1em;
-    text-transform: uppercase;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.card-section h2 i {
-    font-size: 1.1em;
+/* Ajustes para .icou-card no matches */
+.matches-content .icou-card {
+    margin-bottom: 20px;
 }
 
 .section-subtitle {
     font-size: 0.85em;
     color: #888;
-    margin-top: -10px;
     margin-bottom: 15px;
 }
 
@@ -117,14 +151,14 @@
 .input-group select,
 .input-group input[type="url"],
 .input-group input[type="text"] {
-	padding: 12px 15px;
-	background-color: var(--input-bg);
-	border: 1px solid var(--input-border);
-	border-radius: 8px;
-	color: var(--text-color);
-	font-size: 1em;
-	width: 100%;
-	outline: none;
+    padding: 12px 15px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1em;
+    width: 100%;
+    outline: none;
     transition: border-color 0.3s ease;
 }
 
@@ -208,7 +242,8 @@
 
 .score-input-item input {
     width: 100%;
-    max-width: 80px; /* Largura fixa para input de placar */
+    max-width: 80px;
+    /* Largura fixa para input de placar */
     padding: 12px;
     text-align: center;
     background-color: var(--input-bg);
@@ -220,7 +255,7 @@
 }
 
 #linkInput {
-	width: 100%;
+    width: 100%;
     height: 2em;
     padding: .25em;
     border-radius: 5px;
@@ -255,7 +290,7 @@
 }
 
 .btn-primary:hover {
-	background-color: var(--table-header-bg);
+    background-color: var(--table-header-bg);
 }
 
 .btn-secondary {
@@ -278,11 +313,11 @@
 
 /* Tabela/Lista de Partidas */
 .match-list {
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
     gap: 15px;
-	max-height: 600px;
-    overflow: auto;
+    /* max-height: 600px; */
+    /* overflow: auto; */
 }
 
 .match-item {
@@ -293,7 +328,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    border-left: 5px solid; /* Borda lateral para status */
+    border-left: 5px solid;
+    /* Borda lateral para status */
 }
 
 /* Header do match-item com data e tipo */
@@ -438,22 +474,33 @@
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .match-item .match-player-info {
         justify-content: center !important;
         width: 100%;
     }
-    
+
     .match-item .match-team-name,
     .match-item .match-player-name {
         max-width: 100px;
     }
 }
 
-.pending-confirmation { border-color: var(--status-pending); }
-.awaiting-opponent { border-color: var(--highlight-color); }
-.contested-final { border-color: var(--status-contested); }
-.confirmed-item { border-color: var(--status-confirmed); }
+.pending-confirmation {
+    border-color: var(--status-pending);
+}
+
+.awaiting-opponent {
+    border-color: var(--highlight-color);
+}
+
+.contested-final {
+    border-color: var(--status-contested);
+}
+
+.confirmed-item {
+    border-color: var(--status-confirmed);
+}
 
 .match-info {
     display: flex;
@@ -477,7 +524,8 @@
     color: var(--highlight-color);
 }
 
-.score-pending-value, .score-confirmed-value {
+.score-pending-value,
+.score-confirmed-value {
     margin: 0 5px;
     font-weight: bold;
     color: var(--text-color);
@@ -494,10 +542,21 @@
     color: var(--primary-bg);
 }
 
-.awaiting-badge { background-color: var(--highlight-color); }
-.pending-badge { background-color: var(--status-pending); }
-.contested-badge { background-color: var(--status-contested); }
-.confirmed-badge { background-color: var(--status-confirmed); }
+.awaiting-badge {
+    background-color: var(--highlight-color);
+}
+
+.pending-badge {
+    background-color: var(--status-pending);
+}
+
+.contested-badge {
+    background-color: var(--status-contested);
+}
+
+.confirmed-badge {
+    background-color: var(--status-confirmed);
+}
 
 
 /* Ações de Fair Play */
@@ -518,7 +577,8 @@
     font-size: 0.85em;
     cursor: pointer;
     transition: all 0.3s ease;
-    flex-grow: 1; /* Ocupa espaço igual */
+    flex-grow: 1;
+    /* Ocupa espaço igual */
 }
 
 .btn-action i {
@@ -577,8 +637,15 @@
 }
 
 @keyframes pulse-dot {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 /*
@@ -587,17 +654,55 @@
    ====================================================================
 */
 @media (max-width: 1360px) {
-	.matches-content {
-		grid-template-columns: .75fr 2.25fr; /* Coluna 1: Forms, Coluna 2: Lista de Partidas */
-	}
+    .matches-content {
+        grid-template-columns: .75fr 2.25fr;
+        /* Coluna 1: Forms, Coluna 2: Lista de Partidas */
+    }
 }
 
 @media (min-width: 768px) {
     .matches-content {
         display: grid;
+        grid-template-areas: 
+            "filters filters"
+            "match result"
+            "fairplay opponent"
+            "contested confirmed"
+        ;
+        grid-template-columns: 1fr 1.5fr;
+        grid-template-rows: 150px 350px 350px 350px;
         gap: 10px;
         padding: 10px;
-		height: 100vh;
+        /* height: 100vh; */
+    }
+
+    /* Grid Area */
+    .section-filters {
+        grid-area: filters;
+    }
+
+    .section-create-match {
+        grid-area: match;
+    }
+
+    .section-insert-result {
+        grid-area: result;
+    }
+
+    .section-pending-fairplay {
+        grid-area: fairplay;
+    }
+
+    .section-awaiting-opponent {
+        grid-area: opponent;
+    }
+
+    .section-contested {
+        grid-area: contested;
+    }
+
+    .section-confirmed {
+        grid-area: confirmed;
     }
 
     .section-new-match {
@@ -613,36 +718,39 @@
     .score-form {
         margin-bottom: 10px;
     }
-    
+
     .transmission-form {
         margin-top: 0;
     }
-    
+
     .match-item {
-        flex-direction: row; /* Coloca info e ações na mesma linha */
+        flex-direction: row;
+        /* Coloca info e ações na mesma linha */
         justify-content: space-between;
         align-items: center;
         /* padding: 15px 20px; */
-		font-size: .95em;
+        font-size: .95em;
     }
-    
+
     .match-info {
         flex-direction: row;
         align-items: center;
         gap: 20px;
     }
-    
+
     .match-date-time {
-        flex-shrink: 0; /* Não encolhe */
+        flex-shrink: 0;
+        /* Não encolhe */
     }
 
     .match-details {
         flex-grow: 1;
         min-width: 150px;
     }
-    
+
     .match-status-badge {
-        order: -1; /* Move o badge para a esquerda */
+        order: -1;
+        /* Move o badge para a esquerda */
         margin-right: 15px;
     }
 
@@ -651,17 +759,18 @@
         border-top: none;
         margin-top: 0;
         flex-shrink: 0;
-        width: 300px; /* Largura fixa para os botões de ação */
+        width: 300px;
+        /* Largura fixa para os botões de ação */
     }
-    
+
     .btn-action {
         padding: 8px 15px;
     }
-    
+
     .score-input-item input {
         max-width: 100px;
     }
-    
+
     .input-group select {
         padding: 12px 15px;
         background-color: var(--input-bg);
@@ -671,7 +780,7 @@
         font-size: 1em;
         width: 100%;
         outline: none;
-		margin-bottom: 0;
+        margin-bottom: 0;
     }
 }
 
@@ -955,29 +1064,29 @@
     .form-row {
         flex-direction: column;
     }
-    
+
     .form-row .input-group {
         min-width: 100%;
     }
-    
+
     .platform-group {
         max-width: 100%;
     }
-    
+
     .placar-display {
         gap: 10px;
     }
-    
+
     .placar-input {
         width: 60px !important;
         height: 50px;
         font-size: 1.5em !important;
     }
-    
+
     .placar-x {
         font-size: 1.5em;
     }
-    
+
     .match-result-indicator {
         width: 100%;
         justify-content: center;
@@ -994,35 +1103,35 @@
         display: flex;
         flex-direction: column;
     }
-    
+
     .card-section {
         padding: 16px;
         border-radius: 12px;
     }
-    
+
     .card-section h2 {
         font-size: 1.1rem;
         margin-bottom: 14px;
         font-weight: 700;
     }
-    
+
     .section-subtitle {
         font-size: 0.9rem;
         margin-bottom: 14px;
         line-height: 1.4;
     }
-    
+
     /* Create match form - MAIOR */
     .create-match-form {
         gap: 16px;
     }
-    
+
     .input-group label {
         font-size: 0.9rem;
         margin-bottom: 8px;
         font-weight: 600;
     }
-    
+
     .input-group select,
     .input-group input[type="url"],
     .input-group input[type="text"] {
@@ -1031,54 +1140,54 @@
         min-height: 48px;
         border-radius: 10px;
     }
-    
+
     .streaming-row {
         padding: 14px;
         border-radius: 10px;
     }
-    
+
     .btn-create-match {
         padding: 14px 20px;
         font-size: 1rem;
         min-height: 48px;
         border-radius: 10px;
     }
-    
+
     /* Score inputs - MAIOR */
     .score-inputs-group {
         margin: 18px 12px;
         gap: 12px;
     }
-    
+
     .score-input-item {
         flex: 1;
     }
-    
+
     .score-input-item label {
         font-size: 0.85rem;
         margin-bottom: 6px;
     }
-    
+
     .score-input-item input {
         max-width: 70px;
         padding: 12px;
         font-size: 1.15rem;
         border-radius: 8px;
     }
-    
+
     .score-separator {
         font-size: 1.4em;
     }
-    
+
     #linkInput {
         font-size: 1rem;
     }
-    
+
     /* Match list - MAIOR */
     .match-list {
         gap: 12px;
     }
-    
+
     .match-item {
         padding: 14px;
         flex-direction: column;
@@ -1086,37 +1195,37 @@
         gap: 12px;
         border-radius: 10px;
     }
-    
+
     .match-info {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-    
+
     .match-date-time {
         font-size: 0.9rem;
     }
-    
+
     .match-details h4 {
         font-size: 1rem;
         line-height: 1.4;
     }
-    
+
     .match-score {
         font-size: 0.95rem;
     }
-    
+
     .match-status-badge {
         font-size: 0.85rem;
         padding: 6px 10px;
         border-radius: 6px;
     }
-    
+
     .match-actions {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .btn-action {
         width: 100%;
         justify-content: center;
@@ -1125,52 +1234,52 @@
         min-height: 44px;
         border-radius: 8px;
     }
-    
+
     /* Stream indicator */
     .stream-indicator {
         margin-left: 0;
         margin-top: 10px;
         font-size: 0.9rem;
     }
-    
+
     /* Custom Modal - MAIOR */
     .custom-modal .modal-content {
         width: 95%;
         margin: 10px;
         border-radius: 14px;
     }
-    
+
     .modal-header {
         padding: 18px;
     }
-    
+
     .modal-header h3 {
         font-size: 1.1rem;
     }
-    
+
     .modal-body {
         padding: 18px;
         font-size: 1rem;
     }
-    
+
     .modal-footer {
         padding: 18px;
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .modal-footer button {
         width: 100%;
         min-height: 48px;
         font-size: 1rem;
         border-radius: 10px;
     }
-    
+
     /* Placar display */
     .placar-display {
         gap: 10px;
     }
-    
+
     /* Textarea */
     #motivoContestacao {
         font-size: 1rem;
@@ -1190,36 +1299,36 @@
         display: flex;
         flex-direction: column;
     }
-    
+
     .card-section h2 {
         font-size: 1.15rem;
     }
-    
+
     .input-group label {
         font-size: 0.95rem;
     }
-    
+
     .input-group select,
     .input-group input[type="url"],
     .input-group input[type="text"] {
         font-size: 1rem;
         min-height: 50px;
     }
-    
+
     .form-row {
         flex-direction: row;
     }
-    
+
     .match-item {
         flex-direction: row;
         flex-wrap: wrap;
         padding: 16px;
     }
-    
+
     .match-details h4 {
         font-size: 1.05rem;
     }
-    
+
     .match-actions {
         width: 100%;
         flex-direction: row;
@@ -1228,12 +1337,12 @@
         border-top: 1px solid var(--border-color);
         margin-top: 12px;
     }
-    
+
     .btn-action {
         min-height: 46px;
         font-size: 0.95rem;
     }
-    
+
     .modal-footer button {
         min-height: 50px;
     }
@@ -1248,7 +1357,7 @@
         gap: 15px;
         padding: 20px;
     }
-    
+
     .match-actions {
         width: 250px;
     }
@@ -1572,8 +1681,13 @@
 }
 
 @keyframes toastProgress {
-    from { width: 100%; }
-    to { width: 0%; }
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
 }
 
 /* ====================================================================
@@ -1585,9 +1699,18 @@
 }
 
 @keyframes fairplayPulse {
-    0% { transform: scale(1); }
-    30% { transform: scale(1.02); box-shadow: 0 0 20px rgba(40, 167, 69, 0.4); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    30% {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(40, 167, 69, 0.4);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .fairplay-confirmed-badge {
@@ -1610,9 +1733,19 @@
 }
 
 @keyframes badgePop {
-    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-    70% { transform: translate(-50%, -50%) scale(1.1); }
-    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+
+    70% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
 }
 
 /* Ações Fair Play destacadas */
@@ -1652,31 +1785,31 @@
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .filter-group {
         width: 100%;
         min-width: 100%;
     }
-    
+
     .filter-group-search {
         min-width: 100%;
     }
-    
+
     .btn-clear-filters {
         width: 100%;
         justify-content: center;
     }
-    
+
     .filtros-ativos-container {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .adversario-stats {
         flex-direction: column;
         gap: 8px;
     }
-    
+
     .fairplay-toast-container {
         top: auto;
         bottom: 80px;
@@ -1684,15 +1817,15 @@
         left: 10px;
         max-width: none;
     }
-    
+
     .fairplay-toast {
         transform: translateY(100%);
     }
-    
+
     .fairplay-toast-show {
         transform: translateY(0);
     }
-    
+
     .fairplay-toast-hide {
         transform: translateY(100%);
     }

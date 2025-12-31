@@ -583,35 +583,35 @@ function formatDate(timestamp) {
 /**
  * Retorna classe CSS e ícone baseado no status do placar
  * @param {string} placarStatus - Status do placar
- * @returns {Object} { classe, icone, texto }
+ * @returns {Object} { classe, badgeClasse, icone, texto }
  */
 function getStatusInfo(placarStatus) {
     switch (placarStatus) {
         case STATUS_PLACAR.CONFIRMADO:
             return {
                 classe: 'confirmed',
-                badgeClasse: 'confirmed-badge',
+                badgeClasse: 'status-confirmado',
                 icone: 'fa-check-circle',
                 texto: 'Confirmado'
             };
         case STATUS_PLACAR.PENDENTE:
             return {
                 classe: 'pending',
-                badgeClasse: 'pending-badge',
+                badgeClasse: 'status-pendente',
                 icone: 'fa-hourglass-half',
                 texto: 'Pendente'
             };
         case STATUS_PLACAR.CONTESTADO:
             return {
                 classe: 'contested',
-                badgeClasse: 'contested-badge',
+                badgeClasse: 'status-contestado',
                 icone: 'fa-exclamation-triangle',
                 texto: 'Contestado'
             };
         case STATUS_PLACAR.SEM_PLACAR:
             return {
                 classe: 'awaiting',
-                badgeClasse: 'awaiting-badge',
+                badgeClasse: 'status-aguardando',
                 icone: 'fa-clock',
                 texto: 'Aguardando'
             };
@@ -626,8 +626,8 @@ function getStatusInfo(placarStatus) {
 }
 
 /**
- * Renderiza uma partida individual com formato detalhado
- * Formato: data + logo time + nome time + | + foto jogador + nome jogador + placar/vs + adversário
+ * Renderiza uma partida no padrão unificado
+ * Estrutura: [TIME + JOGADOR] PLACAR [TIME + JOGADOR]
  * @param {Object} partida - Dados da partida
  * @param {string} userId - ID do usuário atual
  * @returns {string} HTML da partida
@@ -653,11 +653,20 @@ function renderMatchItem(partida, userId) {
     const jogadorBNome = partida.jogadorBNome || 'Jogador B';
     
     // Monta o placar ou "VS"
-    let placarDisplay = '';
+    let placarHtml = '';
     if (partida.placarA !== null && partida.placarB !== null) {
-        placarDisplay = `<span class="match-score">${partida.placarA} x ${partida.placarB}</span>`;
+        const isContestado = partida.placarStatus === STATUS_PLACAR.CONTESTADO;
+        placarHtml = `
+            <div class="partida-placar">
+                <span class="partida-placar-valor${isContestado ? ' contestado' : ''}">${partida.placarA} x ${partida.placarB}</span>
+            </div>
+        `;
     } else {
-        placarDisplay = `<span class="match-vs">VS</span>`;
+        placarHtml = `
+            <div class="partida-placar">
+                <span class="partida-placar-vs">VS</span>
+            </div>
+        `;
     }
     
     // Indicador de transmissão ao vivo
@@ -665,7 +674,7 @@ function renderMatchItem(partida, userId) {
     if (partida.linkTransmissao && partida.status === STATUS_PARTIDA.EM_ANDAMENTO) {
         const plataforma = PLATAFORMAS_STREAMING[partida.plataformaStreaming] || PLATAFORMAS_STREAMING.outro;
         liveIndicator = `
-            <span class="live-indicator" title="Transmissão ao vivo">
+            <span class="partida-stream-badge" title="Transmissão ao vivo">
                 <i class="${plataforma.icone}" style="color: ${plataforma.cor}"></i>
                 <span class="live-badge pulse">AO VIVO</span>
             </span>
@@ -674,41 +683,77 @@ function renderMatchItem(partida, userId) {
     
     // Label de tipo de partida: Campeonato ou Amistoso
     const tipoPartida = partida.campeonatoId ? 'Campeonato' : 'Amistoso';
-    const tipoClasse = partida.campeonatoId ? 'match-type-campeonato' : 'match-type-amistoso';
-    const tipoLabel = `<span class="match-type-label ${tipoClasse}">${tipoPartida}</span>`;
+    const tipoClasse = partida.campeonatoId ? 'tipo-campeonato' : 'tipo-amistoso';
+    
+    // Determina resultado para cards confirmados
+    let resultadoClass = '';
+    let resultadoHtml = '';
+    if (partida.placarStatus === STATUS_PLACAR.CONFIRMADO && partida.placarA !== null) {
+        const isJogadorA = partida.jogadorAId === userId;
+        const placarUsuario = isJogadorA ? partida.placarA : partida.placarB;
+        const placarAdversario = isJogadorA ? partida.placarB : partida.placarA;
+        
+        if (placarUsuario > placarAdversario) {
+            resultadoClass = 'resultado-win';
+            resultadoHtml = '<span class="partida-resultado partida-resultado-win"><i class="fas fa-trophy"></i> VITÓRIA</span>';
+        } else if (placarUsuario < placarAdversario) {
+            resultadoClass = 'resultado-loss';
+            resultadoHtml = '<span class="partida-resultado partida-resultado-loss"><i class="fas fa-times-circle"></i> DERROTA</span>';
+        } else {
+            resultadoClass = 'resultado-draw';
+            resultadoHtml = '<span class="partida-resultado partida-resultado-draw"><i class="fas fa-handshake"></i> EMPATE</span>';
+        }
+    }
     
     return `
-        <article class="match-item ${statusInfo.classe}" data-partida-id="${partida.id}">
-            <div class="match-header">
-                <span class="match-date">${dataPartida}</span>
-                ${tipoLabel}
+        <article class="partida-card ${resultadoClass}" data-partida-id="${partida.id}">
+            <div class="partida-card-header">
+                <span class="partida-data">${dataPartida}</span>
+                <span class="partida-tipo-badge ${tipoClasse}">${tipoPartida}</span>
             </div>
-            <div class="match-teams-detailed">
-                <!-- Jogador A -->
-                <div class="match-player-info">
-                    <img src="${jogadorATimeLogo}" alt="Logo ${jogadorATimeNome}" class="match-team-logo" onerror="this.src='${fallbackTeamLogo}'">
-                    <span class="match-team-name">${jogadorATimeNome}</span>
-                    <span class="match-separator">|</span>
-                    <img src="${jogadorAFoto}" alt="Foto ${jogadorANome}" class="match-player-avatar" onerror="this.src='${fallbackAvatar}'">
-                    <span class="match-player-name">${jogadorANome}</span>
+            <div class="partida-card-body">
+                <!-- Lado A: Time + Jogador -->
+                <div class="partida-lado lado-a">
+                    <div class="partida-time">
+                        <img src="${jogadorATimeLogo}" alt="Logo ${jogadorATimeNome}" class="partida-time-logo" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="partida-time-logo-fallback" style="display:none;">T</div>
+                        <span class="partida-time-nome" title="${jogadorATimeNome}">${jogadorATimeNome}</span>
+                    </div>
+                    <div class="partida-jogador">
+                        <img src="${jogadorAFoto}" alt="Foto ${jogadorANome}" class="partida-jogador-avatar" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="partida-jogador-avatar-fallback" style="display:none;">${jogadorANome.charAt(0).toUpperCase()}</div>
+                        <span class="partida-jogador-nome" title="${jogadorANome}">${jogadorANome}</span>
+                    </div>
                 </div>
                 
-                ${placarDisplay}
+                ${placarHtml}
                 
-                <!-- Jogador B -->
-                <div class="match-player-info">
-                    <img src="${jogadorBTimeLogo}" alt="Logo ${jogadorBTimeNome}" class="match-team-logo" onerror="this.src='${fallbackTeamLogo}'">
-                    <span class="match-team-name">${jogadorBTimeNome}</span>
-                    <span class="match-separator">|</span>
-                    <img src="${jogadorBFoto}" alt="Foto ${jogadorBNome}" class="match-player-avatar" onerror="this.src='${fallbackAvatar}'">
-                    <span class="match-player-name">${jogadorBNome}</span>
+                <!-- Lado B: Time + Jogador -->
+                <div class="partida-lado lado-b">
+                    <div class="partida-time">
+                        <img src="${jogadorBTimeLogo}" alt="Logo ${jogadorBTimeNome}" class="partida-time-logo" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="partida-time-logo-fallback" style="display:none;">T</div>
+                        <span class="partida-time-nome" title="${jogadorBTimeNome}">${jogadorBTimeNome}</span>
+                    </div>
+                    <div class="partida-jogador">
+                        <img src="${jogadorBFoto}" alt="Foto ${jogadorBNome}" class="partida-jogador-avatar" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="partida-jogador-avatar-fallback" style="display:none;">${jogadorBNome.charAt(0).toUpperCase()}</div>
+                        <span class="partida-jogador-nome" title="${jogadorBNome}">${jogadorBNome}</span>
+                    </div>
                 </div>
             </div>
-            <div class="match-meta">
-                ${liveIndicator}
-                <span class="match-status badge ${statusInfo.badgeClasse}">
-                    <i class="fas ${statusInfo.icone}"></i> ${statusInfo.texto}
-                </span>
+            <div class="partida-card-footer">
+                <div>
+                    ${liveIndicator}
+                    <span class="partida-status-badge ${statusInfo.badgeClasse}">
+                        <i class="fas ${statusInfo.icone}"></i> ${statusInfo.texto}
+                    </span>
+                </div>
+                ${resultadoHtml}
             </div>
         </article>
     `;

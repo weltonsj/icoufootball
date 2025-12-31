@@ -3,6 +3,55 @@
    ====================================================================
 */
 
+/* ====================================================================
+   COMPONENTE PADRÃO: ICOU-CARD
+   Card padronizado com header interno (ícone + título)
+   ==================================================================== */
+.icou-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    /* margin-bottom: 24px; */
+    overflow: hidden;
+}
+
+/* Header do Card - Ícone + Título */
+.icou-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.icou-card .card-header i {
+    color: var(--highlight-color);
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+.icou-card .card-header h3,
+.icou-card .card-header h2 {
+    color: var(--text-color);
+    font-size: 1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Conteúdo do Card */
+.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+/* ====================================================================
+   ESTILOS ESPECÍFICOS DO CHAT
+   ==================================================================== */
+
 /* Main Content para Chat */
 .app-content {
 	gap: 0;
@@ -15,23 +64,19 @@
     flex-grow: 1;
 }
 
-/* Chat Sidebar (Lista de Conversas) */
-.chat-sidebar {
-    background-color: var(--secondary-bg);
+/* Chat Sidebar (Lista de Conversas) - usando .icou-card */
+.chat-sidebar.icou-card {
     border-radius: 0; /* Sem bordas em mobile para parecer fullscreen */
-    box-shadow: none;
-    padding: 20px;
+    margin-bottom: 0;
     border-bottom: 1px solid var(--border-color);
     flex-shrink: 0; /* Não encolhe */
 }
 
-.chat-sidebar h2 {
-    text-align: left;
-    margin-bottom: 20px;
-    color: var(--text-color);
-    text-transform: uppercase;
-    font-size: 1.1em;
+.chat-sidebar.icou-card .card-content {
+    padding: 10px 20px 20px 20px;
 }
+
+/* Título h2 agora está no card-header */
 
 .search-chat {
     position: relative;

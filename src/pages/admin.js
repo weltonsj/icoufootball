@@ -47,22 +47,23 @@ export const admin = {
 
             <div class="admin-table-group">
                 <!-- GESTÃO DE AMISTOSOS -->
-                <div class="card-section admin-card-table">
-                    <div class="card-header-with-action">
-                        <h3 class="card-title">Gestão de Amistosos</h3>
+                <div class="admin-card-table icou-card">
+                    <div class="card-header">
+                        <i class="fas fa-gamepad"></i>
+                        <h3>GESTÃO DE AMISTOSOS</h3>
                         <button class="btn-add-new" id="btn-novo-amistoso">
                             <i class="fas fa-plus"></i> Novo Amistoso
                         </button>
                     </div>
+                    <div class="card-content">
                     <div class="table-container">
-                        <table>
+                        <table class="icou-table table-admin">
                             <thead>
                                 <tr>
                                     <th>Partida</th>
-                                    <th>Data/Hora</th>
-                                    <th>Status</th>
-                                    <th>Detalhes</th>
-                                    <th class="col-acoes">Ações</th>
+                                    <th class="col-data">Data</th>
+                                    <th class="col-status">Status</th>
+                                    <th class="col-actions">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-amistosos-tbody">
@@ -70,16 +71,19 @@ export const admin = {
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
 
                 <!-- GESTÃO DE USUÁRIOS -->
-                <div class="card-section admin-card-table">
-                    <div class="card-header-with-action">
-                        <h3 class="card-title">Gestão de Usuários</h3>
+                <div class="admin-card-table icou-card">
+                    <div class="card-header">
+                        <i class="fas fa-users-cog"></i>
+                        <h3>GESTÃO DE USUÁRIOS</h3>
                         <span class="admin-tooltip" data-tooltip="Apenas Superadmin pode excluir ou inativar usuários">
                             <i class="fas fa-info-circle"></i>
                         </span>
                     </div>
+                    <div class="card-content">
                     
                     <!-- Barra de Filtros de Usuários -->
                     <div class="admin-filters-bar" id="usersFiltersBar">
@@ -119,16 +123,14 @@ export const admin = {
                     <div class="filter-results-info" id="usersResultsInfo"></div>
                     
                     <div class="table-container">
-                        <table>
+                        <table class="icou-table table-admin">
                             <thead>
                                 <tr>
                                     <th>Usuário</th>
                                     <th>Time</th>
-                                    <th class="numeric">Estrelas</th>
-                                    <th>Criado em</th>
-                                    <th>Status</th>
-                                    <th>Função</th>
-                                    <th class="col-acoes-lg">Ações</th>
+                                    <th class="col-status">Status</th>
+                                    <th class="col-funcao">Função</th>
+                                    <th class="col-actions">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-users-tbody">
@@ -136,16 +138,19 @@ export const admin = {
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
 
                 <!-- GESTÃO DE CAMPEONATOS -->
-                <div class="card-section admin-card-table">
-                    <div class="card-header-with-action">
-                        <h3 class="card-title">Gestão de Campeonatos</h3>
+                <div class="admin-card-table icou-card">
+                    <div class="card-header">
+                        <i class="fas fa-trophy"></i>
+                        <h3>GESTÃO DE CAMPEONATOS</h3>
                         <button class="btn-add-new" id="btn-novo-campeonato">
                             <i class="fas fa-plus"></i> Novo Campeonato
                         </button>
                     </div>
+                    <div class="card-content">
                     
                     <!-- Barra de Filtros de Campeonatos -->
                     <div class="admin-filters-bar" id="campsFiltersBar">
@@ -177,16 +182,13 @@ export const admin = {
                     <div class="filter-results-info" id="campsResultsInfo"></div>
                     
                     <div class="table-container">
-                        <table>
+                        <table class="icou-table table-admin">
                             <thead>
                                 <tr>
                                     <th>Campeonato</th>
-                                    <th>Tipo</th>
-                                    <th>Status</th>
-                                    <th>Criado em</th>
-                                    <th>Finalizado em</th>
-                                    <th class="numeric">Partic.</th>
-                                    <th class="col-acoes-xl">Ações</th>
+                                    <th class="col-status">Status</th>
+                                    <th class="col-numeric">Partic.</th>
+                                    <th class="col-actions">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-camps-tbody">
@@ -194,11 +196,16 @@ export const admin = {
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card-section admin-actions-critical">
-                <h3 class="card-title">Ações Críticas do Sistema</h3>
+            <div class="admin-actions-critical icou-card">
+                <div class="card-header">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>AÇÕES CRÍTICAS DO SISTEMA</h3>
+                </div>
+                <div class="card-content">
                 <p class="critical-actions-warning">
                     <i class="fas fa-exclamation-triangle"></i>
                     Ações abaixo exigirão confirmação e serão registradas nos logs
@@ -209,24 +216,30 @@ export const admin = {
                     <button class="btn-critical" id="btn-finalizar-campeonato"><i class="fas fa-flag-checkered"></i> Finalizar Campeonato</button>
                     <button class="btn-critical" id="btn-exportar-pdf"><i class="fas fa-file-export"></i> Exportar PDF Geral</button>
                 </div>
+                </div>
             </div>
 
-            <div class="card-section admin-logs">
-                <h3 class="card-title">Logs de Atividade</h3>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data/Hora</th>
-                                <th>Responsável</th>
-                                <th>Ação</th>
-                                <th>Detalhes</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-logs-tbody">
-                            <!-- Renderizado dinamicamente -->
-                        </tbody>
-                    </table>
+            <div class="admin-logs icou-card">
+                <div class="card-header">
+                    <i class="fas fa-history"></i>
+                    <h3>LOGS DE ATIVIDADE</h3>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table class="icou-table table-admin">
+                            <thead>
+                                <tr>
+                                    <th class="col-data">Data</th>
+                                    <th>Responsável</th>
+                                    <th>Ação</th>
+                                    <th>Detalhes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-logs-tbody">
+                                <!-- Renderizado dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>

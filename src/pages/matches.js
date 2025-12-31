@@ -60,8 +60,12 @@ export const matches = {
         <div id="fairplayToastContainer" class="fairplay-toast-container"></div>
 
         <!-- Seção: Filtros de Partidas -->
-        <section class="section-filters card-section">
-            <h2><i class="fas fa-filter"></i> Filtrar Partidas</h2>
+        <section class="section-filters icou-card">
+            <div class="card-header">
+                <i class="fas fa-filter"></i>
+                <h3>FILTRAR PARTIDAS</h3>
+            </div>
+            <div class="card-content">
             
             <div class="filters-bar">
                 <div class="filter-group">
@@ -108,11 +112,16 @@ export const matches = {
                 <span class="filtros-ativos-label"><i class="fas fa-check-circle"></i> Filtros aplicados:</span>
                 <div id="filtrosAtivosTags" class="filtros-ativos-tags"></div>
             </div>
+            </div>
         </section>
 
         <!-- Seção: Criar Nova Partida -->
-        <section class="section-create-match card-section">
-            <h2><i class="fas fa-plus-circle"></i> Criar Nova Partida</h2>
+        <section class="section-create-match icou-card">
+            <div class="card-header">
+                <i class="fas fa-plus-circle"></i>
+                <h3>CRIAR NOVA PARTIDA</h3>
+            </div>
+            <div class="card-content">
             
             <form id="createMatchForm" class="create-match-form">
                 <div class="form-row">
@@ -147,65 +156,91 @@ export const matches = {
                     <i class="fas fa-gamepad"></i> CRIAR PARTIDA
                 </button>
             </form>
+            </div>
         </section>
 
         <!-- Seção: Inserir Resultado -->
-        <section class="section-insert-result card-section">
-            <h2><i class="fas fa-edit"></i> Inserir Resultado</h2>
-            <p class="section-subtitle">Partidas aguardando você inserir o placar</p>
+        <section class="section-insert-result icou-card">
+            <div class="card-header">
+                <i class="fas fa-edit"></i>
+                <h3>INSERIR RESULTADO</h3>
+            </div>
+            <div class="card-content">
+                <p class="section-subtitle">Partidas aguardando você inserir o placar</p>
             
             <div id="matchesAguardandoResultado" class="match-list">
                 <div class="loading-placeholder">
                     <i class="fas fa-spinner fa-spin"></i> Carregando partidas...
                 </div>
             </div>
+            </div>
         </section>
 
         <!-- Seção: Partidas Pendentes Fair Play -->
-        <section class="section-pending-fairplay card-section">
-            <h2><i class="fas fa-balance-scale"></i> Confirmar Resultados (Fair Play)</h2>
-            <p class="section-subtitle">Partidas aguardando sua confirmação</p>
+        <section class="section-pending-fairplay icou-card">
+            <div class="card-header">
+                <i class="fas fa-balance-scale"></i>
+                <h3>CONFIRMAR RESULTADOS (FAIR PLAY)</h3>
+            </div>
+            <div class="card-content">
+                <p class="section-subtitle">Partidas aguardando sua confirmação</p>
             
             <div id="matchesPendentesConfirmacao" class="match-list">
                 <div class="loading-placeholder">
                     <i class="fas fa-spinner fa-spin"></i> Carregando partidas...
                 </div>
             </div>
+            </div>
         </section>
 
         <!-- Seção: Aguardando Adversário -->
-        <section class="section-awaiting-opponent card-section">
-            <h2><i class="fas fa-clock"></i> Aguardando Adversário</h2>
-            <p class="section-subtitle">Você inseriu o placar, aguardando confirmação</p>
+        <section class="section-awaiting-opponent icou-card">
+            <div class="card-header">
+                <i class="fas fa-clock"></i>
+                <h3>AGUARDANDO ADVERSÁRIO</h3>
+            </div>
+            <div class="card-content">
+                <p class="section-subtitle">Você inseriu o placar, aguardando confirmação</p>
             
             <div id="matchesAguardandoAdversario" class="match-list">
                 <div class="loading-placeholder">
                     <i class="fas fa-spinner fa-spin"></i> Carregando partidas...
                 </div>
             </div>
+            </div>
         </section>
 
         <!-- Seção: Partidas Contestadas -->
-        <section class="section-contested card-section">
-            <h2><i class="fas fa-exclamation-triangle"></i> Partidas Contestadas</h2>
-            <p class="section-subtitle">Aguardando resolução do administrador</p>
+        <section class="section-contested icou-card">
+            <div class="card-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>PARTIDAS CONTESTADAS</h3>
+            </div>
+            <div class="card-content">
+                <p class="section-subtitle">Aguardando resolução do administrador</p>
             
             <div id="matchesContestadas" class="match-list">
                 <div class="loading-placeholder">
                     <i class="fas fa-spinner fa-spin"></i> Carregando partidas...
                 </div>
             </div>
+            </div>
         </section>
 
         <!-- Seção: Histórico de Partidas Confirmadas -->
-        <section class="section-confirmed card-section">
-            <h2><i class="fas fa-check-circle"></i> Partidas Confirmadas</h2>
-            <p class="section-subtitle">Histórico de partidas finalizadas</p>
+        <section class="section-confirmed icou-card">
+            <div class="card-header">
+                <i class="fas fa-check-circle"></i>
+                <h3>PARTIDAS CONFIRMADAS</h3>
+            </div>
+            <div class="card-content">
+                <p class="section-subtitle">Histórico de partidas finalizadas</p>
             
             <div id="matchesConfirmadas" class="match-list">
                 <div class="loading-placeholder">
                     <i class="fas fa-spinner fa-spin"></i> Carregando partidas...
                 </div>
+            </div>
             </div>
         </section>
 
@@ -319,6 +354,7 @@ async function carregarAmigos() {
             option.dataset.nome = friend.nome;
             option.dataset.nomeTime = friend.nomeTime || 'Sem time';
             option.dataset.logoTime = friend.logoTime || '';
+            option.dataset.fotoUrl = friend.fotoUrl || '';
             friendSelect.appendChild(option);
         });
         
@@ -458,10 +494,12 @@ async function handleCriarPartida(e) {
             criadorNome: currentUserData?.nome || currentUser.displayName || 'Jogador',
             criadorTimeNome: currentUserData?.nomeTime || currentUserData?.timeName || 'Sem time',
             criadorTimeLogo: currentUserData?.logoTime || currentUserData?.timeLogo || '',
+            criadorFoto: currentUserData?.fotoUrl || currentUser.photoURL || '',
             adversarioId: adversarioId,
             adversarioNome: selectedOption.dataset.nome,
             adversarioTimeNome: selectedOption.dataset.nomeTime,
             adversarioTimeLogo: selectedOption.dataset.logoTime,
+            adversarioFoto: selectedOption.dataset.fotoUrl,
             plataformaStreaming: plataforma,
             linkTransmissao: linkTransmissao,
             oficial: true
@@ -778,12 +816,8 @@ async function carregarPartidasConfirmadas() {
 }
 
 // ============================================================================
-// FUNÇÕES DE RENDERIZAÇÃO
+// FUNÇÕES DE RENDERIZAÇÃO - PADRÃO UNIFICADO
 // ============================================================================
-
-// Fallbacks para imagens
-const FALLBACK_TEAM_LOGO = './assets/img/team-placeholder.svg';
-const FALLBACK_AVATAR = './assets/img/avatar-placeholder.svg';
 
 /**
  * Formata data para exibição
@@ -795,22 +829,67 @@ function formatarData(timestamp) {
 }
 
 /**
- * Renderiza informações de um jogador no formato padrão
- * logo time + nome time + | + foto jogador + nome jogador
+ * Renderiza um lado da partida (Time + Jogador)
+ * @param {Object} dados - { timeLogo, timeNome, jogadorFoto, jogadorNome }
+ * @param {string} lado - 'a' ou 'b'
  */
-function renderPlayerInfo(timeLogo, timeNome, jogadorFoto, jogadorNome, alignRight = false) {
-    const logo = timeLogo || FALLBACK_TEAM_LOGO;
-    const foto = jogadorFoto || FALLBACK_AVATAR;
-    const time = timeNome || 'Sem time';
-    const nome = jogadorNome || 'Jogador';
+function renderLadoPartida(dados, lado = 'a') {
+    const logoSrc = dados.timeLogo || '';
+    const avatarSrc = dados.jogadorFoto || '';
+    const timeNome = dados.timeNome || 'Sem time';
+    const jogadorNome = dados.jogadorNome || 'Jogador';
+    const ladoClass = lado === 'a' ? 'lado-a' : 'lado-b';
+    const inicial = (jogadorNome.charAt(0) || 'J').toUpperCase();
+    
+    // Se não houver logo, mostra fallback diretamente
+    const logoHtml = logoSrc 
+        ? `<img src="${logoSrc}" alt="Logo ${timeNome}" class="partida-time-logo" 
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+           <div class="partida-time-logo-fallback" style="display:none;">T</div>`
+        : `<div class="partida-time-logo-fallback" style="display:flex;">T</div>`;
+    
+    // Se não houver avatar, mostra fallback diretamente  
+    const avatarHtml = avatarSrc
+        ? `<img src="${avatarSrc}" alt="Foto ${jogadorNome}" class="partida-jogador-avatar" 
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+           <div class="partida-jogador-avatar-fallback" style="display:none;">${inicial}</div>`
+        : `<div class="partida-jogador-avatar-fallback" style="display:flex;">${inicial}</div>`;
     
     return `
-        <div class="match-player-info ${alignRight ? 'align-right' : ''}">
-            <img src="${logo}" alt="Logo ${time}" class="match-team-logo" onerror="this.src='${FALLBACK_TEAM_LOGO}'">
-            <span class="match-team-name">${time}</span>
-            <span class="match-separator">|</span>
-            <img src="${foto}" alt="Foto ${nome}" class="match-player-avatar" onerror="this.src='${FALLBACK_AVATAR}'">
-            <span class="match-player-name">${nome}</span>
+        <div class="partida-lado ${ladoClass}">
+            <div class="partida-time">
+                ${logoHtml}
+                <span class="partida-time-nome" title="${timeNome}">${timeNome}</span>
+            </div>
+            <div class="partida-jogador">
+                ${avatarHtml}
+                <span class="partida-jogador-nome" title="${jogadorNome}">${jogadorNome}</span>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Renderiza o placar centralizado
+ * @param {number|null} placarA 
+ * @param {number|null} placarB 
+ * @param {string} status - 'vs', 'confirmado', 'contestado', etc.
+ */
+function renderPlacar(placarA, placarB, status = 'vs') {
+    if (placarA === null || placarA === undefined || placarB === null || placarB === undefined) {
+        return `
+            <div class="partida-placar">
+                <span class="partida-placar-vs">VS</span>
+            </div>
+        `;
+    }
+    
+    let extraClass = '';
+    if (status === 'contestado') extraClass = 'contestado';
+    
+    return `
+        <div class="partida-placar">
+            <span class="partida-placar-valor ${extraClass}">${placarA} x ${placarB}</span>
         </div>
     `;
 }
@@ -820,165 +899,248 @@ function renderPlayerInfo(timeLogo, timeNome, jogadorFoto, jogadorNome, alignRig
  */
 function renderTipoLabel(campeonatoId) {
     const tipo = campeonatoId ? 'Campeonato' : 'Amistoso';
-    const classe = campeonatoId ? 'match-type-campeonato' : 'match-type-amistoso';
-    return `<span class="match-type-label ${classe}">${tipo}</span>`;
+    const classe = campeonatoId ? 'tipo-campeonato' : 'tipo-amistoso';
+    return `<span class="partida-tipo-badge ${classe}">${tipo}</span>`;
 }
 
 /**
- * Renderiza partida aguardando resultado
+ * Renderiza partida aguardando resultado - NOVO PADRÃO
  */
 function renderPartidaAguardandoResultado(partida) {
-    // Verifica se tem link de transmissão
     const hasStream = partida.linkTransmissao && partida.linkTransmissao.length > 0;
     
+    const ladoA = {
+        timeLogo: partida.jogadorATimeLogo,
+        timeNome: partida.jogadorATimeNome,
+        jogadorFoto: partida.jogadorAFoto,
+        jogadorNome: partida.jogadorANome
+    };
+    
+    const ladoB = {
+        timeLogo: partida.jogadorBTimeLogo,
+        timeNome: partida.jogadorBTimeNome,
+        jogadorFoto: partida.jogadorBFoto,
+        jogadorNome: partida.jogadorBNome
+    };
+    
     return `
-        <article class="match-item awaiting-result" data-partida-id="${partida.id}">
-            <div class="match-header">
-                <span class="match-date-time">${formatarData(partida.criadoEm)}</span>
+        <article class="partida-card" data-partida-id="${partida.id}">
+            <div class="partida-card-header">
+                <span class="partida-data">${formatarData(partida.criadoEm)}</span>
                 ${renderTipoLabel(partida.campeonatoId)}
             </div>
-            <div class="match-teams-detailed">
-                ${renderPlayerInfo(partida.jogadorATimeLogo, partida.jogadorATimeNome, partida.jogadorAFoto, partida.jogadorANome, true)}
-                <span class="match-vs">VS</span>
-                ${renderPlayerInfo(partida.jogadorBTimeLogo, partida.jogadorBTimeNome, partida.jogadorBFoto, partida.jogadorBNome)}
+            <div class="partida-card-body">
+                ${renderLadoPartida(ladoA, 'a')}
+                ${renderPlacar(null, null, 'vs')}
+                ${renderLadoPartida(ladoB, 'b')}
             </div>
             ${renderAdversarioEnriquecido(partida)}
-            <div class="match-footer">
-                ${hasStream ? '<span class="stream-indicator"><i class="fas fa-broadcast-tower"></i> Com transmissão</span>' : ''}
-                <span class="match-status-badge awaiting-result-badge">AGUARDANDO RESULTADO</span>
-            </div>
-            <div class="match-actions">
-                <button class="btn-action btn-sm btn-inserir-placar" data-partida-id="${partida.id}">
-                    <i class="fas fa-edit"></i> Placar
-                </button>
-                <button class="btn-action btn-sm btn-edit-stream" data-partida-id="${partida.id}" title="Editar link de transmissão">
-                    <i class="fas fa-video"></i> ${hasStream ? 'Editar' : 'Adicionar'} Link
-                </button>
+            <div class="partida-card-footer">
+                <div>
+                    ${hasStream ? '<span class="partida-stream-badge"><i class="fas fa-broadcast-tower"></i> Transmissão</span>' : ''}
+                    <span class="partida-status-badge status-aguardando">AGUARDANDO RESULTADO</span>
+                </div>
+                <div class="partida-card-actions">
+                    <button class="partida-btn partida-btn-primary btn-inserir-placar" data-partida-id="${partida.id}">
+                        <i class="fas fa-edit"></i> Placar
+                    </button>
+                    <button class="partida-btn partida-btn-secondary btn-edit-stream" data-partida-id="${partida.id}">
+                        <i class="fas fa-video"></i> ${hasStream ? 'Editar' : 'Link'}
+                    </button>
+                </div>
             </div>
         </article>
     `;
 }
 
 /**
- * Renderiza partida pendente de confirmação
+ * Renderiza partida pendente de confirmação - NOVO PADRÃO
  */
 function renderPartidaPendenteConfirmacao(partida) {
+    const ladoA = {
+        timeLogo: partida.jogadorATimeLogo,
+        timeNome: partida.jogadorATimeNome,
+        jogadorFoto: partida.jogadorAFoto,
+        jogadorNome: partida.jogadorANome
+    };
+    
+    const ladoB = {
+        timeLogo: partida.jogadorBTimeLogo,
+        timeNome: partida.jogadorBTimeNome,
+        jogadorFoto: partida.jogadorBFoto,
+        jogadorNome: partida.jogadorBNome
+    };
+    
     return `
-        <article class="match-item pending-confirmation" data-partida-id="${partida.id}">
-            <div class="match-header">
-                <span class="match-date-time">${formatarData(partida.criadoEm)}</span>
+        <article class="partida-card" data-partida-id="${partida.id}">
+            <div class="partida-card-header">
+                <span class="partida-data">${formatarData(partida.criadoEm)}</span>
                 ${renderTipoLabel(partida.campeonatoId)}
             </div>
-            <div class="match-teams-detailed">
-                ${renderPlayerInfo(partida.jogadorATimeLogo, partida.jogadorATimeNome, partida.jogadorAFoto, partida.jogadorANome, true)}
-                <span class="match-score">${partida.placarA} x ${partida.placarB}</span>
-                ${renderPlayerInfo(partida.jogadorBTimeLogo, partida.jogadorBTimeNome, partida.jogadorBFoto, partida.jogadorBNome)}
+            <div class="partida-card-body">
+                ${renderLadoPartida(ladoA, 'a')}
+                ${renderPlacar(partida.placarA, partida.placarB, 'pendente')}
+                ${renderLadoPartida(ladoB, 'b')}
             </div>
             ${renderAdversarioEnriquecido(partida)}
-            <div class="match-footer">
-                <span class="match-status-badge pending-badge">AGUARDANDO SUA CONFIRMAÇÃO</span>
-            </div>
-            <div class="match-actions match-actions-fairplay">
-                <button class="btn-action confirm btn-confirmar" data-partida-id="${partida.id}">
-                    <i class="fas fa-check"></i> Confirmar
-                </button>
-                <button class="btn-action contest btn-contestar" 
-                    data-partida-id="${partida.id}" 
-                    data-placar="${partida.placarA} x ${partida.placarB}">
-                    <i class="fas fa-times"></i> Contestar
-                </button>
+            <div class="partida-card-footer">
+                <span class="partida-status-badge status-pendente">AGUARDANDO SUA CONFIRMAÇÃO</span>
+                <div class="partida-card-actions">
+                    <button class="partida-btn partida-btn-success btn-confirmar" data-partida-id="${partida.id}">
+                        <i class="fas fa-check"></i> Confirmar
+                    </button>
+                    <button class="partida-btn partida-btn-danger btn-contestar" 
+                        data-partida-id="${partida.id}" 
+                        data-placar="${partida.placarA} x ${partida.placarB}">
+                        <i class="fas fa-times"></i> Contestar
+                    </button>
+                </div>
             </div>
         </article>
     `;
 }
 
 /**
- * Renderiza partida aguardando adversário
+ * Renderiza partida aguardando adversário - NOVO PADRÃO
  */
 function renderPartidaAguardandoAdversario(partida) {
+    const ladoA = {
+        timeLogo: partida.jogadorATimeLogo,
+        timeNome: partida.jogadorATimeNome,
+        jogadorFoto: partida.jogadorAFoto,
+        jogadorNome: partida.jogadorANome
+    };
+    
+    const ladoB = {
+        timeLogo: partida.jogadorBTimeLogo,
+        timeNome: partida.jogadorBTimeNome,
+        jogadorFoto: partida.jogadorBFoto,
+        jogadorNome: partida.jogadorBNome
+    };
+    
     return `
-        <article class="match-item awaiting-opponent" data-partida-id="${partida.id}">
-            <div class="match-header">
-                <span class="match-date-time">${formatarData(partida.criadoEm)}</span>
+        <article class="partida-card" data-partida-id="${partida.id}">
+            <div class="partida-card-header">
+                <span class="partida-data">${formatarData(partida.criadoEm)}</span>
                 ${renderTipoLabel(partida.campeonatoId)}
             </div>
-            <div class="match-teams-detailed">
-                ${renderPlayerInfo(partida.jogadorATimeLogo, partida.jogadorATimeNome, partida.jogadorAFoto, partida.jogadorANome, true)}
-                <span class="match-score">${partida.placarA} x ${partida.placarB}</span>
-                ${renderPlayerInfo(partida.jogadorBTimeLogo, partida.jogadorBTimeNome, partida.jogadorBFoto, partida.jogadorBNome)}
+            <div class="partida-card-body">
+                ${renderLadoPartida(ladoA, 'a')}
+                ${renderPlacar(partida.placarA, partida.placarB, 'aguardando')}
+                ${renderLadoPartida(ladoB, 'b')}
             </div>
             ${renderAdversarioEnriquecido(partida)}
-            <div class="match-footer">
-                <span class="match-status-badge awaiting-badge">PLACAR ENVIADO (Aguardando Adversário)</span>
-            </div>
-            <div class="match-actions">
-                ${partida.linkTransmissao ? `
-                    <button class="btn-action view" onclick="window.open('${partida.linkTransmissao}', '_blank')">
-                        <i class="fas fa-link"></i> Ver Transmissão
-                    </button>
-                ` : ''}
+            <div class="partida-card-footer">
+                <span class="partida-status-badge status-aguardando">PLACAR ENVIADO (Aguardando Adversário)</span>
+                <div class="partida-card-actions">
+                    ${partida.linkTransmissao ? `
+                        <button class="partida-btn partida-btn-secondary" onclick="window.open('${partida.linkTransmissao}', '_blank')">
+                            <i class="fas fa-external-link-alt"></i> Ver Transmissão
+                        </button>
+                    ` : ''}
+                </div>
             </div>
         </article>
     `;
 }
 
 /**
- * Renderiza partida contestada
+ * Renderiza partida contestada - NOVO PADRÃO
  */
 function renderPartidaContestada(partida) {
+    const ladoA = {
+        timeLogo: partida.jogadorATimeLogo,
+        timeNome: partida.jogadorATimeNome,
+        jogadorFoto: partida.jogadorAFoto,
+        jogadorNome: partida.jogadorANome
+    };
+    
+    const ladoB = {
+        timeLogo: partida.jogadorBTimeLogo,
+        timeNome: partida.jogadorBTimeNome,
+        jogadorFoto: partida.jogadorBFoto,
+        jogadorNome: partida.jogadorBNome
+    };
+    
     return `
-        <article class="match-item contested-final" data-partida-id="${partida.id}">
-            <div class="match-header">
-                <span class="match-date-time">${formatarData(partida.criadoEm)}</span>
+        <article class="partida-card" data-partida-id="${partida.id}">
+            <div class="partida-card-header">
+                <span class="partida-data">${formatarData(partida.criadoEm)}</span>
                 ${renderTipoLabel(partida.campeonatoId)}
             </div>
-            <div class="match-teams-detailed">
-                ${renderPlayerInfo(partida.jogadorATimeLogo, partida.jogadorATimeNome, partida.jogadorAFoto, partida.jogadorANome, true)}
-                <span class="match-score contested">${partida.placarA} x ${partida.placarB}</span>
-                ${renderPlayerInfo(partida.jogadorBTimeLogo, partida.jogadorBTimeNome, partida.jogadorBFoto, partida.jogadorBNome)}
+            <div class="partida-card-body">
+                ${renderLadoPartida(ladoA, 'a')}
+                ${renderPlacar(partida.placarA, partida.placarB, 'contestado')}
+                ${renderLadoPartida(ladoB, 'b')}
             </div>
             ${renderAdversarioEnriquecido(partida)}
-            <div class="match-footer">
-                <span class="match-status-badge contested-badge">CONTESTADO</span>
-                <p class="contest-reason"><em>Motivo: ${partida.motivoContestacao || 'Não informado'}</em></p>
+            <div class="partida-motivo">
+                <i class="fas fa-exclamation-circle"></i> Motivo: ${partida.motivoContestacao || 'Não informado'}
             </div>
-            <div class="match-actions">
-                <span class="waiting-admin"><i class="fas fa-gavel"></i> Aguardando Admin</span>
+            <div class="partida-card-footer">
+                <span class="partida-status-badge status-contestado">CONTESTADO</span>
+                <div class="partida-card-actions">
+                    <span class="partida-btn partida-btn-secondary" style="cursor: default;">
+                        <i class="fas fa-gavel"></i> Aguardando Admin
+                    </span>
+                </div>
             </div>
         </article>
     `;
 }
 
 /**
- * Renderiza partida confirmada
+ * Renderiza partida confirmada - NOVO PADRÃO
  */
 function renderPartidaConfirmada(partida) {
     const isVencedor = partida.vencedorId === currentUser.uid;
     const isEmpate = partida.vencedorId === null;
     
     let resultClass = 'draw';
-    if (isVencedor) resultClass = 'win';
-    else if (!isEmpate) resultClass = 'loss';
+    let resultIcon = 'fa-handshake';
+    let resultText = 'EMPATE';
+    
+    if (isVencedor) {
+        resultClass = 'win';
+        resultIcon = 'fa-trophy';
+        resultText = 'VITÓRIA';
+    } else if (!isEmpate) {
+        resultClass = 'loss';
+        resultIcon = 'fa-times-circle';
+        resultText = 'DERROTA';
+    }
+    
+    const ladoA = {
+        timeLogo: partida.jogadorATimeLogo,
+        timeNome: partida.jogadorATimeNome,
+        jogadorFoto: partida.jogadorAFoto,
+        jogadorNome: partida.jogadorANome
+    };
+    
+    const ladoB = {
+        timeLogo: partida.jogadorBTimeLogo,
+        timeNome: partida.jogadorBTimeNome,
+        jogadorFoto: partida.jogadorBFoto,
+        jogadorNome: partida.jogadorBNome
+    };
     
     return `
-        <article class="match-item confirmed-item ${resultClass}" data-partida-id="${partida.id}">
-            <div class="match-header">
-                <span class="match-date-time">${formatarData(partida.dataFim || partida.criadoEm)}</span>
+        <article class="partida-card resultado-${resultClass}" data-partida-id="${partida.id}">
+            <div class="partida-card-header">
+                <span class="partida-data">${formatarData(partida.dataFim || partida.criadoEm)}</span>
                 ${renderTipoLabel(partida.campeonatoId)}
             </div>
-            <div class="match-teams-detailed">
-                ${renderPlayerInfo(partida.jogadorATimeLogo, partida.jogadorATimeNome, partida.jogadorAFoto, partida.jogadorANome, true)}
-                <span class="match-score ${resultClass}">${partida.placarA} x ${partida.placarB}</span>
-                ${renderPlayerInfo(partida.jogadorBTimeLogo, partida.jogadorBTimeNome, partida.jogadorBFoto, partida.jogadorBNome)}
+            <div class="partida-card-body">
+                ${renderLadoPartida(ladoA, 'a')}
+                ${renderPlacar(partida.placarA, partida.placarB, 'confirmado')}
+                ${renderLadoPartida(ladoB, 'b')}
             </div>
             ${renderAdversarioEnriquecido(partida)}
-            <div class="match-footer">
-                <span class="match-status-badge confirmed-badge">CONFIRMADO</span>
-                <div class="match-result-indicator ${resultClass}">
-                    ${isVencedor ? '<i class="fas fa-trophy"></i> VITÓRIA' : 
-                      isEmpate ? '<i class="fas fa-handshake"></i> EMPATE' : 
-                      '<i class="fas fa-times-circle"></i> DERROTA'}
-                </div>
+            <div class="partida-card-footer">
+                <span class="partida-status-badge status-confirmado">CONFIRMADO</span>
+                <span class="partida-resultado partida-resultado-${resultClass}">
+                    <i class="fas ${resultIcon}"></i> ${resultText}
+                </span>
             </div>
         </article>
     `;

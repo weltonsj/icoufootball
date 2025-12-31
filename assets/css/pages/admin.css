@@ -3,6 +3,64 @@
    ====================================================================
 */
 
+/* ====================================================================
+   COMPONENTE PADRÃO: ICOU-CARD
+   Card padronizado com header interno (ícone + título)
+   ==================================================================== */
+.icou-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+/* Header do Card - Ícone + Título */
+.icou-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.icou-card .card-header i {
+    color: var(--highlight-color);
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+.icou-card .card-header h3,
+.icou-card .card-header h2 {
+    color: var(--text-color);
+    font-size: 1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Conteúdo do Card */
+.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+/* Botões no header do card */
+.icou-card .card-header .btn-add-new {
+    margin-left: auto;
+}
+
+.icou-card .card-header .admin-tooltip {
+    margin-left: auto;
+}
+
+/* ====================================================================
+   ESTILOS ESPECÍFICOS DO ADMIN
+   ==================================================================== */
+
 /* Main Content para Admin */
 .admin-content {
     padding: 20px;
@@ -23,7 +81,7 @@
 	color: var(--highlight-color);
 }
 
-/* Card Section Styles (reutilizado) */
+/* Card Section Styles - Estilos legado (mantidos para compatibilidade) */
 .card-section {
     background-color: #2b2b2b75;
     border-radius: 10px;
@@ -31,57 +89,72 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.card-title {
-    color: var(--highlight-color);
-    font-size: 0.9em;
-    text-transform: uppercase;
-    margin-bottom: 15px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
+/* Ajustes específicos para admin-card-table com .icou-card */
+.admin-card-table.icou-card {
+    margin-bottom: 20px;
 }
 
-/* Tabelas de Gestão */
-.admin-card-table {
-    margin-bottom: 20px; /* Espaçamento entre os cards de tabela em mobile */
+.admin-card-table.icou-card .card-content {
+    padding: 0 16px 16px 16px;
 }
 
+/* Tabelas de Gestão - Layout Profissional */
 .admin-card-table .table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .admin-card-table table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 400px; /* Largura mínima para tabelas em mobile */
-    table-layout: auto;
+    table-layout: fixed;
 }
 
-/* Colunas devem ocupar o tamanho do conteúdo (principalmente Ações) */
-.admin-card-table th:last-child,
-.admin-card-table td:last-child {
-    width: 1%;
-    white-space: nowrap;
+/* ====================================================================
+   COLUNAS COM LARGURAS FIXAS - SISTEMA PROFISSIONAL
+   ==================================================================== */
+
+/* Colunas de texto curto */
+.admin-card-table .col-status,
+.admin-card-table .col-funcao {
+    width: 100px;
 }
 
-.admin-card-table th.numeric,
-.admin-card-table td.numeric {
-    width: 1%;
-    white-space: nowrap;
+/* Coluna de data/hora */
+.admin-card-table .col-data {
+    width: 110px;
+}
+
+/* Coluna numérica pequena */
+.admin-card-table .col-numeric {
+    width: 80px;
+    text-align: center;
+}
+
+/* Coluna de ações - apenas ícones */
+.admin-card-table .col-actions {
+    width: 120px;
+    text-align: center;
 }
 
 .admin-card-table th, .admin-card-table td {
-    padding: 10px 12px;
+    padding: 12px 14px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
     font-size: 0.85em;
+    vertical-align: middle;
 }
 
 .admin-card-table th {
     background-color: var(--table-header-bg);
-    font-weight: bold;
+    font-weight: 700;
     color: var(--text-color);
     text-transform: uppercase;
+    font-size: 0.75em;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 .admin-card-table tbody tr:last-child td {
@@ -89,45 +162,299 @@
 }
 
 .admin-card-table tbody tr:hover {
-    background-color: var(--table-row-hover);
+    background-color: rgba(253, 138, 36, 0.05);
 }
 
-.admin-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap; /* Permite que os botões quebrem a linha */
-    justify-content: flex-start;
-}
-
-.btn-icon {
-    background-color: var(--button-icon-bg);
-    color: var(--text-color);
-    border: 1px solid var(--input-border);
-    border-radius: 5px;
-    padding: 6px 10px;
-    font-size: 0.8em;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+/* ====================================================================
+   CÉLULAS COM ESTRUTURA VISUAL - JOGADOR, TIME, ETC
+   ==================================================================== */
+   
+/* Célula de Jogador: Avatar + Nome */
+.cell-jogador {
     display: flex;
     align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.jogador-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--highlight-color);
+}
+
+.jogador-avatar-fallback {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(96, 96, 96, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+    border: 2px solid var(--highlight-color);
+}
+
+.jogador-nome {
+    font-weight: 500;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Célula de Time: Logo + Nome */
+.cell-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.time-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 4px;
+}
+
+.time-nome {
+    color: var(--secondary-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.95em;
+}
+
+/* Célula de Estrelas */
+.cell-estrelas {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    justify-content: center;
+}
+
+.cell-estrelas .estrela {
+    color: var(--highlight-color);
+    font-size: 0.7em;
+}
+
+.cell-estrelas .estrelas-extra {
+    font-size: 0.75em;
+    color: var(--secondary-text);
+    margin-left: 4px;
+}
+
+/* ====================================================================
+   BADGES DE STATUS E FUNÇÃO
+   ==================================================================== */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
     gap: 5px;
-    white-space: nowrap; /* Previne que o texto quebre */
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
 }
 
-.btn-icon:hover {
-    background-color: var(--border-color);
+.badge-status.status-ativo {
+    background: rgba(40, 167, 69, 0.15);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
 }
 
-.btn-icon.edit { color: var(--action-blue); }
-.btn-icon.delete { color: var(--action-red); }
-.btn-icon.action-red { background-color: var(--action-red); color: white; border-color: var(--action-red); }
-.btn-icon.action-orange { background-color: var(--action-orange); color: white; border-color: var(--action-orange); }
-.btn-icon.action-green { background-color: var(--action-green); color: white; border-color: var(--action-green); }
-.btn-icon.action-blue { background-color: var(--action-blue); color: white; border-color: var(--action-blue); }
+.badge-status.status-inativo {
+    background: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
 
-.btn-icon:disabled {
-    opacity: 0.5;
+.badge-status.status-finalizado {
+    background: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.badge-status.status-pendente {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.badge-funcao {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.7em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-funcao.funcao-jogador {
+    background: rgba(108, 117, 125, 0.2);
+    color: #aaa;
+}
+
+.badge-funcao.funcao-gestao {
+    background: rgba(23, 162, 184, 0.2);
+    color: #17a2b8;
+}
+
+.badge-funcao.funcao-admin {
+    background: rgba(253, 138, 36, 0.2);
+    color: var(--highlight-color);
+}
+
+.badge-funcao.funcao-superadmin {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(253, 138, 36, 0.2) 100%);
+    color: #dc3545;
+}
+
+/* ====================================================================
+   BOTÕES DE AÇÃO NA TABELA - APENAS ÍCONES
+   ==================================================================== */
+.cell-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-table-action {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85em;
+}
+
+.btn-table-action:disabled {
+    opacity: 0.4;
     cursor: not-allowed;
+}
+
+.btn-table-action.btn-view {
+    background: rgba(23, 162, 184, 0.15);
+    color: #17a2b8;
+    border: 1px solid rgba(23, 162, 184, 0.3);
+}
+
+.btn-table-action.btn-view:hover:not(:disabled) {
+    background: rgba(23, 162, 184, 0.25);
+}
+
+.btn-table-action.btn-edit {
+    background: rgba(253, 138, 36, 0.15);
+    color: var(--highlight-color);
+    border: 1px solid rgba(253, 138, 36, 0.3);
+}
+
+.btn-table-action.btn-edit:hover:not(:disabled) {
+    background: rgba(253, 138, 36, 0.25);
+}
+
+.btn-table-action.btn-warning {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.btn-table-action.btn-warning:hover:not(:disabled) {
+    background: rgba(255, 193, 7, 0.25);
+}
+
+.btn-table-action.btn-success {
+    background: rgba(40, 167, 69, 0.15);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.btn-table-action.btn-success:hover:not(:disabled) {
+    background: rgba(40, 167, 69, 0.25);
+}
+
+.btn-table-action.btn-danger {
+    background: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.btn-table-action.btn-danger:hover:not(:disabled) {
+    background: rgba(220, 53, 69, 0.25);
+}
+
+.btn-table-action.btn-delete {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.btn-table-action.btn-delete:hover:not(:disabled) {
+    background: rgba(220, 53, 69, 0.2);
+}
+
+/* ====================================================================
+   CÉLULA DE PARTIDA/CONFRONTO
+   ==================================================================== */
+.cell-partida {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cell-partida .partida-lado {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cell-partida .partida-time-logo {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    border-radius: 3px;
+}
+
+.cell-partida .partida-jogador-nome {
+    font-size: 0.85em;
+    color: var(--text-color);
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cell-partida .partida-vs {
+    color: var(--secondary-text);
+    font-weight: 600;
+    font-size: 0.75em;
+    padding: 0 4px;
+}
+
+.cell-partida .partida-placar {
+    font-weight: 700;
+    color: var(--highlight-color);
+    font-size: 0.9em;
+    padding: 2px 8px;
+    background: rgba(253, 138, 36, 0.1);
+    border-radius: 4px;
 }
 
 /* Ações Críticas do Sistema */
@@ -957,11 +1284,12 @@
 }
 
 /* ====================================================================
-   RESPONSIVIDADE - Mobile Small (≤ 480px)
-   ELEMENTOS MAIORES PARA MELHOR LEGIBILIDADE
+   RESPONSIVIDADE - Mobile (≤ 768px)
+   TABELAS VIRAM CARDS VERTICAIS
+   Sincronizado com sistema global de tables.css
    ====================================================================
 */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .admin-content {
         padding: 16px;
         gap: 20px;
@@ -999,12 +1327,179 @@
         min-height: 44px;
     }
     
-    /* Colunas de ações - Mobile */
-    .col-acoes,
-    .col-acoes-lg,
-    .col-acoes-xl {
-        width: auto !important;
-        min-width: auto !important;
+    /* ====================================================================
+       TABELAS ADMIN - CARDS MOBILE (Herda de tables.css)
+       ==================================================================== */
+    .admin-card-table .table-container {
+        overflow-x: visible;
+        background: transparent;
+        border: none;
+    }
+    
+    .admin-card-table table {
+        display: block;
+        min-width: 0 !important;
+    }
+    
+    .admin-card-table thead {
+        display: none !important;
+    }
+    
+    .admin-card-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 0;
+    }
+    
+    .admin-card-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        background: var(--secondary-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 14px;
+        gap: 10px;
+        position: relative;
+    }
+    
+    .admin-card-table tbody tr:hover {
+        background: var(--secondary-bg);
+        border-color: var(--highlight-color);
+    }
+    
+    .admin-card-table td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0 !important;
+        border-bottom: none !important;
+        font-size: 0.9rem;
+    }
+    
+    .admin-card-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--secondary-text);
+        font-size: 0.75em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        min-width: 90px;
+        flex-shrink: 0;
+    }
+    
+    /* Esconde label para colunas especiais */
+    .admin-card-table td.col-jogador::before,
+    .admin-card-table td.col-partida::before {
+        display: none;
+    }
+    
+    /* Célula de jogador em mobile - ocupa linha inteira */
+    .admin-card-table td.col-jogador {
+        justify-content: flex-start;
+        padding-bottom: 10px !important;
+        margin-bottom: 6px;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+    
+    .admin-card-table td.col-jogador .cell-jogador {
+        width: 100%;
+    }
+    
+    /* Avatar e nome sempre visíveis */
+    .admin-card-table td.col-jogador .jogador-avatar,
+    .admin-card-table td.col-jogador .jogador-avatar-fallback {
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+    }
+    
+    .admin-card-table td.col-jogador .jogador-nome {
+        font-size: 1rem;
+        font-weight: 600;
+        max-width: none;
+    }
+    
+    /* Célula de partida em mobile */
+    .admin-card-table td.col-partida {
+        flex-direction: column;
+        align-items: stretch;
+        padding-bottom: 10px !important;
+        margin-bottom: 6px;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+    
+    .admin-card-table td.col-partida .cell-partida,
+    .admin-card-table td.col-partida .cell-time-jogador {
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    /* Time logo sempre visível */
+    .admin-card-table .time-logo {
+        width: 28px !important;
+        height: 28px !important;
+        display: block !important;
+    }
+    
+    /* Ações em mobile - centralizado */
+    .admin-card-table td.col-actions {
+        justify-content: center !important;
+        padding-top: 12px !important;
+        margin-top: 8px;
+        border-top: 1px solid var(--border-color) !important;
+    }
+    
+    .admin-card-table td.col-actions::before {
+        display: none;
+    }
+    
+    .admin-card-table td.col-actions .cell-actions {
+        width: 100%;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .admin-card-table td.col-actions .btn-table-action {
+        width: 40px;
+        height: 40px;
+        font-size: 1em;
+        min-height: 44px;
+    }
+    
+    /* Coluna numérica */
+    .admin-card-table td.col-numeric {
+        text-align: right;
+    }
+    
+    .admin-card-table td.col-numeric .cell-estrelas {
+        justify-content: flex-end;
+    }
+    
+    /* Badges em mobile */
+    .admin-card-table .badge-status,
+    .admin-card-table .badge-funcao {
+        font-size: 0.8em;
+        padding: 5px 12px;
+    }
+    
+    /* Critical actions - Mobile */
+    .critical-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .btn-critical {
+        padding: 16px 12px;
+        font-size: 0.9rem;
+        min-height: 80px;
+        border-radius: 10px;
+    }
+    
+    .btn-critical i {
+        font-size: 1.6em;
+        margin-bottom: 8px;
     }
     
     /* Modal form - Mobile */
@@ -1039,73 +1534,36 @@
         font-size: 0.7em;
     }
     
-    /* Tables - Fontes maiores */
-    .admin-card-table {
-        margin-bottom: 16px;
-    }
-    
-    .admin-card-table .table-container {
-        border-radius: 8px;
-    }
-    
-    .admin-card-table table {
-        min-width: 500px;
-    }
-    
-    .admin-card-table th,
-    .admin-card-table td {
-        padding: 12px 10px;
-        font-size: 0.95rem;
-        line-height: 1.4;
-    }
-    
-    .admin-card-table th {
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-    
-    .admin-actions {
+    /* Filtros em mobile - empilhados */
+    .admin-filters-bar {
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
     }
     
-    .btn-icon {
+    .filter-group {
         width: 100%;
-        justify-content: center;
-        padding: 12px 14px;
-        font-size: 0.9rem;
-        min-height: 44px;
-        border-radius: 8px;
     }
     
-    /* Critical actions - Maiores */
-    .critical-actions-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+    .filter-group.filter-search {
+        min-width: 100%;
     }
     
-    .btn-critical {
-        padding: 16px 12px;
-        font-size: 0.9rem;
-        min-height: 80px;
-        border-radius: 10px;
+    .filter-select {
+        width: 100%;
     }
     
-    .btn-critical i {
-        font-size: 1.6em;
-        margin-bottom: 8px;
-    }
-    
-    .btn-critical span {
-        font-size: 0.85rem;
+    .btn-clear-filters {
+        width: 100%;
+        padding: 12px;
     }
 }
 
 /* ====================================================================
-   RESPONSIVIDADE - Mobile Large (481px - 768px)
+   RESPONSIVIDADE - Tablet (769px - 1024px)
+   Tabelas completas, oculta colunas secundárias
    ====================================================================
 */
-@media (min-width: 481px) and (max-width: 768px) {
+@media (min-width: 769px) and (max-width: 1024px) {
     .admin-content {
         padding: 20px;
         gap: 25px;
@@ -1121,12 +1579,18 @@
     
     .admin-card-table th,
     .admin-card-table td {
-        padding: 12px;
-        font-size: 0.95rem;
+        padding: 10px;
+        font-size: 0.8rem;
+    }
+    
+    /* Oculta colunas secundárias em tablet */
+    .admin-card-table .col-secondary,
+    .admin-card-table .hide-tablet {
+        display: none !important;
     }
     
     .critical-actions-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 14px;
     }
     
@@ -1135,14 +1599,12 @@
         font-size: 0.95rem;
     }
     
-    .admin-actions {
-        flex-wrap: wrap;
-        gap: 8px;
+    .cell-actions {
+        gap: 6px;
     }
     
-    .btn-icon {
-        padding: 10px 14px;
-        font-size: 0.9rem;
-        min-height: 44px;
+    .btn-table-action {
+        width: 34px;
+        height: 34px;
     }
 }

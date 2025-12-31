@@ -320,50 +320,18 @@
 
 /* ====================================================================
    RF12: Bloco Ao Vivo - Transmissões em Tempo Real
+   (Estilos base - sobrescritos pelo .icou-card quando aplicado)
    ==================================================================== */
 .section-live {
     margin-bottom: 30px;
-    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(231, 76, 60, 0.05) 100%);
-    border: 1px solid var(--chat-border-color);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    position: relative;
-    overflow: hidden;
-    min-height: 480px;
+    min-height: auto;
 }
 
-.section-live::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #e74c3c, #f39c12, #e74c3c);
-    background-size: 200% 100%;
-    animation: gradient-slide 2s linear infinite;
-}
+/* Estilos antigos do h2 removidos - agora usa .card-header */
 
 @keyframes gradient-slide {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
-}
-
-.section-live h2 {
-    color: #e74c3c;
-    font-size: 1.1em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    letter-spacing: 1px;
-}
-
-.section-live h2 i {
-    animation: pulse-live 1.5s infinite;
 }
 
 @keyframes pulse-live {
@@ -942,6 +910,371 @@
     margin-bottom: 30px;
 }
 
+/* ====================================================================
+   COMPONENTE PADRÃO: ICOU-CARD
+   Card padronizado com header interno (ícone + título)
+   ==================================================================== */
+.icou-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color);
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+/* Header do Card - Ícone + Título */
+.icou-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.icou-card .card-header i {
+    color: var(--highlight-color);
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+
+.icou-card .card-header h3,
+.icou-card .card-header h2 {
+    color: var(--text-color);
+    font-size: 1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Conteúdo do Card */
+.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+/* Scroll estilizado para conteúdos com lista */
+.icou-card .card-content.scrollable {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.icou-card .card-content.scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.icou-card .card-content.scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.icou-card .card-content.scrollable::-webkit-scrollbar-thumb {
+    background: var(--highlight-color);
+    border-radius: 3px;
+}
+
+.icou-card .card-content.scrollable::-webkit-scrollbar-thumb:hover {
+    background: #e67e22;
+}
+
+/* ====================================================================
+   AJUSTES ESPECÍFICOS POR SEÇÃO (usando .icou-card)
+   ==================================================================== */
+
+/* Section Players - Ticker não precisa de padding extra */
+.section-players.icou-card .card-content {
+    padding: 12px;
+}
+
+/* Section Live - Estilos especiais para bloco ao vivo */
+.section-live.icou-card {
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(231, 76, 60, 0.05) 100%);
+    position: relative;
+}
+
+.section-live.icou-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #e74c3c, #f39c12, #e74c3c);
+    background-size: 200% 100%;
+    animation: gradient-slide 2s linear infinite;
+}
+
+.section-live.icou-card .card-header {
+    background: transparent;
+    border-bottom-color: rgba(231, 76, 60, 0.2);
+}
+
+.section-live.icou-card .card-header i {
+    color: #e74c3c;
+    animation: pulse-live 1.5s infinite;
+}
+
+.section-live.icou-card .card-header h3 {
+    color: #e74c3c;
+}
+
+/* Section Standings - Tabela com scroll */
+.section-standings.icou-card .card-content {
+    padding: 0;
+}
+
+.section-standings.icou-card .table-container {
+    border-radius: 0;
+    margin: 0;
+}
+
+/* Section Championship - Com filtros */
+.section-championship.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+.section-championship.icou-card .championship-standings-controls {
+    margin-bottom: 16px;
+}
+
+.section-championship.icou-card .table-container {
+    border-radius: 0;
+    margin: 0;
+}
+
+/* Section Latest Results - Ajuste para manter scroll interno */
+.section-latest-results.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+.section-latest-results.icou-card .latest-results-container {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+/* Section Stats - Grid de cards */
+.section-stats.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+.section-stats.icou-card .stats-cards {
+    margin: 0;
+}
+
+/* ====================================================================
+   BLOCO DE ÚLTIMAS PARTIDAS (mantém estilos internos)
+   ==================================================================== */
+.section-latest-results {
+    margin-bottom: 30px;
+}
+
+/* O título agora está dentro do .card-header - estilos específicos removidos */
+
+.latest-results-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Scroll estilizado para mais de 4 resultados */
+.latest-results-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.latest-results-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.latest-results-container::-webkit-scrollbar-thumb {
+    background: var(--highlight-color);
+    border-radius: 3px;
+}
+
+.latest-results-container::-webkit-scrollbar-thumb:hover {
+    background: #e67e22;
+}
+
+/* Loading state */
+.latest-results-loading {
+    text-align: center;
+    padding: 30px 20px;
+    color: #888;
+}
+
+.latest-results-loading i {
+    margin-right: 8px;
+    color: var(--highlight-color);
+}
+
+/* Estado vazio */
+.latest-results-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 30px 20px;
+    color: #888;
+}
+
+.latest-results-empty i {
+    font-size: 2em;
+    margin-bottom: 12px;
+    opacity: 0.5;
+    color: var(--highlight-color);
+}
+
+.latest-results-empty p {
+    font-size: 0.9em;
+    margin: 0;
+}
+
+/* Item de resultado */
+.latest-result-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.latest-result-item:hover {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: rgba(253, 138, 36, 0.2);
+}
+
+/* Time A (esquerda) */
+.result-team-a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.result-team-a .team-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px;
+    flex-shrink: 0;
+}
+
+.result-team-a .team-info {
+    min-width: 0;
+    text-align: left;
+}
+
+.result-team-a .team-name {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-team-a .player-name {
+    font-size: 0.7em;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Placar (centro) */
+.result-score {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    flex-shrink: 0;
+}
+
+.result-score .score {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--highlight-color);
+    min-width: 24px;
+    text-align: center;
+}
+
+.result-score .score-separator {
+    font-size: 1em;
+    color: #666;
+    font-weight: 400;
+}
+
+/* Time B (direita) */
+.result-team-b {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    flex-direction: row-reverse;
+}
+
+.result-team-b .team-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px;
+    flex-shrink: 0;
+}
+
+.result-team-b .team-info {
+    min-width: 0;
+    text-align: right;
+}
+
+.result-team-b .team-name {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-team-b .player-name {
+    font-size: 0.7em;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Badge de destaque para o vencedor */
+.result-team-a.winner .team-name,
+.result-team-b.winner .team-name {
+    color: #2ecc71;
+}
+
+.result-team-a.winner .team-logo,
+.result-team-b.winner .team-logo {
+    border: 2px solid rgba(46, 204, 113, 0.5);
+}
+
+/* Data/hora da partida */
+.result-date {
+    font-size: 0.65em;
+    color: #666;
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* Stats cards internos (dentro do .icou-card) */
 .stats-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -949,8 +1282,8 @@
 }
 
 .stat-card {
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--chat-border-color);
+    background-color: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 10px;
     padding: 15px;
     text-align: center;
@@ -973,6 +1306,7 @@
     color: var(--text-color);
 }
 
+/* Section players - agora usa .icou-card */
 .section-players {
     margin-bottom: 20px;
 }
@@ -1051,8 +1385,8 @@
 
     .section-players {
         /* grid-column: 1 / 4; */
-        /* margin-top: 30px; */
-        /* min-height: 300px; */
+        margin-top: 0;
+        min-height: auto;
     }
 
     .table-container {
@@ -1352,5 +1686,155 @@
         padding: 1px 6px;
         font-size: 0.6em;
         margin-left: 4px;
+    }
+
+    /* Bloco Últimas Partidas - Mobile pequeno */
+    .section-latest-results {
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .section-latest-results h3 {
+        font-size: 0.9em;
+        margin-bottom: 12px;
+    }
+
+    .latest-results-container {
+        max-height: 240px;
+        gap: 8px;
+    }
+
+    .latest-result-item {
+        padding: 10px 12px;
+        border-radius: 10px;
+    }
+
+    .result-team-a .team-logo,
+    .result-team-b .team-logo {
+        width: 30px;
+        height: 30px;
+    }
+
+    .result-team-a .team-name,
+    .result-team-b .team-name {
+        font-size: 0.75em;
+    }
+
+    .result-team-a .player-name,
+    .result-team-b .player-name {
+        font-size: 0.65em;
+    }
+
+    .result-score {
+        padding: 0 10px;
+        gap: 6px;
+    }
+
+    .result-score .score {
+        font-size: 1.1em;
+        min-width: 20px;
+    }
+
+    .latest-results-empty {
+        padding: 20px 16px;
+    }
+
+    .latest-results-empty i {
+        font-size: 1.6em;
+    }
+
+    .latest-results-empty p {
+        font-size: 0.8em;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Bloco Últimas Partidas (481px - 768px)
+   ==================================================================== */
+@media (min-width: 481px) and (max-width: 768px) {
+    .section-latest-results {
+        padding: 16px;
+    }
+
+    .latest-results-container {
+        max-height: 260px;
+    }
+
+    .result-team-a .team-logo,
+    .result-team-b .team-logo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .result-score .score {
+        font-size: 1.2em;
+    }
+}
+
+/* ====================================================================
+   RESPONSIVIDADE - Componente .icou-card
+   ==================================================================== */
+@media (max-width: 480px) {
+    .icou-card {
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    .icou-card .card-header {
+        padding: 12px 14px;
+        gap: 8px;
+    }
+
+    .icou-card .card-header i {
+        font-size: 1em;
+    }
+
+    .icou-card .card-header h3,
+    .icou-card .card-header h2 {
+        font-size: 0.9em;
+    }
+
+    .icou-card .card-content {
+        padding: 12px 14px;
+    }
+
+    /* Ajustes específicos por seção em mobile */
+    .section-players.icou-card .card-content {
+        padding: 10px;
+    }
+
+    .section-live.icou-card .card-content {
+        padding: 12px;
+    }
+
+    .section-standings.icou-card .card-content,
+    .section-championship.icou-card .card-content {
+        padding: 0;
+    }
+
+    .section-championship.icou-card .championship-standings-controls {
+        padding: 12px 14px;
+        margin-bottom: 0;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .icou-card {
+        border-radius: 14px;
+        margin-bottom: 20px;
+    }
+
+    .icou-card .card-header {
+        padding: 14px 18px;
+    }
+
+    .icou-card .card-content {
+        padding: 14px 18px;
+    }
+}
+
+@media (min-width: 769px) {
+    .icou-card {
+        margin-bottom: 24px;
     }
 }

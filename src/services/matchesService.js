@@ -168,10 +168,12 @@ export async function criarPartida(dados) {
     criadorNome,
     criadorTimeNome,
     criadorTimeLogo,
+    criadorFoto,
     adversarioId, 
     adversarioNome,
     adversarioTimeNome,
     adversarioTimeLogo,
+    adversarioFoto,
     plataformaStreaming = null, 
     linkTransmissao = null,
     oficial = true,
@@ -202,11 +204,13 @@ export async function criarPartida(dados) {
       jogadorANome: criadorNome || 'Jogador A',
       jogadorATimeNome: criadorTimeNome || 'Sem time',
       jogadorATimeLogo: criadorTimeLogo || '',
+      jogadorAFoto: criadorFoto || '',
       
       jogadorBId: adversarioId,
       jogadorBNome: adversarioNome || 'Jogador B',
       jogadorBTimeNome: adversarioTimeNome || 'Sem time',
       jogadorBTimeLogo: adversarioTimeLogo || '',
+      jogadorBFoto: adversarioFoto || '',
       
       // Placar
       placarA: null,
@@ -976,6 +980,77 @@ async function atualizarEstatisticasJogador(userId, dados) {
 }
 
 // ============================================================================
+// ÚLTIMAS PARTIDAS FINALIZADAS
+// ============================================================================
+
+/**
+ * Busca as últimas partidas finalizadas com placar confirmado
+ * @param {number} limite - Número máximo de partidas a retornar (padrão: 4)
+ * @returns {Promise<Array>} - Lista de partidas finalizadas
+ */
+export async function getUltimasPartidasFinalizadas(limite = 4) {
+  try {
+    const partidasRef = collection(db, 'partidas');
+    const q = query(
+      partidasRef,
+      where('placarStatus', '==', STATUS_PLACAR.CONFIRMADO),
+      orderBy('dataFim', 'desc')
+    );
+    
+    const snapshot = await getDocs(q);
+    const partidas = [];
+    
+    snapshot.forEach((doc) => {
+      if (partidas.length < limite) {
+        partidas.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      }
+    });
+    
+    return partidas;
+    
+  } catch (error) {
+    console.error('[matchesService] Erro ao buscar últimas partidas:', error);
+    return [];
+  }
+}
+
+/**
+ * Listener em tempo real para últimas partidas finalizadas
+ * @param {Function} callback - Função chamada quando dados mudam
+ * @param {number} limite - Número máximo de partidas (padrão: 4)
+ * @returns {Function} - Função para cancelar listener
+ */
+export function onUltimasPartidasFinalizadas(callback, limite = 4) {
+  const partidasRef = collection(db, 'partidas');
+  const q = query(
+    partidasRef,
+    where('placarStatus', '==', STATUS_PLACAR.CONFIRMADO),
+    orderBy('dataFim', 'desc')
+  );
+  
+  return onSnapshot(q, (snapshot) => {
+    const partidas = [];
+    
+    snapshot.forEach((doc) => {
+      if (partidas.length < limite) {
+        partidas.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      }
+    });
+    
+    callback(partidas);
+  }, (error) => {
+    console.error('[matchesService] Erro no listener de últimas partidas:', error);
+    callback([]);
+  });
+}
+
+// ============================================================================
 // EXPORT DEFAULT
 // ============================================================================
 
@@ -1004,6 +1079,8 @@ export default {
   getPartidasContestadas,
   getPartidasConfirmadas,
   getPartida,
+  getUltimasPartidasFinalizadas,
+  onUltimasPartidasFinalizadas,
   
   // Transmissões
   getTransmissoesAoVivo,

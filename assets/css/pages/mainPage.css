@@ -23,9 +23,8 @@
 .players-ticker-viewport {
    width: 100%;
    overflow: hidden;
-   border: 1px solid var(--chat-border-color);
-   border-radius: 14px;
-   background: var(--secondary-bg);
+   border-radius: 10px;
+   background: rgba(0, 0, 0, 0.1);
    padding: 10px 0;
 }
 
