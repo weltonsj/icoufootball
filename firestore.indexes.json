@@ -47,7 +47,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "placarStatus", "order": "ASCENDING" },
-        { "fieldPath": "criadoEm", "order": "DESCENDING" }
+        { "fieldPath": "dataFim", "order": "DESCENDING" }
       ]
     }
   ],
