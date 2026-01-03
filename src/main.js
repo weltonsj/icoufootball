@@ -23,8 +23,13 @@ let currentUserId = null;
 
 async function renderTable(ranking, tbodyId = "standings-body", limitResults = true) {
     const tbody = document.getElementById(tbodyId);
-    if (!tbody) return;
+    if (!tbody) {
+        console.warn(`[main] ⚠️ Container de tabela não encontrado: #${tbodyId}`);
+        return;
+    }
 
+    console.log(`[main] 🏆 Renderizando tabela (${tbodyId}) com ${ranking.length} jogadores`);
+    
     tbody.innerHTML = "";
     
     // Aplica limite de 10 jogadores visíveis para classificação geral (com scroll se mais)
@@ -228,6 +233,8 @@ async function renderTable(ranking, tbodyId = "standings-body", limitResults = t
             tableContainer.classList.remove('standings-scroll');
         }
     }
+    
+    console.log(`[main] ✅ Tabela renderizada com sucesso (${tbodyId}): ${tbody.querySelectorAll('tr').length} linhas`);
 }
 
 async function renderStats(stats) {
@@ -245,9 +252,20 @@ async function renderStats(stats) {
             const snap = await getDocs(q);
             const d = snap.docs[0];
             elPrev.textContent = d ? (d.data().nome || d.id) : '-';
-        } catch {
+            console.log('[main] ✅ Campeão anterior carregado:', elPrev.textContent);
+        } catch (err) {
+            console.error('[main] ❌ Erro ao carregar campeão anterior:', err);
             elPrev.textContent = '-';
         }
+    }
+
+    // Verificar se stats existe e tem dados
+    if (!stats) {
+        console.log('[main] ℹ️ Nenhuma estatística para renderizar');
+        if (elAtk) elAtk.textContent = '-';
+        if (elDef) elDef.textContent = '-';
+        if (elGoleada) elGoleada.textContent = '-';
+        return;
     }
 
     const ids = [];
@@ -260,15 +278,26 @@ async function renderStats(stats) {
     if (stats.bestAttack && elAtk) {
         const u = userMap.get(stats.bestAttack.id) || {};
         elAtk.textContent = `${u.nome || stats.bestAttack.id} (${stats.bestAttack.val} GP)`;
+        console.log('[main] ✅ Melhor ataque:', elAtk.textContent);
+    } else if (elAtk) {
+        elAtk.textContent = '-';
     }
+
     if (stats.bestDefense && elDef) {
         const u = userMap.get(stats.bestDefense.id) || {};
         elDef.textContent = `${u.nome || stats.bestDefense.id} (${stats.bestDefense.val} GC)`;
+        console.log('[main] ✅ Melhor defesa:', elDef.textContent);
+    } else if (elDef) {
+        elDef.textContent = '-';
     }
+
     if (stats.biggestWin && elGoleada) {
         const ua = userMap.get(stats.biggestWin.a) || {};
         const ub = userMap.get(stats.biggestWin.b) || {};
         elGoleada.textContent = `${ua.nome || stats.biggestWin.a} ${stats.biggestWin.ga}x${stats.biggestWin.gb} ${ub.nome || stats.biggestWin.b}`;
+        console.log('[main] ✅ Maior goleada:', elGoleada.textContent);
+    } else if (elGoleada) {
+        elGoleada.textContent = '-';
     }
 }
 
@@ -321,9 +350,15 @@ async function initHomepage() {
     initUserStatusBlock(currentUserId);
 
     // 1) Classificação Geral = ranking anual acumulado
-    unsubscribeAnnual = subscribeToAnnualStandings({ year: new Date().getFullYear() }, ({ ranking, stats }) => {
-        renderTable(ranking, 'standings-body');
-        renderStats(stats);
+    unsubscribeAnnual = subscribeToAnnualStandings({ year: new Date().getFullYear() }, async ({ ranking, stats }) => {
+        console.log('[main] 📊 Listener anual disparado: renderizando tabela e estatísticas');
+        try {
+            await renderTable(ranking, 'standings-body');
+            await renderStats(stats);
+            console.log('[main] ✅ Classificação e estatísticas renderizadas com sucesso');
+        } catch (error) {
+            console.error('[main] ❌ Erro ao renderizar classificação/estatísticas:', error);
+        }
     });
 
     // 2) Players em destaque (ticker)
@@ -662,18 +697,30 @@ function initLatestResults() {
     }
     
     // Inicia listener em tempo real (limite de 4 partidas)
-    unsubscribeLatestResults = onUltimasPartidasFinalizadas((partidas) => {
-        console.log('[main] Últimas partidas atualizadas:', partidas.length);
+    try {
+        unsubscribeLatestResults = onUltimasPartidasFinalizadas((partidas) => {
+            console.log('[main] 📜 Últimas partidas atualizadas:', partidas.length);
+            
+            if (partidas.length === 0) {
+                container.innerHTML = renderEmptyLatestResults();
+                console.log('[main] ℹ️ Nenhuma partida finalizada encontrada');
+                return;
+            }
+            
+            container.innerHTML = partidas.map(partida => renderLatestResultItem(partida)).join('');
+            console.log('[main] ✅ Últimas partidas renderizadas com sucesso');
+        }, 4);
         
-        if (partidas.length === 0) {
-            container.innerHTML = renderEmptyLatestResults();
-            return;
-        }
-        
-        container.innerHTML = partidas.map(partida => renderLatestResultItem(partida)).join('');
-    }, 4);
-    
-    console.log('[main] Listener de últimas partidas iniciado');
+        console.log('[main] 📡 Listener de últimas partidas iniciado');
+    } catch (error) {
+        console.error('[main] ❌ Erro ao inicializar listener de últimas partidas:', error);
+        container.innerHTML = `
+            <div class="latest-results-empty">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Erro ao carregar últimas partidas.<br>Tente recarregar a página.</p>
+            </div>
+        `;
+    }
 }
 
 /**

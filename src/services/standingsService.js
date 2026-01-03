@@ -80,13 +80,18 @@ function subscribeToStandings(campeonatoId, cb) {
     return () => {};
   }
 
+  console.log('[Standings] Iniciando listener de campeonato:', campeonatoId);
   const q = query(collection(db, "partidas"), where("campeonatoId", "==", campeonatoId));
   return onSnapshot(q, (snap) => {
     const matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     const confirmadas = matches.filter(m => m.placarStatus === 'confirmado' && Number.isFinite(m.placarA) && Number.isFinite(m.placarB));
     const ranking = computeRanking(confirmadas);
     const stats = computeStats(confirmadas);
+    console.log('[Standings] Campeonato carregado:', confirmadas.length, 'partidas confirmadas');
     cb({ ranking, stats });
+  }, (error) => {
+    console.error('[Standings] Erro ao carregar campeonato:', error.code, error.message);
+    cb({ ranking: [], stats: computeStats([]) });
   });
 }
 
@@ -95,16 +100,47 @@ function subscribeToStandings(campeonatoId, cb) {
  * Consulta apenas por placar confirmado e filtra por ano no client.
  */
 function subscribeToAnnualStandings({ year = new Date().getFullYear() } = {}, cb) {
+  console.log('[Standings] Iniciando listener de classificação anual para ano:', year);
   const q = query(collection(db, "partidas"), where("placarStatus", "==", "confirmado"));
   return onSnapshot(q, (snap) => {
+    console.log('[Standings] Dados recebidos:', snap.docs.length, 'partidas confirmadas');
     const matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     const doAno = matches.filter(m => {
       const y = getYearFromTimestamp(m.dataPartida || m.criadoEm);
       return y === year && Number.isFinite(m.placarA) && Number.isFinite(m.placarB);
     });
+    console.log('[Standings] Partidas do ano', year + ':', doAno.length);
     const ranking = computeRanking(doAno);
     const stats = computeStats(doAno);
+    console.log('[Standings] Ranking calculado:', ranking.length, 'jogadores');
     cb({ ranking, stats, year });
+  }, (error) => {
+    console.error('[Standings] Erro ao carregar classificação:', error.code, error.message);
+    // Tentar fallback: buscar todas as partidas e filtrar no cliente
+    if (error.code === 'failed-precondition' || error.code === 'permission-denied') {
+      console.warn('[Standings] Tentando fallback sem índice...');
+      try {
+        getDocs(collection(db, "partidas")).then((snap) => {
+          console.log('[Standings] Fallback recebeu:', snap.docs.length, 'partidas totais');
+          const matches = snap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(m => m.placarStatus === 'confirmado');
+          console.log('[Standings] Partidas confirmadas:', matches.length);
+          const doAno = matches.filter(m => {
+            const y = getYearFromTimestamp(m.dataPartida || m.criadoEm);
+            return y === year && Number.isFinite(m.placarA) && Number.isFinite(m.placarB);
+          });
+          const ranking = computeRanking(doAno);
+          const stats = computeStats(doAno);
+          cb({ ranking, stats, year });
+        });
+      } catch (fallbackError) {
+        console.error('[Standings] Fallback também falhou:', fallbackError);
+        cb({ ranking: [], stats: computeStats([]), year });
+      }
+    } else {
+      cb({ ranking: [], stats: computeStats([]), year });
+    }
   });
 }
 

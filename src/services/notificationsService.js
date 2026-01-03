@@ -105,35 +105,46 @@ export function listenUnreadNotifications(userId, callback) {
     return () => {}; // Retorna função vazia para unsubscribe
   }
 
+  console.log('[Notifications] Iniciando listener para userId:', userId);
   const notificacoesRef = collection(db, 'notificacoes');
-  const q = query(
-    notificacoesRef,
-        where('usuarioId', '==', userId),
-    where('lida', '==', false)
-  );
+  // Simplificar query: apenas filtrar por usuarioId (sem lida para evitar índice)
+  const q = query(notificacoesRef, where('usuarioId', '==', userId));
   
-  return onSnapshot(q, (snapshot) => {
-    const count = snapshot.size;
+  let unsubscribe = null;
+  
+  unsubscribe = onSnapshot(q, (snapshot) => {
+    // Filtrar no cliente por lida=false
     const notifications = [];
     
     snapshot.forEach(doc => {
-      notifications.push({
-        id: doc.id,
-        ...doc.data()
-      });
+      const data = doc.data();
+      if (!data.lida) { // Apenas notificações não lidas
+        notifications.push({
+          id: doc.id,
+          ...data
+        });
+      }
     });
     
+    const count = notifications.length;
+    console.log('[Notifications] ✅ Recebidas', count, 'notificações não lidas');
     callback(count, notifications);
   }, (error) => {
-    // Erro silencioso se for problema de permissões (usuário não autenticado ou sem acesso)
+    // Erro de permissão
     if (error.code === 'permission-denied') {
-      console.warn('[Notifications] Permissões insuficientes - usuário pode não estar autenticado');
+      console.error('[Notifications] Erro de permissão ao ler notificações. Verifique as Security Rules e authenticação.', error);
       callback(0, []);
     } else {
       console.error('[Notifications] Erro ao escutar notificações:', error);
       callback(0, []);
     }
   });
+  
+  return () => {
+    if (unsubscribe) {
+      unsubscribe();
+    }
+  };
 }
 
 /**

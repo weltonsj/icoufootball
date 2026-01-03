@@ -994,7 +994,7 @@ export async function getUltimasPartidasFinalizadas(limite = 4) {
     const q = query(
       partidasRef,
       where('placarStatus', '==', STATUS_PLACAR.CONFIRMADO),
-      orderBy('dataFim', 'desc')
+      orderBy('criadoEm', 'desc')
     );
     
     const snapshot = await getDocs(q);
@@ -1028,7 +1028,7 @@ export function onUltimasPartidasFinalizadas(callback, limite = 4) {
   const q = query(
     partidasRef,
     where('placarStatus', '==', STATUS_PLACAR.CONFIRMADO),
-    orderBy('dataFim', 'desc')
+    orderBy('criadoEm', 'desc')
   );
   
   return onSnapshot(q, (snapshot) => {
