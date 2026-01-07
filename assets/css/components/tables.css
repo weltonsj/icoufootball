@@ -142,8 +142,7 @@ th.hide-tablet, td.hide-tablet {
 /* Coluna de posição/ranking */
 .icou-table th.col-pos,
 .icou-table td.col-pos {
-    text-align: center;
-    width: 40px;
+    text-align: left;
     min-width: 40px;
     font-weight: 700;
 }
@@ -1162,12 +1161,12 @@ th.hide-tablet, td.hide-tablet {
    ==================================================================== */
 .table-standings {
     min-width: 500px;
+    border-radius: 0;
 }
 
 .table-standings th.col-time,
 .table-standings td.col-time {
     min-width: 100px;
-    text-align: center;
 }
 
 /* Centraliza o conteúdo da célula de time */

@@ -97,53 +97,87 @@ export async function markNotificationsAsRead(notificationIds) {
  * @param {Function} callback - Função chamada quando houver mudanças
  * @returns {Function} Função para cancelar a escuta
  */
-export function listenUnreadNotifications(userId, callback) {
-  // Verificar se usuário está autenticado antes de criar listener
-  if (!userId || !auth.currentUser) {
-    console.warn('[Notifications] Usuário não autenticado, não iniciando listener');
+export function listenUnreadNotifications(userId, callback, retryCount = 0) {
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 1000;
+  
+  // Verificar se usuário está autenticado e se o userId corresponde antes de criar listener
+  if (!userId || !auth.currentUser || auth.currentUser.uid !== userId) {
+    console.warn('[Notifications] Usuário não autenticado ou userId inválido, não iniciando listener');
     callback(0, []);
     return () => {}; // Retorna função vazia para unsubscribe
   }
 
-  console.log('[Notifications] Iniciando listener para userId:', userId);
+  console.log('[Notifications] Iniciando listener para userId:', userId, retryCount > 0 ? `(tentativa ${retryCount + 1})` : '');
   const notificacoesRef = collection(db, 'notificacoes');
-  // Simplificar query: apenas filtrar por usuarioId (sem lida para evitar índice)
-  const q = query(notificacoesRef, where('usuarioId', '==', userId));
+  const q = query(
+    notificacoesRef,
+    where('usuarioId', '==', userId),
+    where('lida', '==', false)
+  );
   
   let unsubscribe = null;
+  let isListenerActive = true;
   
   unsubscribe = onSnapshot(q, (snapshot) => {
-    // Filtrar no cliente por lida=false
+    // Se listener foi cancelado enquanto aguardava resposta, ignorar
+    if (!isListenerActive) return;
+    
+    const count = snapshot.size;
     const notifications = [];
     
     snapshot.forEach(doc => {
-      const data = doc.data();
-      if (!data.lida) { // Apenas notificações não lidas
-        notifications.push({
-          id: doc.id,
-          ...data
-        });
-      }
+      notifications.push({
+        id: doc.id,
+        ...doc.data()
+      });
     });
     
-    const count = notifications.length;
     console.log('[Notifications] ✅ Recebidas', count, 'notificações não lidas');
     callback(count, notifications);
   }, (error) => {
-    // Erro de permissão
+    // Se listener foi cancelado, ignorar erro
+    if (!isListenerActive) return;
+    
+    // Erro de permissão: pode ser condição de corrida ou permissão insuficiente
     if (error.code === 'permission-denied') {
-      console.error('[Notifications] Erro de permissão ao ler notificações. Verifique as Security Rules e authenticação.', error);
-      callback(0, []);
+      // Verificar se ainda temos usuário autenticado com UUID correto
+      if (auth.currentUser?.uid === userId && retryCount < MAX_RETRIES) {
+        console.warn(`[Notifications] Permissão negada, tentando novamente em ${RETRY_DELAY}ms (tentativa ${retryCount + 1}/${MAX_RETRIES})...`);
+        const retryTimeout = setTimeout(() => {
+          // Dupla verificação antes de retry
+          if (isListenerActive && auth.currentUser?.uid === userId) {
+            listenUnreadNotifications(userId, callback, retryCount + 1);
+          }
+        }, RETRY_DELAY);
+        
+        // Retornar função que cancela tanto o listener quanto o timeout
+        return () => {
+          isListenerActive = false;
+          clearTimeout(retryTimeout);
+          if (unsubscribe) {
+            unsubscribe();
+          }
+        };
+      } else {
+        console.warn(`[Notifications] ⚠️ Permissões insuficientes ou usuário deslogado. userId=${userId}, currentUid=${auth.currentUser?.uid}, retryCount=${retryCount}`);
+        isListenerActive = false;
+      }
     } else {
-      console.error('[Notifications] Erro ao escutar notificações:', error);
-      callback(0, []);
+      console.error('[Notifications] Erro ao escutar notificações:', error.code, error.message);
     }
+    
+    // Chamar callback com dados vazios após erro
+    callback(0, []);
   });
   
+  // Retornar função de unsubscribe
   return () => {
+    isListenerActive = false;
     if (unsubscribe) {
       unsubscribe();
     }
+    console.log('[Notifications] Listener cancelado para userId:', userId);
   };
 }
 
@@ -221,15 +255,25 @@ let ultimaContagem = -1; // Cache para evitar atualizações desnecessárias
  * @param {string} userId - ID do usuário logado
  */
 export function iniciarListenerNotificacoes(userId) {
-    if (!userId) return;
+    if (!userId || !auth.currentUser) {
+        console.warn('[Notifications] Impossível iniciar listener: usuário não autenticado ou userId vazio');
+        return;
+    }
+    
+    if (auth.currentUser.uid !== userId) {
+        console.warn('[Notifications] Impossível iniciar listener: userId não corresponde ao usuário autenticado');
+        return;
+    }
     
     // Cancelar listener anterior se existir
     if (unsubscribeNotificacoes) {
+        console.log('[Notifications] Cancelando listener anterior...');
         unsubscribeNotificacoes();
     }
     
     ultimaContagem = -1; // Reset cache
-    console.log('[Notifications] Iniciando listener de notificações...');
+    notificacoesAtuais = []; // Limpar notificações em cache
+    console.log('[Notifications] ▶️ Iniciando listener de notificações para userId:', userId);
     
     unsubscribeNotificacoes = listenUnreadNotifications(userId, (count, notifications) => {
         notificacoesAtuais = notifications;
@@ -239,13 +283,16 @@ export function iniciarListenerNotificacoes(userId) {
 
 /**
  * Para o listener de notificações
+ * Deve ser chamado no logout ou quando desmontar componente
  */
 export function pararListenerNotificacoes() {
     if (unsubscribeNotificacoes) {
+        console.log('[Notifications] ⏹️ Parando listener de notificações...');
         unsubscribeNotificacoes();
         unsubscribeNotificacoes = null;
         ultimaContagem = -1;
-        console.log('[Notifications] Listener de notificações parado');
+        notificacoesAtuais = [];
+        console.log('[Notifications] Listener de notificações parado com sucesso');
     }
 }
 

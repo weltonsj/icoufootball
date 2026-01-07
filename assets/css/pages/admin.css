@@ -327,7 +327,7 @@
 .cell-actions {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 6px;
 }
 
@@ -1055,7 +1055,7 @@
 }
 
 /* ====================================================================
-   ADMIN TOOLTIP
+   ADMIN TOOLTIP - Z-INDEX CORRIGIDO
    ====================================================================
 */
 .admin-tooltip {
@@ -1063,32 +1063,36 @@
     cursor: help;
     color: var(--secondary-text);
     font-size: 0.9em;
+    z-index: 10;
 }
 
 .admin-tooltip::after {
     content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
+    position: fixed;
+    bottom: auto;
     left: 50%;
     transform: translateX(-50%);
     background: var(--secondary-bg);
     color: var(--text-color);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.75em;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.8em;
     white-space: nowrap;
     opacity: 0;
     visibility: hidden;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border-color);
-    z-index: 100;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+    border: 2px solid var(--highlight-color);
+    z-index: 99999;
+    pointer-events: none;
+    max-width: 300px;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 .admin-tooltip:hover::after {
     opacity: 1;
     visibility: visible;
-    bottom: calc(100% + 8px);
 }
 
 /* ====================================================================

@@ -38,8 +38,22 @@
       "collectionGroup": "mensagens",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "dataEnvio", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "mensagens",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "lida", "order": "ASCENDING" },
         { "fieldPath": "remetenteId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "mensagens",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "entregue", "order": "ASCENDING" }
       ]
     },
     {

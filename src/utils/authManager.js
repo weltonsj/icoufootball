@@ -588,7 +588,7 @@ async function handleLogout() {
   if (!confirmed) return;
 
   try {
-    showSpinner();
+    showSpinner(null, 'Encerrando sessão...');
     // Limpar estado persistente do chat
     sessionStorage.removeItem('conversaAtivaId');
     
@@ -632,6 +632,10 @@ async function handleLogout() {
 
     hideSpinner();
     showModal('success', 'Sessão encerrada', 'Você foi desconectado');
+    
+    // Dispara evento para resetar flags de inicialização do modal de auth
+    window.dispatchEvent(new CustomEvent('authLogout'));
+    
     setTimeout(() => {
       window.location.hash = '#homepage';
       window.location.href = './index.html#homepage';

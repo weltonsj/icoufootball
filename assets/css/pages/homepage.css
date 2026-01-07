@@ -2,7 +2,8 @@
    Bloco de Status do Usuário - Estado em Campeonatos
    ==================================================================== */
 .section-user-status {
-    margin-bottom: 24px;
+    /* margin-bottom: 24px; */
+    /* padding: 20px !important; */
 }
 
 .section-user-status.hidden {
@@ -13,7 +14,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px 20px;
+    padding: 54.5px 20px;
     background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
     border: 1px solid var(--chat-border-color);
     border-radius: 12px;
@@ -187,7 +188,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 40px 24px;
+    padding: 10px;
     grid-column: 1 / -1;
 }
 
@@ -312,6 +313,87 @@
    ==================================================================== */
 .section-standings {
     margin-bottom: 30px;
+}
+
+/* Controles de Filtro de Ano - Classificação Geral */
+.standings-controls {
+    margin: 10px 0 14px;
+}
+
+.standings-filters-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.standings-filters-row .input-group {
+    flex: 0 0 160px;
+    max-width: 180px;
+}
+
+.standings-controls .input-group select {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1em;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, opacity 0.2s;
+}
+
+.standings-controls .input-group select:focus {
+    border-color: var(--highlight-color);
+}
+
+/* Estado Vazio - Classificação Geral */
+.empty-standings-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 24px;
+}
+
+.empty-standings-state.hidden {
+    display: none;
+}
+
+.empty-standings-icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(253, 138, 36, 0.1);
+    border-radius: 50%;
+    margin-bottom: 14px;
+}
+
+.empty-standings-icon i {
+    font-size: 1.5em;
+    color: var(--highlight-color);
+    opacity: 0.7;
+}
+
+.empty-standings-state h4 {
+    font-size: 1em;
+    color: var(--text-color);
+    margin: 0 0 8px 0;
+}
+
+.empty-standings-state p {
+    font-size: 0.85em;
+    color: #888;
+    max-width: 350px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+#standings-table.hidden {
+    display: none;
 }
 
 .numeric {
@@ -1020,28 +1102,155 @@
     color: #e74c3c;
 }
 
-/* Section Standings - Tabela com scroll */
+/* ====================================================================
+   TABELAS COM CABEÇALHO FIXO E CORPO COM SCROLL (NOVA ARQUITETURA)
+   ==================================================================== */
+
+/* Container principal da tabela */
 .section-standings.icou-card .card-content {
-    padding: 0;
+    padding: 0 0 0 0;
 }
 
-.section-standings.icou-card .table-container {
-    border-radius: 0;
-    margin: 0;
+.table-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 340px;
+    position: relative;
 }
 
-/* Section Championship - Com filtros */
+/* Tabela do cabeçalho - SEMPRE VISÍVEL */
+.table-header-fixed {
+    flex-shrink: 0;
+    background: var(--secondary-bg);
+    border-bottom: 2px solid rgba(253, 138, 36, 0.3);
+}
+
+.table-header-fixed thead tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.table-header-fixed th {
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85em;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Container do corpo com scroll */
+.table-body-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--highlight-color) rgba(0, 0, 0, 0.1);
+    max-height: 165px;
+}
+
+/* Scroll bar webkit (Chrome, Safari, Edge) */
+.table-body-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-body-wrapper::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.table-body-wrapper::-webkit-scrollbar-thumb {
+    background: var(--highlight-color);
+    border-radius: 3px;
+}
+
+.table-body-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #e67e22;
+}
+
+/* Tabela do corpo - SEM CABEÇALHO */
+.table-body-scroll {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-body-scroll tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.table-body-scroll td {
+    padding: 10px 8px;
+    text-align: left;
+    font-size: 0.9em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Alinhamento de colunas - CRÍTICO para manter síncrono */
+.col-pos {
+    width: 5%;
+    min-width: 40px;
+}
+
+.col-time {
+    width: 15%;
+    min-width: 80px;
+}
+
+.col-jogador {
+    width: 20%;
+    min-width: 100px;
+}
+
+.col-numeric {
+    width: 6%;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* Estados das tabelas */
+.table-container.hidden,
+.table-header-fixed.hidden,
+.table-body-wrapper.hidden {
+    display: none;
+}
+
+/* Estados vazios permanecem visíveis */
+.empty-standings-state,
+.empty-championship-state {
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.empty-standings-state.hidden,
+.empty-championship-state.hidden {
+    display: none;
+}
+
+/* Section Standings styles */
+.section-standings.icou-card .card-content {
+    padding: 16px 20px;
+}
+
+.section-standings.icou-card .standings-controls {
+    padding: 8px 0;
+    margin-bottom: 8px;
+}
+
+/* Section Championship styles */
 .section-championship.icou-card .card-content {
     padding: 16px 20px;
 }
 
 .section-championship.icou-card .championship-standings-controls {
-    margin-bottom: 16px;
-}
-
-.section-championship.icou-card .table-container {
-    border-radius: 0;
-    margin: 0;
+    padding: 8px 0;
+    margin-bottom: 8px;
 }
 
 /* Section Latest Results - Ajuste para manter scroll interno */
@@ -1050,8 +1259,10 @@
 }
 
 .section-latest-results.icou-card .latest-results-container {
-    max-height: 280px;
+    max-height: 380px;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--highlight-color) rgba(0, 0, 0, 0.1);
 }
 
 /* Section Stats - Grid de cards */
@@ -1281,6 +1492,13 @@
     gap: 15px;
 }
 
+/* Stats Cards Enhanced - Com Avatares */
+.stats-cards-enhanced {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
 .stat-card {
     background-color: rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -1292,6 +1510,146 @@
     justify-content: center;
     align-items: center;
     min-height: 80px;
+}
+
+/* Stat Card com Avatar */
+.stat-card-avatar {
+    flex-direction: row;
+    gap: 14px;
+    padding: 16px 20px;
+    min-height: 100px;
+    text-align: left;
+    justify-content: flex-start;
+}
+
+.stat-avatar-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.stat-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--highlight-color);
+    box-shadow: 0 2px 8px rgba(253, 138, 36, 0.25);
+}
+
+.stat-avatar.hidden {
+    display: none;
+}
+
+.stat-avatar-fallback {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(253, 138, 36, 0.2) 0%, rgba(253, 138, 36, 0.1) 100%);
+    border: 3px solid var(--highlight-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(253, 138, 36, 0.25);
+}
+
+.stat-avatar-fallback.hidden {
+    display: none;
+}
+
+.stat-avatar-fallback i {
+    font-size: 1.4em;
+    color: var(--highlight-color);
+    opacity: 0.8;
+}
+
+/* Avatar pequeno para goleada */
+.stat-avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+}
+
+.stat-avatar-fallback-sm {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+}
+
+.stat-avatar-fallback-sm i {
+    font-size: 1em;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    flex: 1;
+}
+
+.stat-card-avatar .stat-info h4 {
+    margin-bottom: 6px;
+    font-size: 0.7em;
+    letter-spacing: 0.5px;
+}
+
+.stat-card-avatar .stat-info p {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Card Maior Goleada - Layout especial */
+.stat-card-goleada {
+    grid-column: span 2;
+    padding: 16px 24px;
+    min-height: auto;
+}
+
+.stat-card-goleada h4 {
+    font-size: 0.7em;
+    color: var(--highlight-color);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.goleada-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.goleada-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 80px;
+}
+
+.goleada-name {
+    font-size: 0.85em;
+    color: var(--text-color);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+    text-align: center;
+}
+
+.goleada-score {
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--highlight-color);
+    padding: 0 12px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .stat-card h4 {
@@ -1505,15 +1863,85 @@
         justify-content: center;
     }
 
-    /* Stats cards */
+    /* Stats cards - Responsivo Mobile */
     .stats-cards {
         grid-template-columns: 1fr 1fr;
         gap: 10px;
+    }
+    
+    .stats-cards-enhanced {
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
 
     .stat-card {
         padding: 12px 10px;
         min-height: 70px;
+    }
+    
+    .stat-card-avatar {
+        flex-direction: row;
+        gap: 12px;
+        padding: 14px 16px;
+        min-height: auto;
+    }
+    
+    .stat-avatar {
+        width: 48px;
+        height: 48px;
+        border-width: 2px;
+    }
+    
+    .stat-avatar-fallback {
+        width: 48px;
+        height: 48px;
+        border-width: 2px;
+    }
+    
+    .stat-avatar-fallback i {
+        font-size: 1.2em;
+    }
+    
+    .stat-card-avatar .stat-info h4 {
+        font-size: 0.65em;
+    }
+    
+    .stat-card-avatar .stat-info p {
+        font-size: 0.9em;
+    }
+    
+    /* Card Goleada Mobile */
+    .stat-card-goleada {
+        grid-column: span 1;
+        padding: 14px 16px;
+    }
+    
+    .goleada-content {
+        gap: 12px;
+    }
+    
+    .goleada-player {
+        min-width: 60px;
+    }
+    
+    .stat-avatar-sm {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .stat-avatar-fallback-sm {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .goleada-name {
+        font-size: 0.75em;
+        max-width: 70px;
+    }
+    
+    .goleada-score {
+        font-size: 1.3em;
+        padding: 0 8px;
     }
 
     .stat-card h4 {
@@ -1772,6 +2200,96 @@
 }
 
 /* ====================================================================
+   GRÁFICO DE DESEMPENHO ANUAL - Top 5 Classificação
+   ==================================================================== */
+.performance-chart-container {
+    margin-top: 50px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(30, 30, 30, 0.6) 0%, rgba(20, 20, 20, 0.8) 100%);
+    border-radius: 12px;
+    border: 1px solid var(--chat-border-color);
+}
+
+.performance-chart-container .chart-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.performance-chart-container .chart-title i {
+    color: var(--highlight-color);
+}
+
+.performance-chart-container .chart-title span {
+    color: var(--highlight-color);
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 280px;
+    width: 100%;
+}
+
+.chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.chart-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #888;
+    text-align: center;
+}
+
+.chart-empty-state i {
+    font-size: 3em;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.chart-empty-state p {
+    font-size: 0.9em;
+    margin: 0;
+}
+
+.chart-empty-state.hidden {
+    display: none;
+}
+
+/* Responsivo - Gráfico */
+@media (max-width: 480px) {
+    .performance-chart-container {
+        margin-top: 16px;
+        padding: 14px;
+    }
+
+    .performance-chart-container .chart-title {
+        font-size: 0.85em;
+        gap: 8px;
+    }
+
+    .chart-wrapper {
+        height: 220px;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .chart-wrapper {
+        height: 250px;
+    }
+}
+
+/* ====================================================================
    RESPONSIVIDADE - Componente .icou-card
    ==================================================================== */
 @media (max-width: 480px) {
@@ -1807,8 +2325,7 @@
         padding: 12px;
     }
 
-    .section-standings.icou-card .card-content,
-    .section-championship.icou-card .card-content {
+    .section-standings.icou-card .card-content {
         padding: 0;
     }
 
@@ -1835,6 +2352,6 @@
 
 @media (min-width: 769px) {
     .icou-card {
-        margin-bottom: 24px;
+        margin-bottom: 0px !important;
     }
 }

@@ -51,6 +51,25 @@ async function getChampionshipYears() {
 }
 
 /**
+ * Lista anos disponíveis para classificação geral (baseado em partidas confirmadas).
+ * Retorna array de anos únicos em ordem decrescente.
+ */
+async function getStandingsYears() {
+  const q = query(collection(db, "partidas"), where("placarStatus", "==", "confirmado"));
+  const snap = await getDocs(q);
+  const years = new Set();
+  snap.docs.forEach(doc => {
+    const data = doc.data();
+    const year = getYearFromTimestamp(data.dataPartida || data.criadoEm);
+    if (year) years.add(year);
+  });
+  // Sempre inclui o ano atual, mesmo sem partidas
+  const currentYear = new Date().getFullYear();
+  years.add(currentYear);
+  return Array.from(years).sort((a, b) => b - a);
+}
+
+/**
  * Lista campeonatos de um ano específico.
  * Filtra no client para evitar índices compostos.
  */
@@ -90,7 +109,7 @@ function subscribeToStandings(campeonatoId, cb) {
     console.log('[Standings] Campeonato carregado:', confirmadas.length, 'partidas confirmadas');
     cb({ ranking, stats });
   }, (error) => {
-    console.error('[Standings] Erro ao carregar campeonato:', error.code, error.message);
+    console.error('[Standings] Erro ao carregar campeonato:', error);
     cb({ ranking: [], stats: computeStats([]) });
   });
 }
@@ -115,32 +134,8 @@ function subscribeToAnnualStandings({ year = new Date().getFullYear() } = {}, cb
     console.log('[Standings] Ranking calculado:', ranking.length, 'jogadores');
     cb({ ranking, stats, year });
   }, (error) => {
-    console.error('[Standings] Erro ao carregar classificação:', error.code, error.message);
-    // Tentar fallback: buscar todas as partidas e filtrar no cliente
-    if (error.code === 'failed-precondition' || error.code === 'permission-denied') {
-      console.warn('[Standings] Tentando fallback sem índice...');
-      try {
-        getDocs(collection(db, "partidas")).then((snap) => {
-          console.log('[Standings] Fallback recebeu:', snap.docs.length, 'partidas totais');
-          const matches = snap.docs
-            .map(d => ({ id: d.id, ...d.data() }))
-            .filter(m => m.placarStatus === 'confirmado');
-          console.log('[Standings] Partidas confirmadas:', matches.length);
-          const doAno = matches.filter(m => {
-            const y = getYearFromTimestamp(m.dataPartida || m.criadoEm);
-            return y === year && Number.isFinite(m.placarA) && Number.isFinite(m.placarB);
-          });
-          const ranking = computeRanking(doAno);
-          const stats = computeStats(doAno);
-          cb({ ranking, stats, year });
-        });
-      } catch (fallbackError) {
-        console.error('[Standings] Fallback também falhou:', fallbackError);
-        cb({ ranking: [], stats: computeStats([]), year });
-      }
-    } else {
-      cb({ ranking: [], stats: computeStats([]), year });
-    }
+    console.error('[Standings] Erro ao carregar classificação:', error);
+    cb({ ranking: [], stats: computeStats([]), year });
   });
 }
 
@@ -272,4 +267,4 @@ function subscribeToUserChampionshipStatus(userId, callback) {
   });
 }
 
-export { getActiveChampionshipId, subscribeToActiveChampionships, subscribeToStandings, subscribeToAnnualStandings, getChampionshipYears, getChampionshipsByYear, getUserChampionshipStatus, subscribeToUserChampionshipStatus };
+export { getActiveChampionshipId, subscribeToActiveChampionships, subscribeToStandings, subscribeToAnnualStandings, getChampionshipYears, getChampionshipsByYear, getStandingsYears, getUserChampionshipStatus, subscribeToUserChampionshipStatus };

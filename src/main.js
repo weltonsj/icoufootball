@@ -4,7 +4,7 @@ import { registerUser } from "./services/registerService.js";
 import { validateRegister } from "./utils/validation.js";
 import { showModal, showConfirmModal, showEmailPromptModal } from "./components/modal.js";
 import { showSpinner, hideSpinner } from "./components/spinner.js";
-import { subscribeToActiveChampionships, subscribeToStandings, subscribeToAnnualStandings, getChampionshipYears, getChampionshipsByYear, subscribeToUserChampionshipStatus } from "./services/standingsService.js";
+import { subscribeToActiveChampionships, subscribeToStandings, subscribeToAnnualStandings, getChampionshipYears, getChampionshipsByYear, getStandingsYears, subscribeToUserChampionshipStatus } from "./services/standingsService.js";
 import { getUserMap } from "./services/usersService.js";
 import { initAuthManager, loadAuthStateFromCache, updateMenuVisibility, getCurrentUser } from "./utils/authManager.js";
 import { initThemeManager } from "./utils/themeManager.js";
@@ -230,11 +230,32 @@ async function renderTable(ranking, tbodyId = "standings-body", limitResults = t
     }
 }
 
-async function renderStats(stats) {
+async function renderStats(stats, rankingData = []) {
     const elAtk = document.getElementById("stat-melhor-ataque");
     const elDef = document.getElementById("stat-melhor-defesa");
     const elGoleada = document.getElementById("stat-maior-goleada");
     const elPrev = document.getElementById("stat-campeao-anterior");
+    const elRank1 = document.getElementById("stat-ranking-primeiro");
+
+    // Função auxiliar para definir avatar ou fallback
+    function setAvatar(imgId, fallbackId, photoUrl) {
+        const imgEl = document.getElementById(imgId);
+        const fallbackEl = document.getElementById(fallbackId);
+        if (!imgEl || !fallbackEl) return;
+        
+        if (photoUrl) {
+            imgEl.src = photoUrl;
+            imgEl.classList.remove('hidden');
+            fallbackEl.classList.add('hidden');
+            imgEl.onerror = () => {
+                imgEl.classList.add('hidden');
+                fallbackEl.classList.remove('hidden');
+            };
+        } else {
+            imgEl.classList.add('hidden');
+            fallbackEl.classList.remove('hidden');
+        }
+    }
 
     // Campeão anterior (último campeão marcado no user)
     if (elPrev) {
@@ -244,17 +265,31 @@ async function renderStats(stats) {
             const q = query(collection(db, 'users'), where('ultimoCampeao', '==', true), limit(1));
             const snap = await getDocs(q);
             const d = snap.docs[0];
-            elPrev.textContent = d ? (d.data().nome || d.id) : '-';
-        } catch (err) {
-            console.error('[Main] Erro ao carregar campeão anterior:', err);
+            if (d) {
+                const data = d.data();
+                elPrev.textContent = `${data.nome || d.id} 🏆`;
+                setAvatar('avatar-campeao-anterior', 'fallback-campeao-anterior', data.fotoUrl);
+            } else {
+                elPrev.textContent = '-';
+                setAvatar('avatar-campeao-anterior', 'fallback-campeao-anterior', null);
+            }
+        } catch {
             elPrev.textContent = '-';
+            setAvatar('avatar-campeao-anterior', 'fallback-campeao-anterior', null);
         }
     }
 
-    // Verificar se stats existe e tem dados
-    if (!stats) {
-        console.log('[Main] Nenhuma estatística para renderizar');
-        return;
+    // Ranking 1º - Pega o primeiro colocado do ranking atual
+    if (elRank1 && rankingData.length > 0) {
+        const firstPlace = rankingData[0];
+        const userMap = await getUserMap([firstPlace.id]);
+        const u = userMap.get(firstPlace.id) || {};
+        
+        elRank1.textContent = `${u.nome || firstPlace.id} (${firstPlace.P || 0} pts)`;
+        setAvatar('avatar-ranking-primeiro', 'fallback-ranking-primeiro', u.fotoUrl);
+    } else {
+        if (elRank1) elRank1.textContent = '-';
+        setAvatar('avatar-ranking-primeiro', 'fallback-ranking-primeiro', null);
     }
 
     const ids = [];
@@ -267,23 +302,44 @@ async function renderStats(stats) {
     if (stats.bestAttack && elAtk) {
         const u = userMap.get(stats.bestAttack.id) || {};
         elAtk.textContent = `${u.nome || stats.bestAttack.id} (${stats.bestAttack.val} GP)`;
-    } else if (elAtk) {
-        elAtk.textContent = '-';
+        setAvatar('avatar-melhor-ataque', 'fallback-melhor-ataque', u.fotoUrl);
+    } else {
+        if (elAtk) elAtk.textContent = '-';
+        setAvatar('avatar-melhor-ataque', 'fallback-melhor-ataque', null);
     }
-
+    
     if (stats.bestDefense && elDef) {
         const u = userMap.get(stats.bestDefense.id) || {};
         elDef.textContent = `${u.nome || stats.bestDefense.id} (${stats.bestDefense.val} GC)`;
-    } else if (elDef) {
-        elDef.textContent = '-';
+        setAvatar('avatar-melhor-defesa', 'fallback-melhor-defesa', u.fotoUrl);
+    } else {
+        if (elDef) elDef.textContent = '-';
+        setAvatar('avatar-melhor-defesa', 'fallback-melhor-defesa', null);
     }
-
+    
     if (stats.biggestWin && elGoleada) {
         const ua = userMap.get(stats.biggestWin.a) || {};
         const ub = userMap.get(stats.biggestWin.b) || {};
-        elGoleada.textContent = `${ua.nome || stats.biggestWin.a} ${stats.biggestWin.ga}x${stats.biggestWin.gb} ${ub.nome || stats.biggestWin.b}`;
-    } else if (elGoleada) {
-        elGoleada.textContent = '-';
+        
+        // Atualiza avatares e nomes separadamente para o card de goleada
+        const nomeA = document.getElementById('nome-goleada-a');
+        const nomeB = document.getElementById('nome-goleada-b');
+        
+        if (nomeA) nomeA.textContent = ua.nome || stats.biggestWin.a;
+        if (nomeB) nomeB.textContent = ub.nome || stats.biggestWin.b;
+        
+        setAvatar('avatar-goleada-a', 'fallback-goleada-a', ua.fotoUrl);
+        setAvatar('avatar-goleada-b', 'fallback-goleada-b', ub.fotoUrl);
+        
+        elGoleada.textContent = `${stats.biggestWin.ga} x ${stats.biggestWin.gb}`;
+    } else {
+        if (elGoleada) elGoleada.textContent = '-';
+        const nomeA = document.getElementById('nome-goleada-a');
+        const nomeB = document.getElementById('nome-goleada-b');
+        if (nomeA) nomeA.textContent = '-';
+        if (nomeB) nomeB.textContent = '-';
+        setAvatar('avatar-goleada-a', 'fallback-goleada-a', null);
+        setAvatar('avatar-goleada-b', 'fallback-goleada-b', null);
     }
 }
 
@@ -294,6 +350,201 @@ let unsubscribeUserStatus = null;
 let unsubscribeLatestResults = null;
 let activeCampsCache = [];
 let selectedChampionshipId = null;
+let performanceChartInstance = null;
+
+// ====================================================================
+// GRÁFICO DE DESEMPENHO - Top 3 Classificação
+// ====================================================================
+
+/**
+ * Renderiza o gráfico de desempenho dos top 3 jogadores
+ * @param {Array} ranking - Array de jogadores com suas estatísticas
+ * @param {number} year - Ano selecionado
+ */
+async function renderPerformanceChart(ranking, year) {
+    const chartContainer = document.getElementById('performance-chart-container');
+    const chartCanvas = document.getElementById('performanceChart');
+    const chartEmptyState = document.getElementById('chart-empty-state');
+    const chartYearLabel = document.getElementById('chart-year-label');
+    const chartWrapper = document.querySelector('.chart-wrapper');
+    
+    if (!chartCanvas || !chartContainer) return;
+    
+    // Atualiza o label do ano
+    if (chartYearLabel) {
+        chartYearLabel.textContent = year;
+    }
+    
+    // Destroi chart anterior se existir
+    if (performanceChartInstance) {
+        performanceChartInstance.destroy();
+        performanceChartInstance = null;
+    }
+    
+    // Empty state se não houver dados
+    if (!ranking || ranking.length === 0) {
+        if (chartWrapper) chartWrapper.classList.add('hidden');
+        if (chartEmptyState) chartEmptyState.classList.remove('hidden');
+        return;
+    }
+    
+    // Mostra o chart e esconde empty state
+    if (chartWrapper) chartWrapper.classList.remove('hidden');
+    if (chartEmptyState) chartEmptyState.classList.add('hidden');
+    
+    // Pega apenas os top 3 (pódio)
+    const top3 = ranking.slice(0, 3);
+    
+    // Busca dados reais dos jogadores via getUserMap para enriquecer nomes e times
+    const userIds = top3.map(p => p.id);
+    const userMap = await getUserMap(userIds);
+    
+    // Enriquece o array top3 com nomes e times reais
+    const enrichedTop3 = top3.map(player => {
+        const userData = userMap.get(player.id) || {};
+        return {
+            ...player,
+            nomeReal: userData.nome || player.nome || 'Jogador',
+            time: userData.timeName || 'Sem Time',
+            timeLogo: userData.timeLogo || null
+        };
+    });
+    
+    // Configuração de cores para cada jogador do pódio
+    const chartColors = [
+        { bg: 'rgba(253, 138, 36, 0.8)', border: '#FD8A24' },     // Laranja (1º - Ouro)
+        { bg: 'rgba(192, 192, 192, 0.8)', border: '#C0C0C0' },    // Prata (2º)
+        { bg: 'rgba(205, 127, 50, 0.8)', border: '#CD7F32' }      // Bronze (3º)
+    ];
+    
+    // Prepara labels com nomes reais dos jogadores
+    const labels = enrichedTop3.map(p => p.nomeReal);
+    const pontos = enrichedTop3.map(p => p.P || p.pontos || 0);
+    const vitorias = enrichedTop3.map(p => p.V || p.vitorias || 0);
+    const saldoGols = enrichedTop3.map(p => p.SG || p.saldoGols || 0);
+    
+    // Prepara dados enriquecidos para tooltip personalizado
+    const playerData = enrichedTop3.map(p => ({
+        nomeReal: p.nomeReal,
+        time: p.time,
+        pontos: p.P || p.pontos || 0,
+        vitorias: p.V || p.vitorias || 0,
+        saldoGols: p.SG || p.saldoGols || 0
+    }));
+    
+    const ctx = chartCanvas.getContext('2d');
+    
+    // Cria o gráfico
+    performanceChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Pontos',
+                    data: pontos,
+                    backgroundColor: chartColors.map(c => c.bg),
+                    borderColor: chartColors.map(c => c.border),
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    barPercentage: 0.7
+                },
+                {
+                    label: 'Vitórias',
+                    data: vitorias,
+                    backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                    borderColor: '#2ECC71',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    barPercentage: 0.7
+                },
+                {
+                    label: 'Saldo de Gols',
+                    data: saldoGols,
+                    backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                    borderColor: '#E74C3C',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    barPercentage: 0.7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#ccc',
+                        font: { size: 11, weight: '500' },
+                        padding: 12,
+                        usePointStyle: true,
+                        pointStyle: 'rectRounded'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 30, 30, 0.95)',
+                    titleColor: '#FD8A24',
+                    bodyColor: '#fff',
+                    borderColor: 'rgba(253, 138, 36, 0.3)',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 8,
+                    // Tooltip personalizado com nome, time e valor exato
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            const player = playerData[index];
+                            return player ? `${player.nomeReal} - ${player.time}` : 'Jogador';
+                        },
+                        label: function(tooltipItem) {
+                            const datasetLabel = tooltipItem.dataset.label || '';
+                            const value = tooltipItem.parsed.y || 0;
+                            return `${datasetLabel}: ${value}`;
+                        },
+                        afterBody: function(tooltipItems) {
+                            if (tooltipItems.length === 0) return [];
+                            const index = tooltipItems[0].dataIndex;
+                            const player = playerData[index];
+                            return player ? [
+                                `📊 P: ${player.pontos} | V: ${player.vitorias} | SG: ${player.saldoGols}`
+                            ] : [];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#888',
+                        font: { size: 10 },
+                        maxRotation: 45,
+                        minRotation: 0
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#888',
+                        font: { size: 10 },
+                        stepSize: 5
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.05)'
+                    }
+                }
+            },
+            animation: {
+                duration: 800,
+                easing: 'easeOutQuart'
+            }
+        }
+    });
+}
 
 function clearHomepageListeners() {
     if (unsubscribeAnnual) {
@@ -320,6 +571,12 @@ function clearHomepageListeners() {
         unsubscribeTicker();
         unsubscribeTicker = null;
     }
+    
+    // Destroi o gráfico de desempenho se existir
+    if (performanceChartInstance) {
+        performanceChartInstance.destroy();
+        performanceChartInstance = null;
+    }
 
     activeCampsCache = [];
     selectedChampionshipId = null;
@@ -335,11 +592,99 @@ async function initHomepage() {
     // 0) Inicializa bloco de status do usuário (apenas se logado)
     initUserStatusBlock(currentUserId);
 
-    // 1) Classificação Geral = ranking anual acumulado
-    unsubscribeAnnual = subscribeToAnnualStandings({ year: new Date().getFullYear() }, async ({ ranking, stats }) => {
-        await renderTable(ranking, 'standings-body');
-        await renderStats(stats);
-    });
+    // 1) Classificação Geral = ranking anual acumulado com filtro de ano
+    const standingsYearSelect = document.getElementById('standings-year-select');
+    const standingsTableHeader = document.getElementById('standings-table-header');
+    const standingsBodyWrapper = document.getElementById('standings-body-wrapper');
+    const emptyStandingsState = document.getElementById('empty-standings-state');
+
+    // Funções auxiliares para controle de exibição
+    function showStandingsTable() {
+        if (standingsTableHeader) standingsTableHeader.classList.remove('hidden');
+        if (standingsBodyWrapper) standingsBodyWrapper.classList.remove('hidden');
+        if (emptyStandingsState) emptyStandingsState.classList.add('hidden');
+    }
+
+    function hideStandingsTable() {
+        if (standingsTableHeader) standingsTableHeader.classList.add('hidden');
+        if (standingsBodyWrapper) standingsBodyWrapper.classList.add('hidden');
+        if (emptyStandingsState) emptyStandingsState.classList.remove('hidden');
+    }
+
+    // Carrega anos disponíveis no seletor
+    async function loadStandingsYearsSelector() {
+        if (!standingsYearSelect) return;
+        const years = await getStandingsYears();
+        const currentYear = new Date().getFullYear();
+        
+        standingsYearSelect.innerHTML = '';
+        years.forEach(year => {
+            const opt = document.createElement('option');
+            opt.value = year;
+            opt.textContent = year;
+            standingsYearSelect.appendChild(opt);
+        });
+        
+        // Seleciona ano atual por padrão
+        standingsYearSelect.value = currentYear;
+    }
+
+    // Carrega classificação para o ano selecionado
+    function loadStandingsByYear(year) {
+        // Cancela listener anterior se existir
+        if (unsubscribeAnnual) {
+            unsubscribeAnnual();
+            unsubscribeAnnual = null;
+        }
+
+        if (!year) return;
+
+        unsubscribeAnnual = subscribeToAnnualStandings({ year: parseInt(year, 10) }, ({ ranking, stats }) => {
+            if (ranking && ranking.length > 0) {
+                showStandingsTable();
+                renderTable(ranking, 'standings-body');
+                // Renderiza o gráfico de desempenho com os dados do ranking
+                renderPerformanceChart(ranking, year);
+            } else {
+                hideStandingsTable();
+                // Renderiza o gráfico mesmo sem dados (mostra empty state)
+                renderPerformanceChart([], year);
+            }
+            renderStats(stats, ranking);
+        });
+    }
+
+    // Inicializa seletor de anos da classificação geral
+    if (standingsYearSelect) {
+        await loadStandingsYearsSelector();
+        
+        const initialYear = parseInt(standingsYearSelect.value, 10);
+        
+        // Carrega dados do ano atual inicialmente
+        loadStandingsByYear(initialYear);
+        
+        // Inicializa últimas partidas com o ano inicial
+        initLatestResults(initialYear);
+        
+        // Listener para mudança de ano
+        standingsYearSelect.onchange = () => {
+            const selectedYear = parseInt(standingsYearSelect.value, 10);
+            loadStandingsByYear(selectedYear);
+            // Atualiza últimas partidas para o ano selecionado
+            initLatestResults(selectedYear);
+        };
+    } else {
+        // Fallback: carrega ano atual sem seletor
+        const currentYear = new Date().getFullYear();
+        unsubscribeAnnual = subscribeToAnnualStandings({ year: currentYear }, ({ ranking, stats }) => {
+            renderTable(ranking, 'standings-body');
+            renderStats(stats, ranking);
+            // Renderiza gráfico no fallback também
+            renderPerformanceChart(ranking, currentYear);
+        });
+        // Inicializa últimas partidas com ano atual
+        initLatestResults(currentYear);
+    }
 
     // 2) Players em destaque (ticker)
     initPlayersTicker();
@@ -351,7 +696,8 @@ async function initHomepage() {
     const yearSelect = document.getElementById('championship-year-select');
     const champControls = document.getElementById('championship-standings-controls');
     const champTbody = document.getElementById('championship-standings-body');
-    const champTable = document.getElementById('championship-table');
+    const champTableHeader = document.getElementById('championship-table-header');
+    const champBodyWrapper = document.getElementById('championship-body-wrapper');
     const emptyChampState = document.getElementById('empty-championship-state');
 
     async function renderChampionshipHeader(champ) {
@@ -361,12 +707,14 @@ async function initHomepage() {
     }
 
     function showChampionshipTable() {
-        if (champTable) champTable.classList.remove('hidden');
+        if (champTableHeader) champTableHeader.classList.remove('hidden');
+        if (champBodyWrapper) champBodyWrapper.classList.remove('hidden');
         if (emptyChampState) emptyChampState.classList.add('hidden');
     }
 
     function hideChampionshipTable() {
-        if (champTable) champTable.classList.add('hidden');
+        if (champTableHeader) champTableHeader.classList.add('hidden');
+        if (champBodyWrapper) champBodyWrapper.classList.add('hidden');
         if (emptyChampState) emptyChampState.classList.remove('hidden');
     }
 
@@ -394,6 +742,8 @@ async function initHomepage() {
     async function loadYearsSelector() {
         if (!yearSelect) return;
         const years = await getChampionshipYears();
+        const currentYear = new Date().getFullYear();
+        
         yearSelect.innerHTML = '<option value="">Selecione o ano</option>';
         years.forEach(year => {
             const opt = document.createElement('option');
@@ -401,10 +751,21 @@ async function initHomepage() {
             opt.textContent = year;
             yearSelect.appendChild(opt);
         });
+        
+        // Auto-seleciona o ano atual se disponível
+        if (years.includes(currentYear)) {
+            yearSelect.value = currentYear;
+            return currentYear;
+        } else if (years.length > 0) {
+            // Se não tiver o ano atual, seleciona o mais recente
+            yearSelect.value = years[0];
+            return years[0];
+        }
+        return null;
     }
 
-    async function loadChampionshipsByYear(year) {
-        if (!champSelect) return;
+    async function loadChampionshipsByYear(year, autoSelectLast = false) {
+        if (!champSelect) return null;
         
         // Limpa e desabilita select de campeonatos enquanto carrega
         champSelect.innerHTML = '<option value="">Selecione o campeonato</option>';
@@ -412,7 +773,7 @@ async function initHomepage() {
         clearChampionshipTable();
         
         if (!year) {
-            return;
+            return null;
         }
 
         const camps = await getChampionshipsByYear(parseInt(year, 10));
@@ -420,10 +781,14 @@ async function initHomepage() {
 
         if (!camps.length) {
             champSelect.innerHTML = '<option value="">Nenhum campeonato encontrado</option>';
-            return;
+            return null;
         }
 
         champSelect.innerHTML = '<option value="">Selecione o campeonato</option>';
+        
+        // Encontra o último campeonato finalizado para auto-seleção
+        let lastFinalized = null;
+        
         camps.forEach((c) => {
             const opt = document.createElement('option');
             opt.value = c.id;
@@ -433,21 +798,41 @@ async function initHomepage() {
                 opt.textContent += ' (Ativo)';
             } else if (c.status === 'Finalizado') {
                 opt.textContent += ' (Finalizado)';
+                // Guarda o último finalizado (primeiro da lista já está ordenado por data)
+                if (!lastFinalized) lastFinalized = c;
             }
             champSelect.appendChild(opt);
         });
         champSelect.disabled = false;
+        
+        // Auto-seleciona o último campeonato finalizado se solicitado
+        if (autoSelectLast && lastFinalized) {
+            champSelect.value = lastFinalized.id;
+            return lastFinalized;
+        }
+        
+        return null;
     }
 
-    // Inicializa seletores
+    // Inicializa seletores com auto-seleção
     if (yearSelect) {
-        loadYearsSelector();
+        const selectedYear = await loadYearsSelector();
         
         yearSelect.onchange = async () => {
-            const selectedYear = yearSelect.value;
+            const year = yearSelect.value;
             selectedChampionshipId = null;
-            await loadChampionshipsByYear(selectedYear);
+            await loadChampionshipsByYear(year);
         };
+        
+        // Carrega campeonatos do ano selecionado e auto-seleciona o último finalizado
+        if (selectedYear) {
+            const lastChamp = await loadChampionshipsByYear(selectedYear, true);
+            if (lastChamp) {
+                selectedChampionshipId = lastChamp.id;
+                renderChampionshipHeader(lastChamp);
+                bindChampionshipStandings(lastChamp.id);
+            }
+        }
     }
 
     if (champSelect) {
@@ -469,9 +854,6 @@ async function initHomepage() {
     if (champControls) {
         champControls.classList.remove('hidden');
     }
-
-    // 4) Bloco de Últimas Partidas
-    initLatestResults();
 }
 
 let unsubscribeTicker = null;
@@ -660,9 +1042,10 @@ function renderUserStatusBlock(status, elements) {
 
 /**
  * Inicializa o bloco de últimas partidas finalizadas na Home Page
- * Exibe até 4 partidas com placar confirmado
+ * Exibe exatamente as 10 últimas partidas confirmadas do ano selecionado
+ * @param {number} year - Ano para filtrar as partidas
  */
-function initLatestResults() {
+function initLatestResults(year = new Date().getFullYear()) {
     const container = document.getElementById('latest-results-container');
     
     if (!container) {
@@ -676,29 +1059,47 @@ function initLatestResults() {
         unsubscribeLatestResults = null;
     }
     
-    // Inicia listener em tempo real (limite de 4 partidas)
+    // Inicia listener em tempo real (limite de 50 partidas para garantir dados após filtro)
     unsubscribeLatestResults = onUltimasPartidasFinalizadas((partidas) => {
         console.log('[main] Últimas partidas atualizadas:', partidas.length);
         
-        if (partidas.length === 0) {
-            container.innerHTML = renderEmptyLatestResults();
+        // Filtra apenas partidas do ano especificado
+        const partidasDoAno = partidas.filter(p => {
+            if (!p.dataPartida && !p.criadoEm) return false;
+            const timestamp = p.dataPartida || p.criadoEm;
+            const partidaYear = timestamp?.toDate?.()?.getFullYear();
+            return partidaYear === year;
+        });
+        
+        // Ordena por data decrescente (mais recentes primeiro) e limita a 10
+        partidasDoAno.sort((a, b) => {
+            const dateA = (a.dataPartida || a.criadoEm)?.toDate?.()?.getTime() || 0;
+            const dateB = (b.dataPartida || b.criadoEm)?.toDate?.()?.getTime() || 0;
+            return dateB - dateA;
+        });
+        
+        const ultimasDez = partidasDoAno.slice(0, 10);
+        
+        if (ultimasDez.length === 0) {
+            container.innerHTML = renderEmptyLatestResults(year);
             return;
         }
         
-        container.innerHTML = partidas.map(partida => renderLatestResultItem(partida)).join('');
-    }, 4);
+        container.innerHTML = ultimasDez.map(partida => renderLatestResultItem(partida)).join('');
+    }, 50);
     
-    console.log('[main] Listener de últimas partidas iniciado');
+    console.log(`[main] Listener de últimas partidas iniciado para o ano ${year}`);
 }
 
 /**
  * Renderiza o estado vazio do bloco de últimas partidas
+ * @param {number} year - Ano para exibir na mensagem
  */
-function renderEmptyLatestResults() {
+function renderEmptyLatestResults(year) {
     return `
         <div class="latest-results-empty">
             <i class="fas fa-futbol"></i>
-            <p>Nenhuma partida finalizada ainda.<br>Os resultados aparecerão aqui assim que as partidas forem concluídas.</p>
+            <p>Nenhuma partida finalizada em ${year}.<br>Os resultados aparecerão aqui assim que as partidas forem concluídas.</p>
         </div>
     `;
 }
@@ -1056,55 +1457,124 @@ function cleanupLiveStreams() {
 // MODAL DE AUTENTICAÇÃO - Gerencia abertura/fechamento do modal
 // ====================================================================
 
+let authModalInitialized = false;
+
+// BUG_A FIX: Listener para reset de flags após logout
+window.addEventListener('authLogout', () => {
+    console.log('[AuthModal] Reset de flags após logout');
+    authModalInitialized = false;
+    loginInitialized = false;
+});
+
+/**
+ * BUG_B FIX: Reseta o modal para a view de Login
+ */
+function resetAuthModalToLogin() {
+    const btnToggleLogin = document.getElementById("btnToggleLogin");
+    const btnToggleRegister = document.getElementById("btnToggleRegister");
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    
+    if (btnToggleLogin && btnToggleRegister && loginForm && registerForm) {
+        btnToggleLogin.classList.add("active");
+        btnToggleRegister.classList.remove("active");
+        loginForm.classList.remove("hidden");
+        registerForm.classList.add("hidden");
+    }
+    
+    // Limpar campos
+    const inputs = document.querySelectorAll('#authModal input');
+    inputs.forEach(input => {
+        input.value = '';
+        input.removeAttribute('aria-invalid');
+    });
+}
+
 function setupAuthModal() {
+    // Evitar múltiplos registros de event listeners
+    if (authModalInitialized) {
+        console.log('[AuthModal] Já inicializado, pulando...');
+        return;
+    }
+    
     const headerLoginLink = document.getElementById('header-login-link');
     const authModal = document.getElementById('authModal');
     const authModalClose = document.getElementById('authModalClose');
+    const authModalContent = authModal?.querySelector('.auth-modal-content');
 
-    if (!headerLoginLink) return;
+    console.log('[AuthModal] Elementos encontrados:', {
+        headerLoginLink: !!headerLoginLink,
+        authModal: !!authModal,
+        authModalClose: !!authModalClose,
+        authModalContent: !!authModalContent
+    });
 
-    // Abrir modal ao clicar no link de login
+    if (!headerLoginLink || !authModal) return;
+    
+    authModalInitialized = true;
+    console.log('[AuthModal] Inicializando...');
+
+    // Impede que cliques no conteúdo do modal propaguem para o overlay
+    if (authModalContent) {
+        authModalContent.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // Abrir modal ao clicar no link de login - BUG_B FIX: Reset para Login
     headerLoginLink.addEventListener('click', (e) => {
         e.preventDefault();
-        if (authModal) {
-            authModal.classList.remove('hidden');
-            // Focar no primeiro input
-            setTimeout(() => {
-                const loginEmail = document.getElementById('loginEmail');
-                if (loginEmail) loginEmail.focus();
-            }, 100);
+        e.stopPropagation();
+        console.log('[AuthModal] Abrindo modal');
+        resetAuthModalToLogin(); // BUG_B FIX
+        authModal.classList.remove('hidden');
+        console.log('[AuthModal] Modal classes após abrir:', authModal.className);
+    });
+
+    // Fechar modal pelo botão X - BUG_B FIX: Reset ao fechar
+    if (authModalClose) {
+        authModalClose.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('[AuthModal] Fechando via botão X');
+            authModal.classList.add('hidden');
+            resetAuthModalToLogin(); // BUG_B FIX
+        });
+    }
+
+    // Fechar modal ao clicar no overlay (fora do conteúdo) - BUG_B FIX
+    authModal.addEventListener('click', (e) => {
+        console.log('[AuthModal] Click detectado. Target:', e.target.id || e.target.className, 'authModal:', authModal === e.target);
+        // Só fecha se clicou diretamente no overlay
+        if (e.target === authModal) {
+            console.log('[AuthModal] Fechando via clique no overlay');
+            authModal.classList.add('hidden');
+            resetAuthModalToLogin(); // BUG_B FIX
         }
     });
 
-    // Fechar modal pelo botão X
-    if (authModalClose) {
-        authModalClose.addEventListener('click', () => {
-            authModal.classList.add('hidden');
-        });
-    }
-
-    // Fechar modal ao clicar fora
-    if (authModal) {
-        authModal.addEventListener('click', (e) => {
-            if (e.target === authModal) {
-                authModal.classList.add('hidden');
-            }
-        });
-    }
-
-    // Fechar modal com ESC
+    // Fechar modal com ESC - BUG_B FIX
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && authModal && !authModal.classList.contains('hidden')) {
+            console.log('[AuthModal] Fechando via ESC');
             authModal.classList.add('hidden');
+            resetAuthModalToLogin(); // BUG_B FIX
         }
     });
+    
+    console.log('[AuthModal] Inicialização concluída');
 }
 
 // ====================================================================
 // LOGIN - Autenticação e Registro
 // ====================================================================
 
+let loginInitialized = false;
+
 function initLogin() {
+    // Evitar múltiplos registros de event listeners
+    if (loginInitialized) return;
+    
     const btnToggleLogin = document.getElementById("btnToggleLogin");
     const btnToggleRegister = document.getElementById("btnToggleRegister");
     const loginForm = document.getElementById("loginForm");
@@ -1114,6 +1584,8 @@ function initLogin() {
 
     // Se elementos não existem, pular (usuário já autenticado)
     if (!btnToggleLogin || !loginForm) return;
+    
+    loginInitialized = true;
 
     // Configura o modal de autenticação
     setupAuthModal();
@@ -1138,9 +1610,16 @@ function initLogin() {
         e.preventDefault();
         const email = document.getElementById("loginEmail").value;
         const password = document.getElementById("loginPassword").value;
+        const submitBtn = loginForm.querySelector('.btn-primary');
 
         try {
-            showSpinner();
+            // Feedback visual no botão
+            if (submitBtn) {
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+            }
+            
+            showSpinner(null, 'Autenticando...');
             await login(email, password);
             hideSpinner();
             
@@ -1149,13 +1628,28 @@ function initLogin() {
                 authModal.classList.add('hidden');
             }
             
-            showModal('success', 'Login efetuado', 'Você está autenticado');
+            showModal('success', 'Login efetuado', 'Redirecionando para o Dashboard...');
+            
+            // Redirecionamento automático para o Dashboard
             setTimeout(() => {
-                window.location.hash = '#mainPage';
+                window.location.hash = '#dashboard';
                 window.location.reload();
-            }, 800);
+            }, 600);
         } catch (err) {
             hideSpinner();
+            
+            // Remove estado de loading do botão
+            if (submitBtn) {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+            
+            // Animação de erro no card
+            const authCard = document.querySelector('.auth-card-modal');
+            if (authCard) {
+                authCard.classList.add('shake');
+                setTimeout(() => authCard.classList.remove('shake'), 400);
+            }
             
             // Verifica se é usuário inativado
             const errorMessage = err?.message || '';
@@ -1221,6 +1715,34 @@ function initLogin() {
         rConfirm.addEventListener('input', () => { mark(rConfirm, rConfirm.value === rPass.value); });
     }
     validateRealtime();
+    
+    // Toggle de visibilidade de senha
+    function setupPasswordToggle() {
+        const toggles = document.querySelectorAll('.password-toggle');
+        toggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = toggle.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = toggle.querySelector('i');
+                
+                if (input && icon) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                        toggle.setAttribute('aria-label', 'Ocultar senha');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                        toggle.setAttribute('aria-label', 'Mostrar senha');
+                    }
+                }
+            });
+        });
+    }
+    setupPasswordToggle();
 
     // Recuperação de senha
     if (forgotLink) {
@@ -1356,6 +1878,10 @@ function removeDynamicPageAssets() {
         const js = document.querySelector(`#${page}-js`);
         if (js) js.remove();
     });
+    
+    // Resetar flags de inicialização quando página é recarregada
+    authModalInitialized = false;
+    loginInitialized = false;
 }
 
 // Retorna o HTML da homepage

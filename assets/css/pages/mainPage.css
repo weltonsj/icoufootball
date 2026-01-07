@@ -185,6 +185,48 @@
       font-size: 0.8em;
    }
    
+   /* Classificação Geral - Filtros Mobile */
+   .standings-controls {
+      margin: 8px 0 10px;
+   }
+   
+   .standings-filters-row {
+      flex-direction: column;
+      gap: 8px;
+   }
+   
+   .standings-filters-row .input-group {
+      flex: 1;
+      max-width: 100%;
+   }
+   
+   .standings-controls .input-group select {
+      padding: 10px 12px;
+      font-size: 0.95em;
+   }
+   
+   /* Empty state mobile */
+   .empty-standings-state {
+      padding: 30px 16px;
+   }
+   
+   .empty-standings-icon {
+      width: 48px;
+      height: 48px;
+   }
+   
+   .empty-standings-icon i {
+      font-size: 1.3em;
+   }
+   
+   .empty-standings-state h4 {
+      font-size: 0.95em;
+   }
+   
+   .empty-standings-state p {
+      font-size: 0.8em;
+   }
+   
    .championship-standings-controls {
       margin: 8px 0 10px;
    }

@@ -991,25 +991,33 @@ async function atualizarEstatisticasJogador(userId, dados) {
 export async function getUltimasPartidasFinalizadas(limite = 4) {
   try {
     const partidasRef = collection(db, 'partidas');
+    
+    // Query simples sem orderBy para evitar índice composto
+    // Ordenação é feita no cliente
     const q = query(
       partidasRef,
-      where('placarStatus', '==', STATUS_PLACAR.CONFIRMADO),
-      orderBy('dataFim', 'desc')
+      where('placarStatus', '==', STATUS_PLACAR.CONFIRMADO)
     );
     
     const snapshot = await getDocs(q);
     const partidas = [];
     
     snapshot.forEach((doc) => {
-      if (partidas.length < limite) {
-        partidas.push({
-          id: doc.id,
-          ...doc.data()
-        });
-      }
+      partidas.push({
+        id: doc.id,
+        ...doc.data()
+      });
     });
     
-    return partidas;
+    // Ordena no cliente por dataFim ou dataPartida ou criadoEm (fallback)
+    partidas.sort((a, b) => {
+      const dataA = (a.dataFim || a.dataPartida || a.criadoEm)?.toMillis?.() || 0;
+      const dataB = (b.dataFim || b.dataPartida || b.criadoEm)?.toMillis?.() || 0;
+      return dataB - dataA; // Mais recente primeiro
+    });
+    
+    // Retorna apenas o limite solicitado
+    return partidas.slice(0, limite);
     
   } catch (error) {
     console.error('[matchesService] Erro ao buscar últimas partidas:', error);
@@ -1024,30 +1032,50 @@ export async function getUltimasPartidasFinalizadas(limite = 4) {
  * @returns {Function} - Função para cancelar listener
  */
 export function onUltimasPartidasFinalizadas(callback, limite = 4) {
-  const partidasRef = collection(db, 'partidas');
-  const q = query(
-    partidasRef,
-    where('placarStatus', '==', STATUS_PLACAR.CONFIRMADO),
-    orderBy('dataFim', 'desc')
-  );
-  
-  return onSnapshot(q, (snapshot) => {
-    const partidas = [];
+  try {
+    const partidasRef = collection(db, 'partidas');
     
-    snapshot.forEach((doc) => {
-      if (partidas.length < limite) {
-        partidas.push({
-          id: doc.id,
-          ...doc.data()
+    // Query simples sem orderBy para evitar índice composto
+    // Ordenação é feita no cliente
+    const q = query(
+      partidasRef,
+      where('placarStatus', '==', STATUS_PLACAR.CONFIRMADO)
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      try {
+        const partidas = [];
+        
+        snapshot.forEach((doc) => {
+          partidas.push({
+            id: doc.id,
+            ...doc.data()
+          });
         });
+        
+        // Ordena no cliente por dataFim ou dataPartida ou criadoEm (fallback)
+        partidas.sort((a, b) => {
+          const dataA = (a.dataFim || a.dataPartida || a.criadoEm)?.toMillis?.() || 0;
+          const dataB = (b.dataFim || b.dataPartida || b.criadoEm)?.toMillis?.() || 0;
+          return dataB - dataA; // Mais recente primeiro
+        });
+        
+        // Retorna apenas o limite solicitado
+        callback(partidas.slice(0, limite));
+      } catch (innerError) {
+        console.error('[matchesService] Erro ao processar últimas partidas:', innerError);
+        callback([]);
       }
+    }, (error) => {
+      console.error('[matchesService] Erro no listener de últimas partidas:', error);
+      // Erro isolado - não afeta outros blocos
+      callback([]);
     });
-    
-    callback(partidas);
-  }, (error) => {
-    console.error('[matchesService] Erro no listener de últimas partidas:', error);
+  } catch (error) {
+    console.error('[matchesService] Erro ao criar listener de últimas partidas:', error);
     callback([]);
-  });
+    return () => {}; // Retorna função vazia para evitar erro em cleanup
+  }
 }
 
 // ============================================================================
