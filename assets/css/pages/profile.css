@@ -579,7 +579,7 @@
 }
 
 .danger-description {
-    color: #ddd;
+    color: var(--text-secondary);
     line-height: 1.7;
     font-size: 0.95em;
 }
@@ -594,7 +594,7 @@
     border-left: 3px solid #dc3545;
     padding: 12px 15px;
     border-radius: 4px;
-    color: #ffb3b3;
+    color: var(--contested-badge-text);
     display: flex;
     align-items: center;
     gap: 10px;

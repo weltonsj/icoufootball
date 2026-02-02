@@ -466,6 +466,43 @@ table tbody tr:hover {
     display: none !important
 }
 
+/* ====================================================================
+   AUDIO TOGGLE - Controle de Som do Sistema
+   ==================================================================== */
+.audio-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: var(--icon-color);
+}
+
+.audio-toggle:hover {
+    background-color: var(--button-icon-bg);
+    color: var(--highlight-color);
+    transform: scale(1.1);
+}
+
+.audio-toggle:active {
+    transform: scale(0.95);
+}
+
+.audio-toggle .audio-icon {
+    width: 22px;
+    height: 22px;
+    transition: all 0.2s ease;
+}
+
+/* Quando o som está ativo, destaca o ícone */
+.audio-toggle[data-active="true"] .audio-icon {
+    color: var(--highlight-color);
+}
+
 .dark-mode-toggle {
     display: flex;
     align-items: center;

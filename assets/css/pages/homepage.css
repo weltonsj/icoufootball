@@ -245,7 +245,7 @@
     gap: 8px;
     padding: 12px 20px;
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    color: #fff;
+    color: #fff !important;
     font-size: 0.9em;
     font-weight: 600;
     text-decoration: none;

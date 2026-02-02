@@ -36,132 +36,435 @@
     --confirmed-badge-bg: #28a745;
     --pending-badge-bg: #ffc107;
     --contested-badge-bg: #dc3545;
+    
+    /* Configuração de Transição Global - Smooth Theme Switching */
+    --transition-speed: 0.3s;
+    --transition-easing: ease;
 }
 
-/* Tema Claro - Cores suaves e limpas */
+/* Transições Suaves para mudança de tema */
+body, .app-content, .card-section, .icou-card, .modal, input, textarea, select, button, .nav-item, table, th, td, span, p, h1, h2, h3, h4, i, .sidebar {
+    transition: background-color var(--transition-speed) var(--transition-easing),
+                color var(--transition-speed) var(--transition-easing),
+                border-color var(--transition-speed) var(--transition-easing),
+                box-shadow var(--transition-speed) var(--transition-easing);
+}
+
+/* ========================================
+   TEMA CLARO PREMIUM - Platinum Grey
+   Refatorado para estética profissional
+   ======================================== */
 .theme-light,
 .theme-light body,
 html.theme-light {
-    --primary-bg: #F5F5F5;
-    --secondary-bg: #FFFFFF;
-    --text-color: #2C3E50;
-    --highlight-color: #FD8A24;
-    --border-color: #D1D5DB;
-    --table-header-bg: #E8EAF0;
-    --table-row-hover: #F3F4F6;
-    --star-filled: #FFA500;
-    --star-empty: #CBD5E0;
+    /* === ESTRUTURA PRINCIPAL - Tons de Cinza Sofisticados === */
+    --primary-bg: #E8ECEF;            /* Cinza Platina Suave */
+    --secondary-bg: #F8FAFC;          /* Branco Acinzentado (Cards) */
+    --tertiary-bg: #F1F5F9;           /* Elementos secundários */
+    
+    /* === CORES DE TEXTO - Alto Contraste === */
+    --text-color: #1E293B;            /* Cinza Chumbo Profundo */
+    --text-secondary: #475569;        /* Texto secundário */
+    --text-muted: #64748B;            /* Texto terciário */
+    
+    /* === COR DE DESTAQUE === */
+    --highlight-color: #FD8A24;       /* Laranja original mantido */
+    --highlight-hover: #E67A14;
+    --highlight-light: #FFF7ED;
+    
+    /* === BORDAS E DIVISORES === */
+    --border-color: #CBD5E1;          /* Cinza claro definido */
+    --border-strong: #94A3B8;
+    --border-light: #E2E8F0;
+    
+    /* === TABELAS === */
+    --table-header-bg: #DFE4E9;       /* Levemente mais escuro que cards */
+    --table-row-hover: #F1F5F9;
+    --table-row-alt: #F8FAFC;
+    
+    /* === INPUTS === */
     --input-bg: #FFFFFF;
-    --input-border: #D1D5DB;
-    --icon-color: #6B7280;
-    --button-icon-bg: #F3F4F6;
-    --chat-bubble-received: #E5E7EB;
-    --chat-bubble-sent: #FEE2D5;
+    --input-border: #CBD5E1;
+    --input-focus-border: #FD8A24;
+    --input-placeholder: #94A3B8;
+    
+    /* === CHAT === */
+    --chat-bubble-received: #E2E8F0;  /* Fundo cinza para recebidas */
+    --chat-bubble-sent: #FD8A24;      /* Fundo laranja para enviadas */
     --chat-input-bg: #FFFFFF;
-    --chat-border-color: #D1D5DB;
-    --unread-badge-bg: #EF4444;
-    --status-confirmed: #10B981;
-    --status-pending: #F59E0B;
-    --status-contested: #EF4444;
-    --action-confirm: #10B981;
-    --action-contest: #EF4444;
-    --action-secondary: #3B82F6;
-    --action-red: #EF4444;
-    --action-orange: #F97316;
-    --action-green: #10B981;
-    --action-blue: #3B82F6;
-    --kpi-icon-color: #FBBF24;
-    --confirmed-badge-bg: #10B981;
-    --pending-badge-bg: #F59E0B;
-    --contested-badge-bg: #EF4444;
+    --chat-border-color: #CBD5E1;
+    
+    /* === STATUS (Cores mais densas) === */
+    --status-confirmed: #166534;      /* Verde escuro para contraste */
+    --status-pending: #854D0E;        /* Amarelo/Marrom para contraste */
+    --status-contested: #991B1B;      /* Vermelho escuro */
+    
+    --action-confirm: #166534;
+    --action-contest: #991B1B;
+    --action-secondary: #0F172A;      /* Dark Blue/Black */
+    --action-red: #991B1B;
+    --action-orange: #fd7e14;
+    --action-green: #166534;
+    --action-blue: #0F172A;
+    
+    /* === KPIs e BADGES === */
+    --kpi-icon-color: #CA8A04;        /* Darker Gold */
+    --confirmed-badge-bg: #DCFCE7;
+    --confirmed-badge-text: #166534;
+    --pending-badge-bg: #FEF9C3;
+    --pending-badge-text: #854D0E;
+    --contested-badge-bg: #FEE2E2;
+    --contested-badge-text: #991B1B;
+    
+    /* === SOMBRAS PREMIUM === */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    
+    /* === INTERAÇÃO === */
+    --star-filled: #FFD700;           /* Estrela preenchida - dourado */
+    --star-empty: #CBD5E0;            /* Estrela vazia */
+    
+    /* === ÍCONES E BOTÕES === */
+    --icon-color: #64748B;
+    --icon-hover: #1E293B;            /* Ícones no hover */
+    --button-icon-bg: #F1F5F9;        /* Background de botões de ícone */
+    
+    --unread-badge-bg: #E74C3C;       /* Badge vermelho vibrante */
 }
 
-/* Ajustes específicos para elementos no tema claro */
+/* ========================================
+   AJUSTES ESPECÍFICOS DO TEMA CLARO
+   Alto contraste e hierarquia visual
+   ======================================== */
+
+/* Header e Footer com sombra e separação */
 .theme-light .app-header {
     background-color: #FFFFFF;
-    border-bottom: 2px solid #E5E7EB;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #CBD5E0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .theme-light .app-footer {
     background-color: #FFFFFF;
-    border-top: 2px solid #E5E7EB;
-    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+    border-top: 1px solid #CBD5E0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.theme-light .card-section {
-    background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+/* Cards com destaque e profundidade */
+.theme-light .card-section,
+.theme-light .icou-card {
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
+    border: 1px solid rgba(253, 138, 36, 0.2);
+    /* background-color: #FFFFFF;
+    border: 1px solid #E2E8F0; */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.theme-light .card-section:hover,
+.theme-light .icou-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Tabelas com melhor contraste */
 .theme-light table {
     background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
+    border: 1px solid #CBD5E0;
 }
 
+.theme-light table th {
+    background-color: #EDF2F7;
+    color: #1A202C;
+    font-weight: 600;
+    border-bottom: 2px solid #CBD5E0;
+}
+
+.theme-light table td {
+    border-bottom: 1px solid #E2E8F0;
+    color: #2D3748;
+}
+
+.theme-light table tr:hover td {
+    background-color: #F7FAFC;
+}
+
+/* Modais com sombra profunda */
 .theme-light .modal {
     background-color: #FFFFFF;
-    border: 1px solid #D1D5DB;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid #CBD5E0;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
+.theme-light .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Popovers e Dropdowns */
 .theme-light .avatar-popover {
     background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #CBD5E0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
+/* Cards de autenticação */
 .theme-light .auth-card {
     background-color: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
+/* Inputs com borda visível */
 .theme-light .input-with-icon input,
-.theme-light .input-with-icon textarea {
+.theme-light .input-with-icon textarea,
+.theme-light input[type="text"],
+.theme-light input[type="email"],
+.theme-light input[type="password"],
+.theme-light input[type="number"],
+.theme-light textarea,
+.theme-light select {
     background-color: #FFFFFF;
-    border: 1px solid #D1D5DB;
-    color: #2C3E50;
+    border: 1.5px solid #CBD5E0;
+    color: #2D3748;
 }
 
 .theme-light .input-with-icon input:focus,
-.theme-light .input-with-icon textarea:focus {
+.theme-light .input-with-icon textarea:focus,
+.theme-light input:focus,
+.theme-light textarea:focus,
+.theme-light select:focus {
     border-color: #FD8A24;
-    box-shadow: 0 0 0 3px rgba(253, 138, 36, 0.1);
+    box-shadow: 0 0 0 3px rgba(253, 138, 36, 0.15);
+    outline: none;
 }
 
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
+    color: #A0AEC0;
+}
+
+/* Zona de perigo */
 .theme-light .danger-zone {
-    background-color: rgba(239, 68, 68, 0.05);
-    border-color: #EF4444;
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
+    border: 1px solid rgba(253, 138, 36, 0.2);
+    /* background-color: #FFF5F5;
+    border: 1px solid #FC8181; */
+    border-left: 4px solid #E53E3E;
+}
+
+/* Navegação */
+.theme-light .nav-item {
+    color: #2D3748;
+    font-weight: 500;
+}
+
+.theme-light .nav-item:hover {
+    color: #FD8A24;
+}
+
+.theme-light .nav-item.active {
+    color: #FD8A24;
+}
+
+/* Botões primários */
+.theme-light .btn-primary,
+.theme-light .primary-btn {
+    background: linear-gradient(135deg, #FD8A24 0%, #FDAB5C 100%);
+    color: #FFFFFF;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(253, 138, 36, 0.3);
+}
+
+.theme-light .btn-primary:hover,
+.theme-light .primary-btn:hover {
+    background: linear-gradient(135deg, #E67A14 0%, #FD9A3C 100%);
+    box-shadow: 0 4px 12px rgba(253, 138, 36, 0.4);
+}
+
+/* Botões secundários */
+.theme-light .btn-secondary,
+.theme-light .secondary-btn {
+    background-color: #EDF2F7;
+    color: #2D3748;
+    border: 1px solid #CBD5E0;
+}
+
+.theme-light .btn-secondary:hover,
+.theme-light .secondary-btn:hover {
+    background-color: #E2E8F0;
+    border-color: #A0AEC0;
+}
+
+/* Badges de status com texto legível */
+.theme-light .badge-confirmed,
+.theme-light .status-confirmed {
+    background-color: #D4EDDA;
+    color: #155724;
+    border: 1px solid #A3D9A5;
+}
+
+.theme-light .badge-pending,
+.theme-light .status-pending {
+    background-color: #FFF3CD;
+    color: #856404;
+    border: 1px solid #FFEEBA;
+}
+
+.theme-light .badge-contested,
+.theme-light .status-contested {
+    background-color: #F8D7DA;
+    color: #721C24;
+    border: 1px solid #F5C6CB;
+}
+
+/* KPIs e Stats */
+.theme-light .stat-card,
+.theme-light .kpi-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.theme-light .stat-value,
+.theme-light .kpi-value {
+    color: #1A202C;
+    font-weight: 700;
+}
+
+.theme-light .stat-label,
+.theme-light .kpi-label {
+    color: #4A5568;
+}
+
+/* Links */
+.theme-light a {
+    color: #3182CE;
+}
+
+.theme-light a:hover {
+    color: #2B6CB0;
+}
+
+/* Scrollbar no tema claro */
+.theme-light ::-webkit-scrollbar-track {
+    background: #EDF2F7;
+}
+
+.theme-light ::-webkit-scrollbar-thumb {
+    background: #CBD5E0;
+}
+
+.theme-light ::-webkit-scrollbar-thumb:hover {
+    background: #A0AEC0;
+}
+
+/* Audio toggle no tema claro */
+.theme-light .audio-toggle {
+    color: #718096;
+}
+
+.theme-light .audio-toggle:hover {
+    background-color: #EDF2F7;
+    color: #FD8A24;
+}
+
+/* Switch de tema no modo claro */
+.theme-light .dark-mode-toggle span {
+    color: #718096;
+}
+
+.theme-light .dark-mode-status {
+    color: #FD8A24;
+}
+
+/* Notificações */
+.theme-light .notification-bell {
+    color: #718096;
+}
+
+.theme-light .notification-bell:hover {
+    color: #FD8A24;
+}
+
+/* Player cards */
+.theme-light .player-card {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.theme-light .player-card:hover {
+    border-color: #FD8A24;
+    box-shadow: 0 4px 16px rgba(253, 138, 36, 0.18);
+}
+
+/* Chat específico */
+.theme-light .chat-message.received {
+    background-color: #E2E8F0;
+    color: #2D3748;
+}
+
+.theme-light .chat-message.sent {
+    background-color: #FD8A24;
+    color: #FFFFFF;
+}
+
+.theme-light .chat-input-container {
+    background-color: #FFFFFF;
+    border-top: 1px solid #CBD5E0;
+}
+
+/* Texto do footer */
+.theme-light .app-footer p,
+.theme-light .app-footer a,
+.theme-light .app-footer span {
+    color: #4A5568;
+}
+
+.theme-light .app-footer a:hover {
+    color: #FD8A24;
+}
+
+/* Mobile menu */
+.theme-light .mobile-nav-menu {
+    background-color: #FFFFFF;
+    border-right: 1px solid #E2E8F0;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.12);
+}
+
+.theme-light .mobile-nav-menu .nav-item {
+    color: #2D3748;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.theme-light .mobile-nav-menu .nav-item:hover {
+    background-color: #F7FAFC;
+    color: #FD8A24;
+}
+
+/* Títulos e headers */
+.theme-light h1, 
+.theme-light h2, 
+.theme-light h3, 
+.theme-light h4 {
+    color: #1A202C;
+}
+
+.theme-light .section-title {
+    color: #2D3748;
+    border-bottom: 2px solid #FD8A24;
+}
+
+/* Textos secundários */
+.theme-light .text-muted,
+.theme-light .text-secondary {
+    color: #718096;
 }
 
 /* ========================================
-   MODO CLARO (Light Mode)
+   MODO CLARO (Light Mode) - Body Styles
    ======================================== */
-.theme-light {
-    --primary-bg: #F5F5F5;
-    --secondary-bg: #FFFFFF;
-    --text-color: #2B2B2B;
-    --highlight-color: #FD8A24;
-    --border-color: #DDDDDD;
-    --table-header-bg: #EEEEEE;
-    --table-row-hover: #F8F8F8;
-    --star-filled: #FFD700;
-    --star-empty: #CCCCCC;
-    --input-bg: #FFFFFF;
-    --input-border: #CCCCCC;
-    --icon-color: #666666;
-    --button-icon-bg: #EEEEEE;
-    --chat-bubble-received: #EEEEEE;
-    --chat-bubble-sent: #FD8A24;
-    --chat-input-bg: #FFFFFF;
-    --chat-border-color: #DDDDDD;
-    --unread-badge-bg: #E74C3C;
-    --status-confirmed: #28a745;
-    --status-pending: #ffc107;
-    --status-contested: #dc3545;
-}
 
 /* Aplica variáveis no .app-content quando modo claro está ativo */
 .app-content.theme-light {
@@ -171,11 +474,11 @@ html.theme-light {
 }
 
 body.theme-light {
-    background-color: #E5E5E5;
+    background-color: #E8ECEF;
 }
 
 body.theme-light .app-container {
-    background-color: var(--secondary-bg);
+    background-color: var(--primary-bg);
 }
 
 body.theme-light .app-header {
@@ -195,7 +498,7 @@ body.theme-light .player-card,
 body.theme-light .auth-card {
     background-color: var(--secondary-bg);
     border-color: var(--border-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-card);
 }
 
 body.theme-light table {

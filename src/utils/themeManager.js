@@ -8,12 +8,18 @@ const THEME_LIGHT = 'light';
 const THEME_DARK = 'dark';
 
 /**
- * Obtém o tema atual do localStorage ou retorna 'dark' como padrão
+ * Obtém o tema atual do localStorage ou retorna via preferência do sistema
  */
 function getCurrentTheme() {
     try {
         const saved = localStorage.getItem(THEME_KEY);
-        return saved === THEME_LIGHT ? THEME_LIGHT : THEME_DARK;
+        if (saved) return saved;
+
+        // Verifica preferência do sistema se não houver salvo
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return THEME_LIGHT;
+        }
+        return THEME_DARK; // Default para escuro
     } catch (e) {
         console.error('Erro ao ler tema:', e);
         return THEME_DARK;
@@ -114,6 +120,16 @@ function initThemeManager() {
     
     // Atualiza o status inicial
     updateThemeStatus(savedTheme);
+
+    // Listener para mudanças na preferência do sistema
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem(THEME_KEY)) {
+            const newTheme = e.matches ? THEME_DARK : THEME_LIGHT;
+            applyTheme(newTheme);
+            updateThemeStatus(newTheme);
+            if (toggleCheckbox) toggleCheckbox.checked = newTheme === THEME_DARK;
+        }
+    });
 }
 
 export {

@@ -250,6 +250,11 @@
         gap: 8px;
     }
 
+    .audio-toggle {
+        order: -2;
+        margin-bottom: 4px;
+    }
+
     .dark-mode-toggle {
         order: -1;
         margin-bottom: 8px;

@@ -118,7 +118,23 @@
             <footer class="app-footer">
                 <p>&copy; Copyright iCouFootball 2025</p>
                 <a href="#" class="footer-link">Sobre</a>
+                
                 <div class="dark-mode-toggle">
+                    <!-- Audio Toggle - Controle de Som -->
+                    <button class="audio-toggle" id="audio-toggle" aria-label="Controle de som" title="Ativar som">
+                        <!-- Ícone Som Ligado (Speaker com ondas) -->
+                        <svg id="audio-icon-on" class="audio-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                            <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M15.54 8.46C16.4774 9.39764 17.0039 10.6692 17.0039 11.995C17.0039 13.3208 16.4774 14.5924 15.54 15.53" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19.07 4.93C20.9447 6.80528 21.9979 9.34836 21.9979 12C21.9979 14.6516 20.9447 17.1947 19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <!-- Ícone Som Mudo (Speaker com X) -->
+                        <svg id="audio-icon-off" class="audio-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
                     <span>Modo Escuro:</span>
                     <span class="dark-mode-status">ON</span>
                     <label class="switch">

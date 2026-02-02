@@ -6,6 +6,9 @@ import { db } from "../services/firebase.js";
 import { API_CONFIG } from "../../config/api-config.js";
 import { doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
+// Avatar placeholder padrão (SVG inline ou caminho)
+const DEFAULT_AVATAR_URL = './assets/img/avatar-placeholder.svg';
+
 let currentUser = null;
 let currentRole = null;
 
@@ -213,21 +216,46 @@ function setActiveNavItem(routeName) {
 
 // Função para carregar avatar do usuário
 async function loadUserAvatar(user) {
-  if (!user) return;
+  if (!user) {
+    // FIX: Se não há usuário, força o avatar placeholder
+    resetAvatarToDefault();
+    return;
+  }
 
   try {
     const data = await getUser(user.uid);
     const headerAvatar = document.querySelector('.profile-avatar-header .avatar-img');
     const fotoUrl = (data && data.fotoUrl) || '';
 
-    if (headerAvatar && fotoUrl) {
-      headerAvatar.src = fotoUrl;
-      // Salva URL do avatar no sessionStorage para recarregamento instantâneo
-      sessionStorage.setItem('avatar_url', fotoUrl);
+    if (headerAvatar) {
+      if (fotoUrl) {
+        headerAvatar.src = fotoUrl;
+        // Salva URL do avatar no sessionStorage para recarregamento instantâneo
+        sessionStorage.setItem('avatar_url', fotoUrl);
+      } else {
+        // FIX: Usuário sem foto - aplica placeholder imediatamente
+        headerAvatar.src = DEFAULT_AVATAR_URL;
+        sessionStorage.removeItem('avatar_url');
+      }
+      // Remove flag de limpeza se existir
+      headerAvatar.removeAttribute('data-user-cleared');
     }
   } catch (err) {
     console.error('Erro ao carregar avatar:', err);
+    // Em caso de erro, aplica placeholder
+    resetAvatarToDefault();
   }
+}
+
+/**
+ * FIX: Reseta avatar para o placeholder padrão
+ */
+function resetAvatarToDefault() {
+  const headerAvatar = document.querySelector('.profile-avatar-header .avatar-img');
+  if (headerAvatar) {
+    headerAvatar.src = DEFAULT_AVATAR_URL;
+  }
+  sessionStorage.removeItem('avatar_url');
 }
 
 // Função auxiliar para salvar dados parciais do usuário
@@ -582,6 +610,35 @@ function showDescriptionModal(uid) {
   input.focus();
 }
 
+/**
+ * FIX: Reseta o estado visual do usuário (avatar, dados em cache)
+ * Chamado no logout para evitar persistência de dados visuais do usuário anterior
+ */
+function resetUserVisualState() {
+  // Limpa avatar no header imediatamente
+  const headerAvatar = document.querySelector('.profile-avatar-header .avatar-img');
+  if (headerAvatar) {
+    headerAvatar.src = DEFAULT_AVATAR_URL;
+    // Força o navegador a não usar cache
+    headerAvatar.setAttribute('data-user-cleared', 'true');
+  }
+  
+  // Limpa foto na página de perfil se existir
+  const profilePhoto = document.querySelector('.profile-photo');
+  if (profilePhoto) {
+    profilePhoto.src = DEFAULT_AVATAR_URL;
+  }
+  
+  // Limpa dados do sessionStorage relacionados ao avatar
+  sessionStorage.removeItem('avatar_url');
+  
+  // Limpa estado interno
+  currentUser = null;
+  currentRole = null;
+  
+  console.log('[Auth] ✅ Estado visual do usuário resetado');
+}
+
 // Função para lidar com logout
 async function handleLogout() {
   const confirmed = await showConfirmModal('Encerrar sessão', 'Deseja sair da sua conta?');
@@ -591,6 +648,9 @@ async function handleLogout() {
     showSpinner(null, 'Encerrando sessão...');
     // Limpar estado persistente do chat
     sessionStorage.removeItem('conversaAtivaId');
+    
+    // FIX: Limpar avatar e dados do usuário anterior ANTES do logout
+    resetUserVisualState();
     
     // IMPORTANTE: Marcar usuário como offline antes de deslogar
     // NÃO atualizar ultimoAcesso - deixar congelado no último valor do heartbeat

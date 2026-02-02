@@ -8,6 +8,7 @@ import { subscribeToActiveChampionships, subscribeToStandings, subscribeToAnnual
 import { getUserMap } from "./services/usersService.js";
 import { initAuthManager, loadAuthStateFromCache, updateMenuVisibility, getCurrentUser } from "./utils/authManager.js";
 import { initThemeManager } from "./utils/themeManager.js";
+import { initAudioManager } from "./utils/audioManager.js";
 import { onTransmissoesAoVivo, PLATAFORMAS_STREAMING, converterParaEmbed, onUltimasPartidasFinalizadas } from "./services/matchesService.js";
 import { initMobileNav, syncMobileNavVisibility, initViewportListener, setActiveMobileNavItem } from "./utils/mobileNav.js";
 
@@ -1784,11 +1785,17 @@ async function startApp() {
     if (cachedState && cachedState.isAuthenticated) {
         updateMenuVisibility({ uid: 'cached' }, cachedState.role);
 
-        // Aplica URL do avatar do cache
+        // Aplica URL do avatar do cache (ou placeholder se não houver)
         const cachedAvatarUrl = sessionStorage.getItem('avatar_url');
-        if (cachedAvatarUrl) {
-            const headerAvatar = document.querySelector('.profile-avatar-header .avatar-img');
-            if (headerAvatar) headerAvatar.src = cachedAvatarUrl;
+        const headerAvatar = document.querySelector('.profile-avatar-header .avatar-img');
+        if (headerAvatar) {
+            headerAvatar.src = cachedAvatarUrl || './assets/img/avatar-placeholder.svg';
+        }
+    } else {
+        // FIX: Se não autenticado, garante que avatar é o placeholder
+        const headerAvatar = document.querySelector('.profile-avatar-header .avatar-img');
+        if (headerAvatar) {
+            headerAvatar.src = './assets/img/avatar-placeholder.svg';
         }
     }
 
@@ -2061,8 +2068,10 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         startApp();
         initThemeManager();
+        initAudioManager();
     });
 } else {
     startApp();
     initThemeManager();
+    initAudioManager();
 }
