@@ -893,35 +893,23 @@ input:-webkit-autofill:active {
 .main-page-content {
     display: grid !important;
     grid-template-areas:
-        /* "players players players"
-        "standings standings stats"
-        "userStatus userStatus live"
-        "championship championship live"
-        "results results results" !important; */
-
         "players players players"
         "standings standings live"
         "championship championship stats"
-        "results results stats" !important;
+        "results results performance" !important;
     grid-template-columns: 1.5fr 1fr 550px !important;
     grid-template-rows: 175px !important;
     gap: 10px !important;
     padding: 10px !important;
-    /* align-items: baseline !important; */
 }
 
 /* Quando autenticado: auth-card oculto, stats expande */
 html.authenticated .main-page-content {
     grid-template-areas:
-        /* "userStatus userStatus players"
-        "standings standings stats"
-        "championship championship live"
-        "results results results" !important; */
-
         "players players userStatus"
         "standings standings live"
         "championship championship stats"
-        "results results stats" !important;
+        "results results performance" !important;
     grid-template-columns: 1fr auto .65fr !important;
 }
 
@@ -956,6 +944,10 @@ html.authenticated .main-page-content .auth-card {
 
 .section-latest-results {
     grid-area: results;
+}
+
+.section-performance-graph {
+    grid-area: performance;
 }
 
 /* Card de autenticação precisa ocupar a área 'auth' do grid */
@@ -1218,6 +1210,8 @@ html.authenticated .main-page-content .auth-card {
             "live"
             "auth"
             "stats"
+            "results"
+            "performance"
             "players";
         grid-template-columns: 1fr;
     }
@@ -1227,6 +1221,8 @@ html.authenticated .main-page-content .auth-card {
             "standings"
             "live"
             "stats"
+            "results"
+            "performance"
             "players";
         grid-template-columns: 1fr;
     }

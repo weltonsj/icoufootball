@@ -253,20 +253,22 @@ export const main = {
                         </div>
                     </div>
                 </div>
-                
-                <!-- Gráfico de Desempenho Anual - Top 3 (Pódio) -->
-                <div class="performance-chart-container" id="performance-chart-container">
-                    <h4 class="chart-title">
-                        <i class="fas fa-medal"></i>
-                        DESEMPENHO TOP 3 - <span id="chart-year-label">2026</span>
-                    </h4>
-                    <div class="chart-wrapper">
-                        <canvas id="performanceChart"></canvas>
-                    </div>
-                    <div class="chart-empty-state hidden" id="chart-empty-state">
-                        <i class="fas fa-chart-area"></i>
-                        <p>Sem dados de desempenho para este ano</p>
-                    </div>
+            </div>
+        </section>
+
+        <!-- Bloco de Desempenho TOP 3 (componente independente) -->
+        <section class="section-performance-graph icou-card">
+            <div class="card-header">
+                <i class="fas fa-medal"></i>
+                <h3>DESEMPENHO TOP 3 - <span id="chart-year-label">2026</span></h3>
+            </div>
+            <div class="card-content">
+                <div class="chart-wrapper" id="performance-chart-wrapper">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                <div class="chart-empty-state hidden" id="chart-empty-state">
+                    <i class="fas fa-chart-area"></i>
+                    <p>Sem dados de desempenho para este ano</p>
                 </div>
             </div>
         </section>

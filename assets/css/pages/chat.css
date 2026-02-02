@@ -292,7 +292,9 @@
 }
 
 .chat-messages {
-    background-color: var(--secondary-bg);
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
+    border: 1px solid rgba(253, 138, 36, 0.2);
+    /* background-color: var(--secondary-bg); */
     flex-grow: 1;
     padding: 20px;
     overflow-y: auto; /* Permite scroll nas mensagens */

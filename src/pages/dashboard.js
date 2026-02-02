@@ -64,6 +64,10 @@ export const dashboard = {
                         </span>
                     </div>
                     <span class="ranking-total" id="rankingTotal">de - jogadores</span>
+                    <div class="ranking-points-info" id="rankingPointsInfo">
+                        <span class="ranking-points" id="rankingPoints"></span>
+                        <span class="ranking-comparativo" id="rankingComparativo"></span>
+                    </div>
                 </div>
             </div>
 
@@ -108,6 +112,58 @@ export const dashboard = {
                 </div>
             </div>
         </section>
+
+        <!-- Modal: Inserir Placar (Dashboard) -->
+        <div id="modalInserirPlacarDashboard" class="modal-overlay hidden">
+            <div class="modal-content modal-small">
+                <button class="modal-close" data-close-modal>&times;</button>
+                <h3><i class="fas fa-futbol"></i> Inserir Placar</h3>
+                
+                <form id="formInserirPlacarDashboard">
+                    <input type="hidden" id="partidaIdPlacarDashboard">
+                    
+                    <div class="placar-display">
+                        <div class="team-placar">
+                            <span id="timeANomePlacarDashboard" class="team-name">Time A</span>
+                            <input type="number" id="placarADashboard" min="0" value="0" class="placar-input" required>
+                        </div>
+                        <span class="placar-x">X</span>
+                        <div class="team-placar">
+                            <span id="timeBNomePlacarDashboard" class="team-name">Time B</span>
+                            <input type="number" id="placarBDashboard" min="0" value="0" class="placar-input" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary btn-full-width">
+                        <i class="fas fa-paper-plane"></i> ENVIAR PLACAR
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: Cancelar Partida (Dashboard) -->
+        <div id="modalCancelarPartidaDashboard" class="modal-overlay hidden">
+            <div class="modal-content modal-small">
+                <button class="modal-close" data-close-modal>&times;</button>
+                <h3><i class="fas fa-times-circle"></i> Cancelar Partida</h3>
+                
+                <form id="formCancelarPartidaDashboard">
+                    <input type="hidden" id="partidaIdCancelarDashboard">
+                    
+                    <div class="cancelar-info">
+                        <p>Tem certeza que deseja cancelar esta partida?</p>
+                        <p class="cancelar-aviso"><i class="fas fa-exclamation-triangle"></i> Esta ação não pode ser desfeita.</p>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" data-close-modal>Voltar</button>
+                        <button type="submit" class="btn-danger">
+                            <i class="fas fa-trash"></i> CANCELAR PARTIDA
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <!-- Seção: Histórico de Partidas (Últimas 3) -->
         <section class="section-match-history icou-card">

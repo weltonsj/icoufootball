@@ -24,10 +24,14 @@ import {
     getPartidasPendentesConfirmacao,
     getPartidasAguardandoAdversario,
     getPartidasConfirmadas,
+    inserirResultado,
+    confirmarResultado,
+    contestarResultado,
     STATUS_PLACAR,
     STATUS_PARTIDA,
     PLATAFORMAS_STREAMING
 } from "../services/matchesService.js";
+import { deleteMatch } from "../services/adminService.js";
 import { 
     subscribeToAnnualStandings,
     getUserChampionshipStatus
@@ -87,6 +91,9 @@ const SELECTORS = {
     rankingPosition: '#rankingPosition',
     rankingVariation: '#rankingVariation',
     rankingTotal: '#rankingTotal',
+    rankingPoints: '#rankingPoints',
+    rankingComparativo: '#rankingComparativo',
+    rankingPointsInfo: '#rankingPointsInfo',
     
     // Campeonato Ativo
     championshipCard: '#dashboardChampionshipCard',
@@ -324,7 +331,7 @@ function renderKPIs(estatisticas) {
 // ============================================================================
 
 /**
- * Renderiza a posição do usuário no ranking geral
+ * Renderiza a posição do usuário no ranking geral com pontos e comparativo
  * @param {Array} ranking - Lista ordenada de jogadores no ranking
  * @param {string} userId - ID do usuário atual
  */
@@ -332,6 +339,16 @@ function renderRankingPosition(ranking, userId) {
     const positionEl = qs(SELECTORS.rankingPosition);
     const variationEl = qs(SELECTORS.rankingVariation);
     const totalEl = qs(SELECTORS.rankingTotal);
+    const pointsEl = qs(SELECTORS.rankingPoints);
+    const comparativoEl = qs(SELECTORS.rankingComparativo);
+    const pointsInfoEl = qs(SELECTORS.rankingPointsInfo);
+    
+    // Função auxiliar para limpar elementos de pontos/comparativo
+    const clearPointsInfo = () => {
+        if (pointsEl) pointsEl.textContent = '';
+        if (comparativoEl) comparativoEl.textContent = '';
+        if (pointsInfoEl) pointsInfoEl.style.display = 'none';
+    };
     
     if (!ranking || ranking.length === 0) {
         if (positionEl) positionEl.textContent = '-';
@@ -341,11 +358,13 @@ function renderRankingPosition(ranking, userId) {
             variationEl.className = 'ranking-variation neutral';
             variationEl.title = 'Sem variação';
         }
+        clearPointsInfo();
         return;
     }
     
     const totalJogadores = ranking.length;
-    const posicaoAtual = ranking.findIndex(r => r.id === userId) + 1;
+    const indiceUsuario = ranking.findIndex(r => r.id === userId);
+    const posicaoAtual = indiceUsuario + 1;
     
     if (posicaoAtual === 0) {
         // Usuário não está no ranking (sem partidas confirmadas)
@@ -356,12 +375,55 @@ function renderRankingPosition(ranking, userId) {
             variationEl.className = 'ranking-variation neutral';
             variationEl.title = 'Você ainda não está no ranking';
         }
+        // Exibe mensagem de sem classificação
+        if (pointsInfoEl) pointsInfoEl.style.display = 'flex';
+        if (pointsEl) {
+            pointsEl.innerHTML = '<i class="fas fa-info-circle"></i> Sem classificação';
+            pointsEl.className = 'ranking-points no-ranking';
+        }
+        if (comparativoEl) {
+            comparativoEl.textContent = 'Jogue partidas para aparecer no ranking';
+            comparativoEl.className = 'ranking-comparativo hint';
+        }
         return;
     }
+    
+    // Obtém dados do usuário no ranking
+    const usuarioRanking = ranking[indiceUsuario];
+    const pontosUsuario = usuarioRanking.pontos || 0;
     
     // Exibe posição atual
     if (positionEl) positionEl.textContent = `${posicaoAtual}º`;
     if (totalEl) totalEl.textContent = `de ${totalJogadores} jogador${totalJogadores > 1 ? 'es' : ''}`;
+    
+    // Exibe pontos do usuário
+    if (pointsInfoEl) pointsInfoEl.style.display = 'flex';
+    if (pointsEl) {
+        pointsEl.innerHTML = `<i class="fas fa-star"></i> ${pontosUsuario} ponto${pontosUsuario !== 1 ? 's' : ''}`;
+        pointsEl.className = 'ranking-points';
+    }
+    
+    // Calcula comparativo com jogador acima
+    if (comparativoEl) {
+        if (posicaoAtual === 1) {
+            // Líder do ranking
+            comparativoEl.innerHTML = '<i class="fas fa-crown"></i> Você é o líder!';
+            comparativoEl.className = 'ranking-comparativo lider';
+        } else {
+            // Calcula diferença para o jogador acima
+            const jogadorAcima = ranking[indiceUsuario - 1];
+            const pontosAcima = jogadorAcima.pontos || 0;
+            const diferenca = pontosAcima - pontosUsuario;
+            
+            if (diferenca === 0) {
+                comparativoEl.innerHTML = `<i class="fas fa-equals"></i> Empatado com o ${posicaoAtual - 1}º`;
+                comparativoEl.className = 'ranking-comparativo empate';
+            } else {
+                comparativoEl.innerHTML = `<i class="fas fa-arrow-up"></i> A ${diferenca} ponto${diferenca !== 1 ? 's' : ''} do ${posicaoAtual - 1}º`;
+                comparativoEl.className = 'ranking-comparativo atras';
+            }
+        }
+    }
     
     // Calcula variação (comparado com posição anterior armazenada)
     if (variationEl) {
@@ -391,7 +453,7 @@ function renderRankingPosition(ranking, userId) {
     // Salva posição atual para próxima comparação
     previousRankingPosition = posicaoAtual;
     
-    console.log('[Dashboard] 📊 Ranking renderizado: posição', posicaoAtual, 'de', totalJogadores);
+    console.log('[Dashboard] 📊 Ranking renderizado: posição', posicaoAtual, 'de', totalJogadores, '- Pontos:', pontosUsuario);
 }
 
 // ============================================================================
@@ -760,6 +822,140 @@ function renderMatchItem(partida, userId) {
 }
 
 /**
+ * Renderiza uma partida pendente com botões de ação
+ * @param {Object} partida - Dados da partida
+ * @param {string} userId - ID do usuário atual
+ * @returns {string} HTML da partida com ações
+ */
+function renderPendingMatchItem(partida, userId) {
+    const statusInfo = getStatusInfo(partida.placarStatus);
+    const dataPartida = formatDate(partida.dataPartida || partida.criadoEm);
+    
+    // Fallbacks para imagens
+    const fallbackTeamLogo = './assets/img/team-placeholder.svg';
+    const fallbackAvatar = './assets/img/avatar-placeholder.svg';
+    
+    // Dados do Jogador A
+    const jogadorATimeLogo = partida.jogadorATimeLogo || fallbackTeamLogo;
+    const jogadorATimeNome = partida.jogadorATimeNome || 'Time A';
+    const jogadorAFoto = partida.jogadorAFoto || fallbackAvatar;
+    const jogadorANome = partida.jogadorANome || 'Jogador A';
+    
+    // Dados do Jogador B
+    const jogadorBTimeLogo = partida.jogadorBTimeLogo || fallbackTeamLogo;
+    const jogadorBTimeNome = partida.jogadorBTimeNome || 'Time B';
+    const jogadorBFoto = partida.jogadorBFoto || fallbackAvatar;
+    const jogadorBNome = partida.jogadorBNome || 'Jogador B';
+    
+    // Label de tipo de partida
+    const tipoPartida = partida.campeonatoId ? 'Campeonato' : 'Amistoso';
+    const tipoClasse = partida.campeonatoId ? 'tipo-campeonato' : 'tipo-amistoso';
+    
+    // Determina quais ações estão disponíveis
+    let acoesHtml = '';
+    const isPendente = partida.placarStatus === STATUS_PLACAR.PENDENTE;
+    const isSemPlacar = partida.placarStatus === STATUS_PLACAR.SEM_PLACAR;
+    const isContestado = partida.placarStatus === STATUS_PLACAR.CONTESTADO;
+    const usuarioJaInseriu = partida.placarInseridoPor === userId;
+    
+    if (isPendente && !usuarioJaInseriu) {
+        // Placar pendente de confirmação - mostrar placar e botão confirmar
+        acoesHtml = `
+            <div class="partida-acoes-pendente">
+                <div class="placar-pendente-info">
+                    <span class="placar-label">Placar informado:</span>
+                    <span class="placar-valor">${partida.placarA} x ${partida.placarB}</span>
+                </div>
+                <div class="partida-acoes-btns">
+                    <button class="btn-acao btn-confirmar-placar" data-partida-id="${partida.id}" data-placar-a="${partida.placarA}" data-placar-b="${partida.placarB}" title="Confirmar placar">
+                        <i class="fas fa-check"></i> Confirmar
+                    </button>
+                    <button class="btn-acao btn-contestar-placar" data-partida-id="${partida.id}" data-placar="${partida.placarA} x ${partida.placarB}" title="Contestar placar">
+                        <i class="fas fa-times"></i> Contestar
+                    </button>
+                </div>
+            </div>
+        `;
+    } else if (isSemPlacar) {
+        // Sem placar - botão para inserir resultado
+        acoesHtml = `
+            <div class="partida-acoes-pendente">
+                <div class="partida-acoes-btns">
+                    <button class="btn-acao btn-inserir-placar" data-partida-id="${partida.id}" data-time-a="${jogadorATimeNome}" data-time-b="${jogadorBTimeNome}" title="Inserir resultado">
+                        <i class="fas fa-edit"></i> Informar Placar
+                    </button>
+                    <button class="btn-acao btn-cancelar-partida btn-outline-danger" data-partida-id="${partida.id}" title="Cancelar partida">
+                        <i class="fas fa-ban"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        `;
+    } else if (isContestado) {
+        // Contestado - apenas informativo
+        acoesHtml = `
+            <div class="partida-acoes-pendente">
+                <div class="contestacao-info">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Placar contestado - aguardando análise</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    return `
+        <article class="partida-card partida-pendente-acao" data-partida-id="${partida.id}">
+            <div class="partida-card-header">
+                <span class="partida-data">${dataPartida}</span>
+                <span class="partida-tipo-badge ${tipoClasse}">${tipoPartida}</span>
+            </div>
+            <div class="partida-card-body">
+                <!-- Lado A: Time + Jogador -->
+                <div class="partida-lado lado-a">
+                    <div class="partida-time">
+                        <img src="${jogadorATimeLogo}" alt="Logo ${jogadorATimeNome}" class="partida-time-logo" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="partida-time-logo-fallback" style="display:none;">T</div>
+                        <span class="partida-time-nome" title="${jogadorATimeNome}">${jogadorATimeNome}</span>
+                    </div>
+                    <div class="partida-jogador">
+                        <img src="${jogadorAFoto}" alt="Foto ${jogadorANome}" class="partida-jogador-avatar" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="partida-jogador-avatar-fallback" style="display:none;">${jogadorANome.charAt(0).toUpperCase()}</div>
+                        <span class="partida-jogador-nome" title="${jogadorANome}">${jogadorANome}</span>
+                    </div>
+                </div>
+                
+                <div class="partida-placar">
+                    <span class="partida-placar-vs">VS</span>
+                </div>
+                
+                <!-- Lado B: Time + Jogador -->
+                <div class="partida-lado lado-b">
+                    <div class="partida-time">
+                        <img src="${jogadorBTimeLogo}" alt="Logo ${jogadorBTimeNome}" class="partida-time-logo" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="partida-time-logo-fallback" style="display:none;">T</div>
+                        <span class="partida-time-nome" title="${jogadorBTimeNome}">${jogadorBTimeNome}</span>
+                    </div>
+                    <div class="partida-jogador">
+                        <img src="${jogadorBFoto}" alt="Foto ${jogadorBNome}" class="partida-jogador-avatar" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="partida-jogador-avatar-fallback" style="display:none;">${jogadorBNome.charAt(0).toUpperCase()}</div>
+                        <span class="partida-jogador-nome" title="${jogadorBNome}">${jogadorBNome}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="partida-card-footer">
+                <span class="partida-status-badge ${statusInfo.badgeClasse}">
+                    <i class="fas ${statusInfo.icone}"></i> ${statusInfo.texto}
+                </span>
+            </div>
+            ${acoesHtml}
+        </article>
+    `;
+}
+
+/**
  * Renderiza partidas pendentes de ação Fair Play
  * @param {Array} partidas - Lista de partidas
  * @param {string} userId - ID do usuário
@@ -796,8 +992,11 @@ function renderPartidasPendentes(partidas, userId) {
     }
     
     container.innerHTML = partidasPendentes
-        .map(p => renderMatchItem(p, userId))
+        .map(p => renderPendingMatchItem(p, userId))
         .join('');
+    
+    // Adiciona event listeners aos botões de ação
+    setupPendingMatchesActions();
 }
 
 /**
@@ -845,6 +1044,227 @@ function renderMatchHistory(partidas, userId) {
         .join('');
     
     console.log(`[Dashboard] 📜 Histórico: exibindo ${partidasHistorico.length} de ${totalPartidas} partidas`);
+}
+
+// ============================================================================
+// FUNÇÕES DE AÇÕES EM PARTIDAS PENDENTES
+// ============================================================================
+
+/**
+ * Configura event listeners para botões de ação em partidas pendentes
+ */
+function setupPendingMatchesActions() {
+    const container = qs(SELECTORS.partidasPendentes);
+    if (!container) return;
+    
+    // Botão: Inserir Placar
+    container.querySelectorAll('.btn-inserir-placar').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const partidaId = btn.dataset.partidaId;
+            const timeA = btn.dataset.timeA;
+            const timeB = btn.dataset.timeB;
+            abrirModalInserirPlacar(partidaId, timeA, timeB);
+        });
+    });
+    
+    // Botão: Confirmar Placar
+    container.querySelectorAll('.btn-confirmar-placar').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const partidaId = btn.dataset.partidaId;
+            await handleConfirmarPlacar(partidaId);
+        });
+    });
+    
+    // Botão: Contestar Placar
+    container.querySelectorAll('.btn-contestar-placar').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const partidaId = btn.dataset.partidaId;
+            const placar = btn.dataset.placar;
+            handleContestarPlacar(partidaId, placar);
+        });
+    });
+    
+    // Botão: Cancelar Partida
+    container.querySelectorAll('.btn-cancelar-partida').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const partidaId = btn.dataset.partidaId;
+            abrirModalCancelarPartida(partidaId);
+        });
+    });
+}
+
+/**
+ * Abre modal para inserir placar
+ * @param {string} partidaId - ID da partida
+ * @param {string} timeA - Nome do time A
+ * @param {string} timeB - Nome do time B
+ */
+function abrirModalInserirPlacar(partidaId, timeA, timeB) {
+    const modal = document.getElementById('modalInserirPlacarDashboard');
+    if (!modal) return;
+    
+    // Preenche dados do modal
+    document.getElementById('partidaIdPlacarDashboard').value = partidaId;
+    document.getElementById('timeANomePlacarDashboard').textContent = timeA || 'Time A';
+    document.getElementById('timeBNomePlacarDashboard').textContent = timeB || 'Time B';
+    document.getElementById('placarADashboard').value = 0;
+    document.getElementById('placarBDashboard').value = 0;
+    
+    modal.classList.remove('hidden');
+    
+    // Foca no primeiro input
+    setTimeout(() => {
+        document.getElementById('placarADashboard').focus();
+    }, 100);
+}
+
+/**
+ * Abre modal para cancelar partida
+ * @param {string} partidaId - ID da partida
+ */
+function abrirModalCancelarPartida(partidaId) {
+    const modal = document.getElementById('modalCancelarPartidaDashboard');
+    if (!modal) return;
+    
+    document.getElementById('partidaIdCancelarDashboard').value = partidaId;
+    modal.classList.remove('hidden');
+}
+
+/**
+ * Fecha todos os modais do Dashboard
+ */
+function fecharModaisDashboard() {
+    const modais = [
+        'modalInserirPlacarDashboard',
+        'modalCancelarPartidaDashboard'
+    ];
+    
+    modais.forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.add('hidden');
+    });
+}
+
+/**
+ * Handler para confirmar placar pendente
+ * @param {string} partidaId - ID da partida
+ */
+async function handleConfirmarPlacar(partidaId) {
+    const user = getCurrentUser();
+    if (!user) return;
+    
+    try {
+        await confirmarResultado(partidaId, user.uid);
+        showModal('success', 'Placar Confirmado!', 'O placar foi confirmado com sucesso.');
+    } catch (error) {
+        console.error('[Dashboard] Erro ao confirmar placar:', error);
+        showModal('error', 'Erro', error.message || 'Não foi possível confirmar o placar.');
+    }
+}
+
+/**
+ * Handler para contestar placar
+ * @param {string} partidaId - ID da partida
+ * @param {string} placar - Placar informado
+ */
+function handleContestarPlacar(partidaId, placar) {
+    // Redireciona para a página de partidas com o modal de contestação
+    // Usando hash navigation do sistema
+    window.location.hash = `matches?contestar=${partidaId}&placar=${encodeURIComponent(placar)}`;
+}
+
+/**
+ * Handler para submissão do formulário de placar
+ * @param {Event} e - Evento do formulário
+ */
+async function handleSubmitPlacar(e) {
+    e.preventDefault();
+    
+    const user = getCurrentUser();
+    if (!user) return;
+    
+    const partidaId = document.getElementById('partidaIdPlacarDashboard').value;
+    const placarA = parseInt(document.getElementById('placarADashboard').value, 10);
+    const placarB = parseInt(document.getElementById('placarBDashboard').value, 10);
+    
+    if (isNaN(placarA) || isNaN(placarB) || placarA < 0 || placarB < 0) {
+        showModal('error', 'Placar Inválido', 'Informe placares válidos (números inteiros >= 0).');
+        return;
+    }
+    
+    try {
+        await inserirResultado(partidaId, user.uid, placarA, placarB);
+        showModal('success', 'Placar Enviado!', 'Aguardando confirmação do adversário.');
+        fecharModaisDashboard();
+    } catch (error) {
+        console.error('[Dashboard] Erro ao inserir placar:', error);
+        showModal('error', 'Erro', error.message || 'Não foi possível enviar o placar.');
+    }
+}
+
+/**
+ * Handler para submissão do formulário de cancelar partida
+ * @param {Event} e - Evento do formulário
+ */
+async function handleSubmitCancelarPartida(e) {
+    e.preventDefault();
+    
+    const user = getCurrentUser();
+    if (!user) return;
+    
+    const partidaId = document.getElementById('partidaIdCancelarDashboard').value;
+    
+    try {
+        await deleteMatch({
+            partidaId,
+            actorUserId: user.uid,
+            actorRole: currentUserData?.funcao || 'Jogador'
+        });
+        showModal('success', 'Partida Cancelada', 'A partida foi cancelada com sucesso.');
+        fecharModaisDashboard();
+    } catch (error) {
+        console.error('[Dashboard] Erro ao cancelar partida:', error);
+        showModal('error', 'Erro', error.message || 'Não foi possível cancelar a partida.');
+    }
+}
+
+/**
+ * Configura event listeners dos modais do Dashboard
+ */
+function setupDashboardModals() {
+    // Formulário de inserir placar
+    const formPlacar = document.getElementById('formInserirPlacarDashboard');
+    if (formPlacar) {
+        formPlacar.addEventListener('submit', handleSubmitPlacar);
+    }
+    
+    // Formulário de cancelar partida
+    const formCancelar = document.getElementById('formCancelarPartidaDashboard');
+    if (formCancelar) {
+        formCancelar.addEventListener('submit', handleSubmitCancelarPartida);
+    }
+    
+    // Botões de fechar modal (data-close-modal)
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', fecharModaisDashboard);
+    });
+    
+    // Fechar modal ao clicar no overlay
+    const modais = ['modalInserirPlacarDashboard', 'modalCancelarPartidaDashboard'];
+    modais.forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    fecharModaisDashboard();
+                }
+            });
+        }
+    });
 }
 
 /**
@@ -1173,6 +1593,9 @@ async function initDashboard() {
     isInitialized = true;
     
     try {
+        // Configura modais do Dashboard
+        setupDashboardModals();
+        
         // Carrega dados iniciais
         await Promise.all([
             loadUserData(user.uid),

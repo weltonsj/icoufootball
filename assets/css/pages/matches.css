@@ -9,8 +9,10 @@
    Card padronizado com header interno (ícone + título)
    ==================================================================== */
 .icou-card {
-    background: var(--secondary-bg);
-    border: 1px solid var(--chat-border-color);
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
+    border: 1px solid rgba(253, 138, 36, 0.2);
+    /* background: var(--secondary-bg);
+    border: 1px solid var(--chat-border-color); */
     border-radius: 16px;
     padding: 0;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -24,8 +26,8 @@
     align-items: center;
     gap: 10px;
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.1);
+    /* border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.1); */
 }
 
 .icou-card .card-header i {

@@ -1272,7 +1272,7 @@ th.hide-tablet, td.hide-tablet {
 .match-history-list,
 .match-list {
     width: 100%;
-    max-height: 250px;
+    max-height: 220px;
     overflow-y: auto;
 }
 
@@ -1285,7 +1285,7 @@ th.hide-tablet, td.hide-tablet {
     border-radius: var(--table-radius);
     overflow: hidden;
     transition: all 0.2s ease;
-    margin: 20px 10px 20px 0;
+    margin: 20px 10px 0 0;
 }
 
 .partida-card:hover {

@@ -362,13 +362,12 @@ let performanceChartInstance = null;
  * @param {number} year - Ano selecionado
  */
 async function renderPerformanceChart(ranking, year) {
-    const chartContainer = document.getElementById('performance-chart-container');
     const chartCanvas = document.getElementById('performanceChart');
     const chartEmptyState = document.getElementById('chart-empty-state');
     const chartYearLabel = document.getElementById('chart-year-label');
-    const chartWrapper = document.querySelector('.chart-wrapper');
+    const chartWrapper = document.getElementById('performance-chart-wrapper');
     
-    if (!chartCanvas || !chartContainer) return;
+    if (!chartCanvas) return;
     
     // Atualiza o label do ano
     if (chartYearLabel) {

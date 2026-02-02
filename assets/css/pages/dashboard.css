@@ -8,12 +8,13 @@
    Card padronizado com header interno (ícone + título)
    ==================================================================== */
 .icou-card {
-    background: var(--secondary-bg);
-    border: 1px solid var(--chat-border-color);
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
+    border: 1px solid rgba(253, 138, 36, 0.2);
+    /* background: #2b2b2b70 var(--secondary-bg); */
+    /* border: 1px solid var(--chat-border-color); */
     border-radius: 16px;
     padding: 0;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    margin-bottom: 24px;
     overflow: hidden;
 }
 
@@ -24,7 +25,7 @@
     gap: 10px;
     padding: 16px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--secondary-bg);
 }
 
 .icou-card .card-header i {
@@ -106,7 +107,11 @@
 .section-kpis.icou-card,
 .section-active-matches.icou-card,
 .section-match-history.icou-card {
-    margin-bottom: 20px;
+    margin-bottom: 10px !important;
+}
+
+.section-kpis.icou-card {
+    margin-bottom: 0 !important;
 }
 
 /* Ajustes específicos para seções existentes */
@@ -116,7 +121,12 @@
 
 .section-active-matches.icou-card .card-content,
 .section-match-history.icou-card .card-content {
-    padding: 10px 16px;
+    margin: 16px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0 10px;
+    border: 4px solid transparent;
+    border-image: linear-gradient(to right, transparent, #fd7e14 30%, #fd7e14 70%, transparent) 1;
 }
 
 .dashboard-content {
@@ -226,7 +236,9 @@
 }
 
 .kpi-card {
-    background-color: var(--secondary-bg);
+    background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(253, 138, 36, 0.05) 100%);
+    border: 1px solid rgba(253, 138, 36, 0.2);
+    /* background-color: var(--secondary-bg); */
 	border-right: 1px solid var(--highlight-color);
     border-left: 1px solid var(--highlight-color);
     border-radius: 10px;
@@ -278,10 +290,11 @@
     width: 100%;
     max-width: 100%;
     overflow: hidden; /* CORREÇÃO: Impede overflow */
+    margin-top: 10px;
 }
 
 .partida-list, .match-history-list, .match-list {
-    max-height: 600px;
+    max-height: 1200px;
 }
 
 .match-item {
@@ -538,6 +551,8 @@
     padding: 40px 20px;
     text-align: center;
     color: #888;
+    min-height: 280px;
+    justify-content: center;
 }
 
 .empty-state .empty-icon {
@@ -597,6 +612,327 @@
 
 /*
    ====================================================================
+   Últimas Partidas
+   ====================================================================
+*/
+.partida-card {
+    margin: 0;
+}
+
+/* ====================================================================
+   PARTIDAS PENDENTES - BOTÕES DE AÇÃO
+   ====================================================================
+*/
+.partida-pendente-acao {
+    border: 1px solid rgba(253, 138, 36, 0.3);
+}
+
+.partida-acoes-pendente {
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.placar-pendente-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 0.95em;
+}
+
+.placar-pendente-info .placar-label {
+    color: var(--secondary-text);
+}
+
+.placar-pendente-info .placar-valor {
+    font-weight: 700;
+    color: var(--highlight-color);
+    font-size: 1.1em;
+}
+
+.partida-acoes-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-acao {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-acao i {
+    font-size: 0.9em;
+}
+
+.btn-inserir-placar {
+    background: var(--highlight-color);
+    color: #fff;
+}
+
+.btn-inserir-placar:hover {
+    background: #e07a1f;
+    transform: translateY(-1px);
+}
+
+.btn-confirmar-placar {
+    background: #28a745;
+    color: #fff;
+}
+
+.btn-confirmar-placar:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+.btn-contestar-placar {
+    background: #dc3545;
+    color: #fff;
+}
+
+.btn-contestar-placar:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+.btn-cancelar-partida,
+.btn-outline-danger {
+    background: transparent;
+    border: 1px solid rgba(220, 53, 69, 0.5);
+    color: #dc3545;
+}
+
+.btn-cancelar-partida:hover,
+.btn-outline-danger:hover {
+    background: rgba(220, 53, 69, 0.15);
+    border-color: #dc3545;
+}
+
+.contestacao-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #ffc107;
+    font-size: 0.9em;
+}
+
+.contestacao-info i {
+    font-size: 1.1em;
+}
+
+/* ====================================================================
+   MODAIS DO DASHBOARD
+   ====================================================================
+*/
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--secondary-bg);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content.modal-small {
+    max-width: 360px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    font-size: 1.5em;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: rgba(220, 53, 69, 0.3);
+    color: #dc3545;
+}
+
+.modal-content h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    padding-right: 30px;
+}
+
+.modal-content h3 i {
+    color: var(--highlight-color);
+}
+
+/* Placar Display no Modal */
+.placar-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.team-placar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.team-placar .team-name {
+    font-size: 0.85em;
+    color: var(--secondary-text);
+    text-align: center;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.placar-input {
+    width: 60px;
+    height: 50px;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: 700;
+    border: 2px solid var(--chat-border-color);
+    border-radius: 10px;
+    background: var(--primary-bg);
+    color: var(--text-color);
+}
+
+.placar-input:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+}
+
+.placar-x {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--secondary-text);
+}
+
+/* Modal Ações */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.cancelar-info {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.cancelar-info p {
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.cancelar-aviso {
+    color: #ffc107;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* Botões do Modal */
+.btn-primary {
+    background: var(--highlight-color);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: #e07a1f;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--chat-border-color);
+    color: var(--text-color);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-full-width {
+    width: 100%;
+}
+
+/*
+   ====================================================================
    Responsividade para Telas Maiores (PC) - Mantendo a consistência
    ====================================================================
 */
@@ -607,13 +943,39 @@
 	
 	.app-content {
 		display: initial;
-		overflow-y: hidden;
 	}
 	
     .dashboard-content {
-        padding: 30px 30px 10px 30px;
+        display: grid;
+        grid-template-areas: 
+            "kpis kpis"
+            "cards cards"
+            "history matches"
+        ;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 10px 10px 0 10px;
     }
-	
+
+    /* Areas do grid */
+    .section-kpis {
+        grid-area: kpis;
+    }
+
+    .section-dashboard-cards {
+        grid-area: cards;
+    }
+
+    .section-active-matches {
+        grid-area: matches;
+    }
+
+    .section-match-history {
+        grid-area: history;
+    }
+
+	/* ========================= */
+
     .kpis-header {
         margin-bottom: 25px;
         flex-wrap: nowrap;
@@ -938,9 +1300,24 @@
 */
 .section-dashboard-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 25px;
+    grid-template-areas: 
+        "championship ranking social"
+    ;
+    gap: 10px;
+    /* margin-bottom: 10px; */
+}
+
+/* Areas do grid .section-dashboard-cards */
+.ranking-card {
+    grid-area: ranking;
+}
+
+.championship-card {
+    grid-area: championship;
+}
+
+.social-card {
+    grid-area: social;
 }
 
 /* Ajustes específicos para os dashboard-cards com .icou-card */
@@ -1028,6 +1405,66 @@
 .ranking-total {
     font-size: 0.85em;
     color: var(--secondary-text);
+}
+
+/* Pontos e Comparativo do Ranking */
+.ranking-points-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%;
+}
+
+.ranking-points {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--highlight-color);
+}
+
+.ranking-points i {
+    font-size: 0.9em;
+}
+
+.ranking-points.no-ranking {
+    color: var(--secondary-text);
+    font-weight: 400;
+    font-size: 0.9em;
+}
+
+.ranking-comparativo {
+    font-size: 0.85em;
+    color: var(--secondary-text);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ranking-comparativo.lider {
+    color: #ffc107;
+}
+
+.ranking-comparativo.lider i {
+    color: #ffc107;
+}
+
+.ranking-comparativo.empate {
+    color: #17a2b8;
+}
+
+.ranking-comparativo.atras i {
+    color: var(--highlight-color);
+}
+
+.ranking-comparativo.hint {
+    font-style: italic;
+    text-align: center;
 }
 
 /* ====================================================================
@@ -1210,12 +1647,11 @@
 
 @media (min-width: 901px) {
     .section-dashboard-cards {
-        grid-template-columns: 1fr 1.5fr 1fr;
-        gap: 20px;
+        grid-template-columns: 500px repeat(2, 1fr);
     }
     
     .dashboard-card {
-        padding: 20px;
+        padding: 0;
     }
     
     .ranking-position {
@@ -1271,8 +1707,12 @@
 .social-friends-featured {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 12px;
-    padding: 8px 0;
+    padding: 8px;
+    max-width: 300px;
+    max-height: 72px;
+    overflow-y: auto;
 }
 
 .social-friend-item {
@@ -1439,3 +1879,4 @@
         padding: 0;
     }
 }
+
